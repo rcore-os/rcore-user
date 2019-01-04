@@ -1,5 +1,7 @@
 # User programs from ucore_os_lab in C-lang
 
+[![Build Status](https://travis-ci.org/wangrunji0408/rcore_user.svg?branch=master)](https://travis-ci.org/wangrunji0408/rcore_user)
+
 ## Build
 ```bash
 mkdir build && cd build

@@ -1,0 +1,56 @@
+sudo: false
+
+dist: xenial
+
+language: c
+
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+
+os:
+  - linux
+  - osx
+
+env:
+  matrix:
+    - ARCH="riscv32"
+    - ARCH="riscv64"
+    - ARCH="i386"
+    - ARCH="x86_64"
+    - ARCH="aarch64"
+
+install:
+  - if [ $ARCH = riscv32 ] || [ $ARCH = riscv64 ]; then
+    [ $TRAVIS_OS_NAME = linux ] && export FILE="riscv64-unknown-elf-gcc-8.1.0-2018.12.0-x86_64-linux-ubuntu14";
+    [ $TRAVIS_OS_NAME = osx   ] && export FILE="riscv64-unknown-elf-gcc-8.1.0-2018.12.0-x86_64-apple-darwin";
+    wget https://static.dev.sifive.com/dev-tools/$FILE.tar.gz;
+    tar xf $FILE.tar.gz;
+    export PATH=$PATH:$PWD/$FILE/bin;
+    fi
+  - if [ $ARCH = aarch64 ]; then
+    if [ $TRAVIS_OS_NAME = linux ]; then
+    wget https://web.stanford.edu/class/cs140e/files/aarch64-none-elf-linux-x64.tar.gz;
+    tar -xzvf aarch64-none-elf-linux-x64.tar.gz;
+    export PATH=$PATH:$PWD/aarch64-none-elf/bin;
+    elif [ $TRAVIS_OS_NAME = osx ]; then
+    brew tap SergioBenitez/osxct;
+    brew install aarch64-none-elf;
+    fi;
+    fi
+  - if [ $ARCH = i386 ]; then
+    if [ $TRAVIS_OS_NAME = osx ]; then
+    brew install i386-elf-gcc;
+    fi;
+    fi
+  - if [ $ARCH = x86_64 ]; then
+    if [ $TRAVIS_OS_NAME = osx ]; then
+    brew tap altkatz/homebrew-gcc_cross_compilers;
+    brew install x64-elf-gcc;
+    fi;
+    fi
+
+script:
+  - mkdir build && cd build
+  - cmake -DARCH=$ARCH ..
+  - make
