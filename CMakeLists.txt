@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.0)
 project(ucore_user)
 
 # Path
-set(ARCH_DIR src/arch/${ARCH})
+if (${ARCH} STREQUAL riscv32 OR ${ARCH} STREQUAL riscv64)
+    set(ARCH_DIR src/arch/riscv)
+else()
+    set(ARCH_DIR src/arch/${ARCH})
+endif()
 aux_source_directory(src SRCS)
 aux_source_directory(${ARCH_DIR}/libs LIBS)
 aux_source_directory(${ARCH_DIR}/ulibs LIBS)
