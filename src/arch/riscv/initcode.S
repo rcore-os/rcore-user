@@ -1,3 +1,5 @@
+#include "arch.h"
+
 .text
 .globl _start
 _start:

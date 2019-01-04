@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(ucore_user)
 
+enable_language(C ASM)
+
 # Path
 if (${ARCH} STREQUAL riscv32 OR ${ARCH} STREQUAL riscv64)
     set(ARCH_DIR src/arch/riscv)
@@ -11,7 +13,7 @@ endif()
 aux_source_directory(src SRCS)
 aux_source_directory(src/libs LIBS)
 aux_source_directory(src/ulibs LIBS)
-aux_source_directory(${ARCH_DIR} LIBS)
+set(LIBS ${ARCH_DIR}/initcode.S ${LIBS})
 include_directories(src/libs src/ulibs ${ARCH_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${ARCH})
 
@@ -37,11 +39,13 @@ elseif (${ARCH} STREQUAL aarch64)
 else()
     message("Unsupported arch: ${ARCH}")
 endif ()
+set(CMAKE_ASM_COMPILER      ${PREFIX}gcc)
 set(CMAKE_C_COMPILER        ${PREFIX}gcc)
 set(CMAKE_RANLIB            ${PREFIX}ranlib)
 set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -fno-builtin -nostdinc -fno-stack-protector -ggdb -Wall")
-set(CMAKE_EXE_LINKER_FLAGS  "-nostdlib")
-set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS) # get rid of '-rdynamic' on Linux
+set(CMAKE_ASM_FLAGS         ${CMAKE_C_FLAGS})
+set(CMAKE_C_LINK_FLAGS      "-nostdlib")    # get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)      # get rid of '-rdynamic' on Linux
 
 # Library
 add_library(ulib ${LIBS})
