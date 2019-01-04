@@ -9,9 +9,10 @@ else()
     set(ARCH_DIR src/arch/${ARCH})
 endif()
 aux_source_directory(src SRCS)
-aux_source_directory(${ARCH_DIR}/libs LIBS)
-aux_source_directory(${ARCH_DIR}/ulibs LIBS)
-include_directories(${ARCH_DIR}/libs ${ARCH_DIR}/ulibs)
+aux_source_directory(src/libs LIBS)
+aux_source_directory(src/ulibs LIBS)
+aux_source_directory(${ARCH_DIR} LIBS)
+include_directories(src/libs src/ulibs ${ARCH_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${ARCH})
 
 # Toolchain

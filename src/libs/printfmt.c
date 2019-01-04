@@ -1,5 +1,5 @@
 #include <defs.h>
-#include <x86.h>
+#include <arch.h>
 #include <error.h>
 #include <stdio.h>
 #include <string.h>

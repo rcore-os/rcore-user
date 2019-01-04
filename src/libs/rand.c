@@ -1,4 +1,4 @@
-#include <x86.h>
+#include <arch.h>
 #include <stdlib.h>
 
 static unsigned long long next = 1;
