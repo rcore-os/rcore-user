@@ -78,7 +78,7 @@ readline(const char *prompt) {
             i --;
         }
         else if (c == '\n' || c == '\r') {
-            putc(c);
+            putc('\n');
             buffer[i] = '\0';
             break;
         }

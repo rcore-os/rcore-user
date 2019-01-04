@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 struct dirent {
-    off_t offset;
+    int32_t offset;
     char name[FS_MAX_FNAME_LEN + 1];
 };
 

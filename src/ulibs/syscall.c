@@ -12,10 +12,10 @@ static inline int
 syscall(int num, ...) {
     va_list ap;
     va_start(ap, num);
-    uint32_t a[MAX_ARGS];
+    size_t a[MAX_ARGS];
     int i, ret;
     for (i = 0; i < MAX_ARGS; i ++) {
-        a[i] = va_arg(ap, uint32_t);
+        a[i] = va_arg(ap, size_t);
     }
     va_end(ap);
 
@@ -50,6 +50,25 @@ syscall(int num, ...) {
     "m" (a[4])
     : "memory"
     );
+#elif defined(__aarch64__)
+    asm volatile (
+        "ldr w8, %1\n"
+        "ldr x0, %2\n"
+        "ldr x1, %3\n"
+        "ldr x2, %4\n"
+        "ldr x3, %5\n"
+        "ldr x4, %6\n"
+        "svc 0\n"
+        "str w0, %0"
+         : "=m" (ret)
+         : "m" (num),
+           "m" (a[0]),
+           "m" (a[1]),
+           "m" (a[2]),
+           "m" (a[3]),
+           "m" (a[4])
+        : "cc", "memory"
+      );
 #endif
     return ret;
 }
