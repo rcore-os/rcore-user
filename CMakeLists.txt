@@ -36,7 +36,7 @@ elseif (${ARCH} STREQUAL riscv64)
 elseif (${ARCH} STREQUAL aarch64)
     set(PREFIX              aarch64-none-elf-)
     set(CMAKE_C_FLAGS       "-mgeneral-regs-only")
-    set(CMAKE_C_LINK_FLAGS  "-Ttext 0xffff000000000000")
+    set(LINK_FLAGS          "-Ttext 0xffff000000000000")
 else()
     message("Unsupported arch: ${ARCH}")
 endif ()
@@ -45,8 +45,8 @@ set(CMAKE_C_COMPILER        ${PREFIX}gcc)
 set(CMAKE_RANLIB            ${PREFIX}ranlib)
 set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -fno-builtin -nostdinc -fno-stack-protector -ggdb -Wall")
 set(CMAKE_ASM_FLAGS         ${CMAKE_C_FLAGS})
-set(CMAKE_C_LINK_FLAGS      "${CMAKE_C_LINK_FLAGS} -nostdlib")  # get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
-set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                          # get rid of '-rdynamic' on Linux
+set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS} -nostdlib")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                  # override default value to get rid of '-rdynamic' on Linux
 
 # Library
 add_library(ulib ${LIBS})
