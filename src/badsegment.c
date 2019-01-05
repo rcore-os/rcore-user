@@ -5,7 +5,7 @@
 
 int
 main(void) {
-#if defined(__x86_64__) || defined(__x86__)
+#if defined(__x86_64__) || defined(__i386__)
     asm volatile("movw $0x28,%ax; movw %ax,%ds");
     panic("FAIL: T.T\n");
 #endif

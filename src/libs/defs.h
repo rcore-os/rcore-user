@@ -12,7 +12,7 @@
 #define CHAR_BIT        8
 
 /* Represents true-or-false values */
-typedef long long bool;
+typedef int bool;
 
 /* Explicitly-sized versions of integer types */
 typedef char int8_t;
@@ -29,8 +29,13 @@ typedef unsigned long long uint64_t;
  * We use pointer types to represent addresses,
  * uintptr_t to represent the numerical values of addresses.
  * */
+#if __riscv_xlen == 64 || defined(__x86_64__) || defined(__aarch64__)
 typedef int64_t intptr_t;
 typedef uint64_t uintptr_t;
+#elif __riscv_xlen == 32 || defined(__i386__)
+typedef int32_t intptr_t;
+typedef uint32_t uintptr_t;
+#endif
 
 /* size_t is used for memory object sizes */
 typedef uintptr_t size_t;
@@ -58,7 +63,7 @@ typedef size_t ppn_t;
 
 /* Round up the result of dividing of n */
 #define ROUNDUP_DIV(a, n) ({                                        \
-uint64_t __n = (uint64_t)(n);                           \
+uintptr_t __n = (uintptr_t)(n);                         \
 (typeof(a))(((a) + __n - 1) / __n);                     \
 })
 
