@@ -64,7 +64,7 @@ print_pgdir(void) {
 void
 lab6_set_priority(uint32_t priority)
 {
-    sys_lab6_set_priority(priority);
+    sys_set_priority(priority);
 }
 
 int

@@ -5,14 +5,19 @@
 #include <ulib.h>
 #include <unistd.h>
 
+static void
+fputch(char c, int *cnt, int fd) {
+    write(fd, &c, sizeof(char));
+    (*cnt) ++;
+}
+
 /* *
  * cputch - writes a single character @c to stdout, and it will
  * increace the value of counter pointed by @cnt.
  * */
 static void
 cputch(int c, int *cnt) {
-    sys_putc(c);
-    (*cnt) ++;
+    fputch(c, cnt, 1);
 }
 
 /* *
@@ -61,13 +66,6 @@ cputs(const char *str) {
     }
     cputch('\n', &cnt);
     return cnt;
-}
-
-
-static void
-fputch(char c, int *cnt, int fd) {
-    write(fd, &c, sizeof(char));
-    (*cnt) ++;
 }
 
 int
