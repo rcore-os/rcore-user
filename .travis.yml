@@ -51,6 +51,7 @@ install:
     fi
 
 script:
+  - cd ucore
   - mkdir build && cd build
   - cmake -DARCH=$ARCH ..
   - make
