@@ -3519,7 +3519,7 @@ char __progname[64];
 char **environ = _environ;
 
 void
-_start(int argc, char **argv, struct kinfo_t *k)
+__start(int argc, char **argv, struct kinfo_t *k)
 {
 	kinfo = k;
 
@@ -3532,15 +3532,17 @@ _start(int argc, char **argv, struct kinfo_t *k)
 }
 
 void
-_entry(void)
+_start(void)
 {
 	// make sure that the stack is 16-byte aligned, as gcc assumes, after
 	// _start's function prologue. gcc emits SSE instructions that require
 	// 16-byte alignment (misalignment generates #GP).
 	asm(
+		"movq   (%%rsp), %%rdi\n"  // argc
+		"leaq   8(%%rsp), %%rsi\n" // argv
 	    "andq	$0xfffffffffffffff0, %%rsp\n"
 	    "subq	$8, %%rsp\n"
-	    "movabs 	$_start, %%rax\n"
+	    "movabs 	$__start, %%rax\n"
 	    "jmpq	*%%rax\n"
 	    ::: "memory", "cc");
 }
