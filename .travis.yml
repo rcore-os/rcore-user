@@ -2,7 +2,10 @@ sudo: false
 
 dist: xenial
 
-language: c
+language: rust
+
+rust:
+  - nightly
 
 cache:
   directories:
@@ -19,6 +22,11 @@ env:
     - ARCH="i386" SRC="ucore"
 #    - ARCH="x86_64" SRC="ucore"
     - ARCH="aarch64" SRC="ucore"
+    - ARCH="riscv32" SRC="rust"
+    - ARCH="riscv64" SRC="rust"
+    - ARCH="i386" SRC="rust"
+    - ARCH="x86_64" SRC="rust"
+    - ARCH="aarch64" SRC="rust"
     - ARCH="x86_64" SRC="biscuit"
 
 install:
@@ -48,12 +56,13 @@ install:
   - if [ $ARCH = x86_64 ]; then
     if [ $TRAVIS_OS_NAME = osx ]; then
     brew tap altkatz/homebrew-gcc_cross_compilers;
-    brew install x64-elf-gcc;
+    travis_wait brew install x64-elf-gcc;
     fi;
     fi
 
+before_script:
+  - rustup component add rust-src
+  - (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
+
 script:
-  - cd $SRC
-  - mkdir build && cd build
-  - cmake -DARCH=$ARCH ..
-  - make
+  - make $SRC arch=$ARCH

@@ -6,32 +6,22 @@ User programs for [rCore OS](https://github.com/wangrunji0408/RustOS).
 
 
 
-Now it has 2 parts:
+Now it has 3 parts:
 
 * `ucore`: C-lang, from the original [ucore_os_lab](https://github.com/chyyuu/ucore_os_plus)
 * `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a partial libc `litc`. (WIP)
+* `rust`: Simple no_std Rust programs.
 
 ## Build
 
-For ucore:
-
 ```bash
-cd ucore
-mkdir build && cd build
-cmake -DARCH={i386,x86_64,riscv32,riscv64,aarch64} ..
-make
+make {ucore,biscuit,rust,all} arch={i386,x86_64,riscv32,riscv64,aarch64}
 ```
 
-For biscuit:
+Output to `build/$(arch)`
 
-```bash
-cd biscuit
-mkdir build && cd build
-cmake -DARCH=x86_64 ..
-make
-```
 
 ## Notice
 
-* The syscall ids have been set compatible with Linux64.
+* The syscall ids have been set compatible with [Linux64](https://syscalls64.paolostivanin.com).
 * So the ucore part can not run on the original ucore.
