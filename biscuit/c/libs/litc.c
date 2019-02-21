@@ -100,7 +100,7 @@ syscall(long a1, long a2, long a3, long a4,
 	asm volatile(
 		"movq	%%rsp, %%r10\n"
 		"leaq	2(%%rip), %%r11\n"
-		"sysenter\n"
+		"syscall\n"
 		: "=a"(ret)
 		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "c"(a4), "r"(r8)
 		: SYSCALL_CLOBBERS);
@@ -845,7 +845,7 @@ tfork_thread(struct tfork_t *args, long (*fn)(void *), void *fnarg)
 	asm volatile(
 	    "movq	%%rsp, %%r10\n"
 	    "leaq	2(%%rip), %%r11\n"
-	    "sysenter\n"
+	    "syscall\n"
 	    "cmpl	$0, %%eax\n"
 	    // parent or error
 	    "jne	1f\n"
@@ -915,7 +915,7 @@ _pcreate(void *vpcarg)
 	asm volatile(
 	    "movq	%%rsp, %%r10\n"
 	    "leaq	2(%%rip), %%r11\n"
-	    "sysenter\n"
+	    "syscall\n"
 	    "cmpq	$0, %%rax\n"
 	    "je		1f\n"
 	    "movq	$0, 0x0\n"
@@ -923,7 +923,7 @@ _pcreate(void *vpcarg)
 	    "movq	%3, %%rax\n"
 	    "movq	%4, %%rdi\n"
 	    "leaq	2(%%rip), %%r11\n"
-	    "sysenter\n"
+	    "syscall\n"
 	    "movq	$0, 0x1\n"
 	    :
 	    : "a"(SYS_MUNMAP), "D"(pcargs.stack), "S"(pcargs.stksz),
