@@ -86,13 +86,20 @@ static struct kinfo_t *kinfo;
 // stack is not used after munmapping it, but before calling exit(2). we use
 // this macro to make sure the clobbers are coherent for these three pieces of
 // code using syscalls.
+#if defined(__x86_64__)
 #define SYSCALL_CLOBBERS "cc", "memory", "r9", "r10", "r11", "r12", "r13", \
 			 "r14", "r15"
+#elif defined(__aarch64__)
+#define SYSCALL_CLOBBERS "cc", "memory"
+#endif
+
 long
 syscall(long a1, long a2, long a3, long a4,
     long a5, long trap)
 {
 	long ret;
+
+#if defined(__x86_64__)
 	register long r8 asm("r8") = a5;
 
 	// we may want to follow the sys5 abi and have the kernel restore
@@ -104,6 +111,20 @@ syscall(long a1, long a2, long a3, long a4,
 		: "=a"(ret)
 		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "c"(a4), "r"(r8)
 		: SYSCALL_CLOBBERS);
+#elif defined(__aarch64__)
+	register long x8 asm("x8") = trap;
+	register long x0 asm("x0") = a1;
+	register long x1 asm("x1") = a2;
+	register long x2 asm("x2") = a3;
+	register long x3 asm("x3") = a4;
+	register long x4 asm("x4") = a5;
+
+	asm volatile(
+		"svc	0"
+		: "=r"(ret)
+		: "r"(x8), "0"(x0), "r"(x1), "r"(x2), "r"(x3), "r"(x4)
+		: SYSCALL_CLOBBERS);
+#endif
 
 	return ret;
 }
@@ -837,6 +858,7 @@ tfork_thread(struct tfork_t *args, long (*fn)(void *), void *fnarg)
 	int tid;
 	long flags = FORK_THREAD;
 
+#if defined(__x86_64__)
 	// rbx and rbp are preserved across syscalls. i don't know how to
 	// specify rbp as a register contraint.
 	register ulong rbp asm("rbp") = (ulong)fn;
@@ -859,6 +881,30 @@ tfork_thread(struct tfork_t *args, long (*fn)(void *), void *fnarg)
 	    : "=a"(tid)
 	    : "D"(args), "S"(flags), "0"(SYS_FORK), "r"(rbp), "r"(rbx)
 	    : SYSCALL_CLOBBERS);
+#elif defined(__aarch64__)
+	// all registers are preserved across syscalls for aarch64.
+	register ulong x8 asm("x8") = SYS_FORK;
+	register ulong x0 asm("x0") = (ulong)args;
+	register ulong x1 asm("x1") = flags;
+
+	asm volatile(
+	    "svc	0\n"
+	    "cmp	x0, #0\n"
+	    // parent or error
+	    "b.ne	1f\n"
+	    // child
+	    "ldr	x0, %5\n"
+	    "ldr	x9, %4\n"
+	    "blr	x9\n"
+	    "bl 	tfork_done\n"
+	    "mov	x0, #0\n"
+	    "str	xzr, [x0]\n"
+	    "1:\n"
+	    : "=r"(tid)
+	    : "r"(x8), "0"(x0), "r"(x1), "m"(fn), "m"(fnarg)
+	    : SYSCALL_CLOBBERS);
+#endif
+
 	return tid;
 }
 
@@ -907,6 +953,7 @@ _pcreate(void *vpcarg)
 	status = (long)(pcargs.fn(pcargs.arg));
 	free(pcargs.tls);
 
+#if defined(__x86_64__)
 	// rbx and rbp are preserved across syscalls. i don't know how to
 	// specify rbp as a register contraint.
 	register ulong rbp asm("rbp") = SYS_THREXIT;
@@ -929,6 +976,29 @@ _pcreate(void *vpcarg)
 	    : "a"(SYS_MUNMAP), "D"(pcargs.stack), "S"(pcargs.stksz),
 	      "r"(rbp), "r"(rbx)
 	    : SYSCALL_CLOBBERS);
+#elif defined(__aarch64__)
+	register ulong x8 asm("x8") = SYS_MUNMAP;
+	register ulong x0 asm("x0") = (ulong)pcargs.stack;
+	register ulong x1 asm("x1") = (ulong)pcargs.stksz;
+
+	asm volatile(
+	    "svc	0\n"
+	    "cmp	x0, #0\n"
+	    "b.eq	1f\n"
+	    "mov	x0, #0\n"
+	    "str	xzr, [x0]\n"
+	    "1:\n"
+	    "mov	x8, %3\n"
+	    "ldr	x0, %4\n"
+	    "svc	0\n"
+	    "mov	x0, #1\n"
+	    "str	xzr, [x0]\n"
+	    :
+	    : "r"(x8), "r"(x0), "r"(x1),
+	      "X"(SYS_THREXIT), "m"(status)
+	    : SYSCALL_CLOBBERS);
+#endif
+
 	// not reached
 	return 0;
 }
@@ -1107,7 +1177,11 @@ pthread_barrier_wait(pthread_barrier_t *b)
 		uint o = b->current;
 		uint n = o + 1;
 		if ((o & m) != 0) {
+#if defined(__x86_64__)
 			asm volatile("pause":::"memory");
+#elif defined(__aarch64__)
+			asm volatile("yield":::"memory");
+#endif
 			continue;
 		}
 		c = n;
@@ -1126,7 +1200,11 @@ pthread_barrier_wait(pthread_barrier_t *b)
 	}
 
 	while ((b->current & m) == 0)
+#if defined(__x86_64__)
 		asm volatile("pause":::"memory");
+#elif defined(__aarch64__)
+		asm volatile("yield":::"memory");
+#endif
 
 	c = __sync_add_and_fetch(&b->current, -1);
 	if (c == m)
@@ -2159,7 +2237,7 @@ DIR *
 fdopendir(int fd)
 {
         #define BSIZE 4096
-  
+
 	struct stat st;
 	if (fstat(fd, &st) == -1)
 		return NULL;
@@ -2785,6 +2863,7 @@ sscanf(const char *src, const char *fmt, ...)
 ulong
 rdtsc(void)
 {
+#if defined(__x86_64__)
 	ulong low, hi;
 	asm volatile(
 	    "rdtsc\n"
@@ -2792,6 +2871,10 @@ rdtsc(void)
 	    :
 	    :);
 	return hi << 32 | low;
+#else
+	// TODO: aarch64
+	return 0;
+#endif
 }
 
 static char readlineb[256];
@@ -3534,17 +3617,25 @@ __start(int argc, char **argv, struct kinfo_t *k)
 void
 _start(void)
 {
+#if defined(__x86_64__)
 	// make sure that the stack is 16-byte aligned, as gcc assumes, after
 	// _start's function prologue. gcc emits SSE instructions that require
 	// 16-byte alignment (misalignment generates #GP).
 	asm(
 		"movq   (%%rsp), %%rdi\n"  // argc
 		"leaq   8(%%rsp), %%rsi\n" // argv
-	    "andq	$0xfffffffffffffff0, %%rsp\n"
-	    "subq	$8, %%rsp\n"
-	    "movabs 	$__start, %%rax\n"
-	    "jmpq	*%%rax\n"
-	    ::: "memory", "cc");
+		"andq	$0xfffffffffffffff0, %%rsp\n"
+		"subq	$8, %%rsp\n"
+		"movabs 	$__start, %%rax\n"
+		"jmpq	*%%rax\n"
+		::: "memory", "cc");
+#elif defined(__aarch64__)
+	asm(
+		"ldr	x0, [sp]\n"   // argc
+		"add	x1, sp, #8\n" // argv
+		"bl 	__start\n"
+		::: "memory", "cc");
+#endif
 }
 
 /* NGINX STUFF */

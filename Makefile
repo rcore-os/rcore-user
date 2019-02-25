@@ -40,7 +40,7 @@ ifneq ($(arch), x86_64)
 endif
 
 biscuit:
-ifeq ($(arch), x86_64)
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make

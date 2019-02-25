@@ -118,6 +118,7 @@ pid_t
 _getppid(void)
 {
 	pid_t ret;
+#if defined(__x86_64__)
 	asm volatile(
 		"movq	%%rsp, %%r10\n"
 		"leaq	2(%%rip), %%r11\n"
@@ -125,6 +126,14 @@ _getppid(void)
 		: "=a"(ret)
 		: "0"(40ul)
 		: "cc", "memory", "r9", "r10", "r11", "edi", "esi", "edx", "ecx", "r8");
+#elif defined(__aarch64__)
+	register long x8 asm("x8") = 40ul;
+	asm volatile(
+		"svc	0"
+		: "=r"(ret)
+		: "r"(x8)
+		: "cc", "memory");
+#endif
 	return ret;
 }
 
@@ -135,6 +144,7 @@ void *igetpids(void *idp)
 
 	long total = 0;
 	while (!cease) {
+#if defined(__x86_64__)
 		asm volatile(
 			"movl	$40, %%eax\n"
 			"movq	%%rsp, %%r10\n"
@@ -143,6 +153,14 @@ void *igetpids(void *idp)
 			:
 			:
 			: SYSCALL_CLOBBERS, "eax", "edi", "esi", "edx", "ecx", "r8");
+#elif defined(__aarch64__)
+		asm volatile(
+			"mov	x8, #40\n"
+			"svc	0"
+			:
+			:
+			: "cc", "memory");
+#endif
 		total++;
 	}
 	return (void *)total;
@@ -692,10 +710,14 @@ void *locks(void *_arg)
 	pthread_barrier_wait(&bar);
 
 	while (!cease) {
+#if defined(__x86_64__)
 		asm("lock incq %0\n"
 			:
 			: "m"(tot)
 			: "cc", "memory");
+#else
+	// TODO: aarch64
+#endif
 	}
 	return (void *)tot;
 }

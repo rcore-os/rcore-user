@@ -568,7 +568,7 @@ fourfiles(void)
   for(pi = 0; pi < 4; pi++){
     fname = names[pi];
     unlink(fname);
-      
+
     pid = fork();
     if(pid < 0){
       printf("fork failed\n");
@@ -581,7 +581,7 @@ fourfiles(void)
         printf("create failed\n");
         exit(0);
       }
-      
+
       memset(buf, '0'+pi, BSIZE);
       for(i = 0; i < 12; i++){
         if((n = write(fd, buf, BSIZE)) != BSIZE){
@@ -938,7 +938,7 @@ linkunlink()
 
   if(pid)
     wait(NULL);
-  else 
+  else
     exit(0);
 
   printf("linkunlink ok\n");
@@ -1007,7 +1007,7 @@ subdir(void)
   }
   write(fd, "ff", 2);
   close(fd);
-  
+
   if(rmdir("dd") >= 0){
     printf("unlink dd (non-empty dir) succeeded!\n");
     exit(0);
@@ -1231,7 +1231,7 @@ bigfile(void)
   fsync(fd);
   close(fd);
 
-  
+
   fd = open("bigfile", 0);
   if(fd < 0){
     printf("cannot open bigfile\n");
@@ -1466,7 +1466,7 @@ forktest(void)
     if(pid == 0)
       exit(0);
   }
-  
+
   if(n == ulim){
     printf("fork claimed to work %d times!\n", ulim);
     exit(0);
@@ -1489,7 +1489,7 @@ forktest(void)
     if (pthread_create(&t[n], NULL, _ptexit, NULL))
       break;
   }
-  
+
   if(n == ulim)
     errx(-1, "pthread_create claimed to work %d times!\n", ulim);
 
@@ -1517,7 +1517,7 @@ forktest(void)
 //  // can one sbrk() less than a page?
 //  a = sbrk(0);
 //  int i;
-//  for(i = 0; i < 5000; i++){ 
+//  for(i = 0; i < 5000; i++){
 //    b = sbrk(1);
 //    if(b != a){
 //      printf("sbrk test failed %d %x %x\n", i, a, b);
@@ -1546,7 +1546,7 @@ forktest(void)
 //  a = sbrk(0);
 //  amt = (BIG) - (uint)a;
 //  p = sbrk(amt);
-//  if (p != a) { 
+//  if (p != a) {
 //    printf("sbrk test failed to grow big address space; enough phys mem?\n");
 //    exit(0);
 //  }
@@ -1585,7 +1585,7 @@ forktest(void)
 //    printf("sbrk downsize failed, a %x c %x\n", a, c);
 //    exit(0);
 //  }
-//  
+//
 //  // can we read the kernel's memory?
 //  for(a = (char*)(KERNBASE); a < (char*) (KERNBASE+2000000); a += 50000){
 //    ppid = getpid();
@@ -1643,14 +1643,26 @@ void
 validateint(int *p)
 {
 	ulong ret;
+
+#define SYS_PIPE2         293
+#if defined(__x86_64__)
 	asm volatile(
 		"movq	%%rsp, %%r10\n"
 		"leaq	2(%%rip), %%r11\n"
 		"sysenter\n"
 		: "=a"(ret)
-#define SYS_PIPE2         293
 		: "0"(SYS_PIPE2), "D"(p)
 		: "cc", "memory");
+#elif defined(__aarch64__)
+	register ulong x8 asm("x8") = SYS_PIPE2;
+	register ulong x0 asm("x0") = (ulong)p;
+	asm volatile(
+		"svc 0\n"
+		: "=r"(ret)
+		: "r"(x8), "0"(x0)
+		: "cc", "memory");
+#endif
+
 	if (ret == 0)
 		errx(-1, "bad int passed?");
 }
@@ -2789,7 +2801,11 @@ static volatile int go;
 static void *_locker(void *v)
 {
 	while (go != 1)
+#if defined(__x86_64__)
 		asm volatile("pause\n":::"memory");
+#elif defined(__aarch64__)
+		asm volatile("yield\n":::"memory");
+#endif
 	pthread_mutex_t *m = (pthread_mutex_t *)v;
 	int i;
 	for (i = 0; i < ltimes; i++) {
@@ -2904,7 +2920,11 @@ static void _condtest(const int nt)
 		if (pthread_create(&t[i], NULL, _condsleep, &args[i]))
 			errx(-1, "pthread_ create");
 		while (go == 0)
+#if defined(__x86_64__)
 			asm volatile("pause\n":::"memory");
+#elif defined(__aarch64__)
+			asm volatile("yield\n":::"memory");
+#endif
 	}
 
 	for (i = 0; i < nt; i++)
@@ -2953,7 +2973,11 @@ static void _condbctest(const int nt)
 	for (i = 0; i < bctimes; i++) {
 		volatile int *p = &lcounter;
 		while (*p < enext)
+#if defined(__x86_64__)
 			asm volatile("pause\n":::"memory");
+#elif defined(__aarch64__)
+			asm volatile("yield\n":::"memory");
+#endif
 		if (pthread_mutex_lock(&m))
 			err(-1, "lock");
 		if (i == bctimes - 1)
@@ -2985,7 +3009,7 @@ int pthreadsharedfd;
 void *threadfd(void *arg)
 {
   long n = (long) arg;
-  
+
   for (int i = 0; i < 1000; i++) {
     if (n == 0) {
       pthreadsharedfd = open("sharedfdf", O_CREATE|O_RDWR);
@@ -3007,13 +3031,13 @@ void _pthreadfd(void) {
   const int nthreads = 2;
 
   printf("pthread shared fd\n");
-	
+
   int i;
   pthread_t t[nthreads];
   for (int i = 0; i < nthreads; i++) {
     if (pthread_create(&t[i], NULL, threadfd, (void *) (long) i))
       errx(-1, "pthread create");
-  }    
+  }
   for (i = 0; i < nthreads; i++) {
     if (pthread_join(t[i], NULL))
       errx(-1, "pthread join");
@@ -3620,7 +3644,7 @@ logtest()
   }
 
   free(buf);
-    
+
   printf("log test OK\n");
 }
 
@@ -3835,9 +3859,9 @@ main(int argc, char *argv[])
   posixtest();
   barriertest();
   threadwait();
-  
+
   pthreadfd();
-  
+
   fnonblock();
   preadwrite();
   stdiotest();

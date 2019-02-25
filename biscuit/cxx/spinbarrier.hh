@@ -39,7 +39,11 @@ public:
   {
     // Wait if the barrier is in the exit phase
     while (entered_ & phase_mask)
+#if defined(__x86_64__)
       asm volatile("pause":::);
+#elif defined(__aarch64__)
+      asm volatile("yield":::);
+#endif
 
     // Enter the barrier
     auto v = ++entered_;
@@ -52,7 +56,11 @@ public:
 
     // Wait until the barrier switches to the exit phase
     while (!(entered_.load(std::memory_order_relaxed) & phase_mask))
+#if defined(__x86_64__)
       asm volatile("pause":::);
+#elif defined(__aarch64__)
+      asm volatile("yield":::);
+#endif
 
     // Exit the batter
     if ((v = --entered_) == phase_mask)

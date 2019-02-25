@@ -101,6 +101,7 @@ setaffinity(int c)
 ulong
 rdtsc(void)
 {
+#if defined(__x86_64__)
 	ulong low, hi;
 	asm volatile(
 	    "rdtsc\n"
@@ -108,5 +109,9 @@ rdtsc(void)
 	    :
 	    :);
 	return hi << 32 | low;
+#else
+	// TODO: aarch64
+	return 0;
+#endif
 }
 #endif

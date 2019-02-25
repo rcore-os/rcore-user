@@ -48,7 +48,11 @@ void *groupfault(void *a)
 	int b = (int)(long)a;
 
 	while (!go)
-		asm volatile("pause");
+#if defined(__x86_64__)
+		asm volatile("pause":::"memory");
+#elif defined(__aarch64__)
+		asm volatile("yield":::"memory");
+#endif
 
 	blah = b;
 

@@ -22,6 +22,7 @@ struct timeval before, end;
 
 void rgettimeofday(struct timeval *h, void *p)
 {
+#if defined(__x86_64__)
 	time_t hi, lo, v;
 	asm(
 	    "rdtsc\n"
@@ -31,6 +32,9 @@ void rgettimeofday(struct timeval *h, void *p)
 	v = hi << 32 | lo;
 	if (h)
 		h->tv_usec = v;
+#else
+	// TODO: aarch64
+#endif
 }
 
 void start()
@@ -117,7 +121,7 @@ write_test(char *name, int n, int size)
       exit(1);
     }
   }
-    
+
   if ((r = close(fd)) < 0) {
     printf("%s: close failed %d %d\n", prog_name, r, errno);
   }
@@ -164,13 +168,13 @@ read_test(int n, int size)
   printf("%s: read took %ld usec\n", prog_name, time);
 }
 
-void 
+void
 delete_test(int n)
-{	
+{
   int i;
   int r;
   int j;
- 
+
   start();
   for (i = 0, j = 0; i < n; i ++) {
 
@@ -208,11 +212,11 @@ int main(int argc, char *argv[])
   printf("%s %d %d %s\n", prog_name, n, size, topdir);
 
   creat_dir();
-  
+
   //printstats(topdir, 1);
-  
+
   creat_test(n, size);
-  
+
   //printstats(topdir, 0);
 
   read_test(n, size);
