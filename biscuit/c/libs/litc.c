@@ -87,20 +87,20 @@ static struct kinfo_t *kinfo;
 // this macro to make sure the clobbers are coherent for these three pieces of
 // code using syscalls.
 #if defined(__x86_64__)
-#define SYSCALL_CLOBBERS "cc", "memory", "r9", "r10", "r11", "r12", "r13", \
+#define SYSCALL_CLOBBERS "cc", "memory", "r10", "r11", "r12", "r13", \
 			 "r14", "r15"
 #elif defined(__aarch64__)
 #define SYSCALL_CLOBBERS "cc", "memory"
 #endif
 
 long
-syscall(long a1, long a2, long a3, long a4,
-    long a5, long trap)
+syscall6(long a1, long a2, long a3, long a4, long a5, long a6, long trap)
 {
 	long ret;
 
 #if defined(__x86_64__)
 	register long r8 asm("r8") = a5;
+	register long r9 asm("r9") = a6;
 
 	// we may want to follow the sys5 abi and have the kernel restore
 	// r14-r15 too...
@@ -109,7 +109,7 @@ syscall(long a1, long a2, long a3, long a4,
 		"leaq	2(%%rip), %%r11\n"
 		"syscall\n"
 		: "=a"(ret)
-		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "c"(a4), "r"(r8)
+		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "c"(a4), "r"(r8), "r"(r9)
 		: SYSCALL_CLOBBERS);
 #elif defined(__aarch64__)
 	register long x8 asm("x8") = trap;
@@ -118,15 +118,23 @@ syscall(long a1, long a2, long a3, long a4,
 	register long x2 asm("x2") = a3;
 	register long x3 asm("x3") = a4;
 	register long x4 asm("x4") = a5;
+	register long x5 asm("x5") = a6;
 
 	asm volatile(
 		"svc	0"
 		: "=r"(ret)
-		: "r"(x8), "0"(x0), "r"(x1), "r"(x2), "r"(x3), "r"(x4)
+		: "r"(x8), "0"(x0), "r"(x1), "r"(x2), "r"(x3), "r"(x4), "r"(x5)
 		: SYSCALL_CLOBBERS);
 #endif
 
 	return ret;
+}
+
+long
+syscall(long a1, long a2, long a3, long a4,
+        long a5, long trap)
+{
+    return syscall6(a1, a2, a3, a4, a5, 0, trap);
 }
 
 #define SA(x)     ((long)x)
@@ -464,10 +472,8 @@ mknod(const char *p, mode_t m, dev_t d)
 void *
 mmap(void *addr, size_t len, int prot, int flags, int fd, long offset)
 {
-	ulong protflags = (ulong)prot << 32;
-	protflags |= flags;
 	long ret;
-	ret = syscall(SA(addr), SA(len), SA(protflags), SA(fd),
+	ret = syscall6(SA(addr), SA(len), SA(prot), SA(flags), SA(fd),
 	    SA(offset), SYS_MMAP);
 	if (ret < 0 && -ret >= ERRNO_FIRST && -ret <= ERRNO_LAST) {
 		errno = -ret;
