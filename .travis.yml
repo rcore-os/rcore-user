@@ -28,6 +28,7 @@ env:
     - ARCH="x86_64" SRC="rust"
     - ARCH="aarch64" SRC="rust"
     - ARCH="x86_64" SRC="biscuit"
+    - ARCH="aarch64" SRC="biscuit"
 
 install:
   - if [ $ARCH = riscv32 ] || [ $ARCH = riscv64 ]; then
