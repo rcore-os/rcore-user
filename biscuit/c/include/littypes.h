@@ -52,13 +52,13 @@ typedef unsigned char 	u8;
 
 typedef long 		time_t;
 typedef unsigned long 	nfds_t;
-typedef unsigned long 	mode_t;
+typedef unsigned int    mode_t;
 typedef long 		dev_t;
 typedef ulong 		ino_t;
 typedef long 		off_t;
 typedef long 		pid_t;
-typedef long 		uid_t;
-typedef long 		gid_t;
+typedef int 		uid_t;
+typedef int 		gid_t;
 typedef unsigned long 	socklen_t;
 typedef unsigned long 	rlim_t;
 typedef unsigned long 	sigset_t;

@@ -44,7 +44,7 @@ void rm(char *fn)
 		dirrm(fn);
 		return;
 	}
-	errx(-1, "weird file type %ld", st.st_mode & S_IFMT);
+	errx(-1, "weird file type %d", st.st_mode & S_IFMT);
 }
 
 int main(int argc, char **argv)
