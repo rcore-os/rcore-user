@@ -87,8 +87,7 @@ static struct kinfo_t *kinfo;
 // this macro to make sure the clobbers are coherent for these three pieces of
 // code using syscalls.
 #if defined(__x86_64__)
-#define SYSCALL_CLOBBERS "cc", "memory", "r10", "r11", "r12", "r13", \
-			 "r14", "r15"
+#define SYSCALL_CLOBBERS "cc", "memory", "r11", "r12", "r13", "r14", "r15"
 #elif defined(__aarch64__)
 #define SYSCALL_CLOBBERS "cc", "memory"
 #endif
@@ -99,6 +98,7 @@ syscall6(long a1, long a2, long a3, long a4, long a5, long a6, long trap)
 	long ret;
 
 #if defined(__x86_64__)
+	register long r10 asm("r10") = a4;
 	register long r8 asm("r8") = a5;
 	register long r9 asm("r9") = a6;
 
@@ -109,7 +109,7 @@ syscall6(long a1, long a2, long a3, long a4, long a5, long a6, long trap)
 		"leaq	2(%%rip), %%r11\n"
 		"syscall\n"
 		: "=a"(ret)
-		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "c"(a4), "r"(r8), "r"(r9)
+		: "0"(trap), "D"(a1), "S"(a2), "d"(a3), "r"(r10), "r"(r8), "r"(r9)
 		: SYSCALL_CLOBBERS);
 #elif defined(__aarch64__)
 	register long x8 asm("x8") = trap;
