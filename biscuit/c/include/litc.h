@@ -715,7 +715,9 @@ typedef struct {
 	struct dirent dents[];
 } DIR;
 
-extern __thread int errno;
+// tls is not fully supported at the time
+//extern __thread int errno;
+extern int errno;
 
 #define		BUFSIZ		4096
 #define		L_tmpnam	20

@@ -53,6 +53,7 @@
 #define SYS_SETRLIMIT    160
 #define SYS_SYNC         162
 #define SYS_REBOOT       169
+#define SYS_GETDENTS64   217
 #define SYS_NANOSLEEP    230
 #define SYS_PIPE2        293
 #define SYS_PROF         31337
@@ -63,7 +64,9 @@
 #define SYS_FUTEX        31342
 #define SYS_GETTID       31343
 
-__thread int errno;
+// tls is not fully support at the time
+//__thread int errno;
+int errno;
 
 static int dolock = 1;
 
@@ -579,6 +582,15 @@ reboot(void)
 	int ret = syscall(0, 0, 0, 0, 0, SYS_REBOOT);
 	ERRNO_NZ(ret);
 	return ret;
+
+}
+
+ssize_t
+getdents64(int fd, void *dirent, size_t count)
+{
+	ssize_t ret = syscall(SA(fd), SA(dirent), SA(count), 0, 0, SYS_GETDENTS64);
+	ERRNO_NEG(ret);
+	return ret;
 }
 
 ssize_t
@@ -955,6 +967,10 @@ _pcreate(void *vpcarg)
 {
 	struct pcargs_t pcargs = *(struct pcargs_t *)vpcarg;
 	free(vpcarg);
+
+	// use arch_prctl to set $fs manually
+	syscall(0x1002, (long)pcargs.tls, 0, 0, 0, 158);
+
 	long status;
 	status = (long)(pcargs.fn(pcargs.arg));
 	free(pcargs.tls);
@@ -2255,20 +2271,24 @@ fdopendir(int fd)
 	if (lseek(fd, 0, SEEK_SET) == -1)
 		return NULL;
 	// on disk format of directory entries
-	struct  __attribute__((packed)) _dirent_t {
+	struct	__attribute__((packed)) _dirent64_t {
+		ulong	inode;
+		ulong	offset;
+		ushort	 reclen;
+		u8	 type;
 		char	name[_POSIX_NAME_MAX];
-		ulong	inum;
 	};
-	const int nde = BSIZE/sizeof(struct _dirent_t);
 	size_t c = 0;
 	char buf[BSIZE];
 	ssize_t r;
-	while ((r = read(fd, buf, sizeof(buf))) > 0) {
-		int i;
-		for (i = 0; i < nde; i++) {
-			struct _dirent_t *de = (struct _dirent_t *)buf + i;
+	while ((r = getdents64(fd, buf, sizeof(buf))) > 0) {
+		int i = 0;
+		while (i < r) {
+			struct _dirent64_t *de = (struct _dirent64_t *)(buf + i);
 			if (de->name[0] != '\0')
 				c++;
+
+			i += de->reclen;
 		}
 	}
 	if (r == -1)
@@ -2286,16 +2306,17 @@ fdopendir(int fd)
 	if (lseek(fd, 0, SEEK_SET) == -1)
 		goto out;
 	struct dirent *p = &ret->dents[0];
-	while ((r = read(fd, buf, sizeof(buf))) > 0) {
-		int i;
-		for (i = 0; i < nde; i++) {
-			struct _dirent_t *de = (struct _dirent_t *)buf + i;
+	while ((r = getdents64(fd, buf, sizeof(buf))) > 0) {
+		int i = 0;
+		while (i < r) {
+			struct _dirent64_t *de = (struct _dirent64_t *)(buf + i);
 			if (de->name[0] != '\0') {
-				p->d_ino = de->inum;
+				p->d_ino = de->inode;
 				strncpy(p->d_name, de->name,
 				    sizeof(p->d_name));
 				p++;
 			}
+			i += de->reclen;
 		}
 	}
 	if (r == -1)
@@ -2341,7 +2362,8 @@ readdir_r(DIR *d, struct dirent *entry, struct dirent **ret)
 		return 0;
 	}
 	struct dirent *src = &d->dents[d->cent++];
-	*entry = *src;
+	// avoid sse instructions generated
+	memcpy(entry, src, sizeof(struct dirent));
 	*ret = entry;
 	return 0;
 }
