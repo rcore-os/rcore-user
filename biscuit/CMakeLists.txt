@@ -17,7 +17,7 @@ if (${ARCH} STREQUAL i386)
     set(CMAKE_C_FLAGS       "-m32 -mno-red-zone")
 elseif (${ARCH} STREQUAL x86_64)
     if(APPLE)
-        set(PREFIX          x86_64-elf-)
+        set(PREFIX          x86_64-linux-musl-)
     endif ()
     set(CMAKE_C_FLAGS       "-m64 -mno-red-zone")
 elseif (${ARCH} STREQUAL riscv32)
@@ -39,17 +39,13 @@ endif ()
 set(CMAKE_ASM_COMPILER      ${PREFIX}gcc)
 set(CMAKE_C_COMPILER        ${PREFIX}gcc)
 set(CMAKE_RANLIB            ${PREFIX}ranlib)
-set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall -Werror -MMD -MP -O -g -ffreestanding -nostdlib -nostdinc -fno-builtin -fno-stack-protector -fPIC -std=gnu11")
+set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall -Werror -Wno-pointer-to-int-cast -Wno-format -MMD -MP -O -g -fPIC -std=gnu99")
 set(CMAKE_ASM_FLAGS         ${CMAKE_C_FLAGS})
-set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS} -nostdlib")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
+set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS}")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                  # override default value to get rid of '-rdynamic' on Linux
-
-# Library
-add_library(ulib ${LIBS})
 
 # Execuatble
 foreach (PATH ${SRCS})
     get_filename_component(NAME ${PATH} NAME_WE)
     add_executable(${NAME} ${PATH})
-    target_link_libraries(${NAME} ulib gcc)
 endforeach ()

@@ -1,9 +1,11 @@
-#include <litc.h>
+#include <common.h>
 
 int main(int argc, char **argv)
 {
 	while (1) {
-		char *ret = readline("input:");
+        printf("input:");
+        char buf[1024];
+		char *ret = gets(buf);
 		if (!ret)
 			break;
 		printf("got: %s\n", ret);

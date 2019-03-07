@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static int lstn(uint16_t lport)
 {

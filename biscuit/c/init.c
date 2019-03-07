@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static void fexec(char * const args[])
 {

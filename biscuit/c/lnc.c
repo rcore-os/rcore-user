@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static char lmss[1ul << 11];
 
@@ -81,7 +81,7 @@ int nc(int s)
 static void usage()
 {
 	fprintf(stderr, "usage:\n"
-	    "%s [-M] [-c host] [-p port] [-l listen port]\n", __progname);
+	    "%s [-M] [-c host] [-p port] [-l listen port]\n", "lnc");
 	exit(-1);
 }
 

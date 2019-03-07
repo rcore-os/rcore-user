@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static int lstn(uint16_t lport)
 {
@@ -126,6 +126,6 @@ int main(int argc, char **argv)
 	if (close(fd) == -1)
 		err(-1, "close");
 	fprintf(stderr, "wrote %zu bytes. rebooting.\n", did);
-	reboot();
+	reboot(RB_AUTOBOOT);
 	return 0;
 }

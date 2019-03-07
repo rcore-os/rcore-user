@@ -1,6 +1,7 @@
-#include <stdio.h>
+#include <common.h>
 
 int main(int argc, char **argv)
 {
-	return sync();
+    sync();
+    return 0;
 }

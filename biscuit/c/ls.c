@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 void dprint(int fd, char *par, int left, int rec)
 {
@@ -77,7 +77,7 @@ void usage(void)
 {
 	fprintf(stderr, "%s [-R]\n"
 	    "-R    recurse subdirectories\n"
-	    "\n", __progname);
+	    "\n", "ls");
 	exit(-1);
 }
 

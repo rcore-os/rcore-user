@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <common.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <err.h>
@@ -35,8 +35,7 @@ void rm(char *fn)
 	struct stat st;
 	if (stat(fn, &st) == -1)
 		err(-1, "stat");
-	if (S_ISREG(st.st_mode) || S_ISSOCK(st.st_mode) ||
-	    S_ISDEV(st.st_mode)) {
+	if (S_ISREG(st.st_mode) || S_ISSOCK(st.st_mode)) {
 		if (unlink(fn) == -1)
 			err(-1, "unlink");
 		return;
@@ -51,7 +50,7 @@ int main(int argc, char **argv)
 {
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <non-empty dir to remove>\n",
-		    __progname);
+		    "rmtree");
 		exit(-1);
 	}
 	char *fn = argv[1];

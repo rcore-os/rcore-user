@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <common.h>
 
 #define BSIZE  4096
 #define NADDR  (BSIZE/8)

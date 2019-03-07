@@ -41,7 +41,7 @@
  *
  */
 
-#include <stdio.h>
+#include <common.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/mman.h>

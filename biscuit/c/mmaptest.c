@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 char *ps[1000];
 

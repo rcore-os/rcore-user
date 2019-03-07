@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <common.h>
 #include <err.h>
 
 #include <sys/utsname.h>
@@ -15,7 +15,7 @@ void usage(void)
 		"-r	OS release\n"
 		"-s	OS name\n"
 		"-v	OS version\n"
-		"\n", __progname);
+		"\n", "uname");
 	exit(-1);
 }
 

@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <common.h>
 
 void generate(void)
 {

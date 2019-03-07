@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 void child(int id)
 {

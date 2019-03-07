@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static char buf[512];
 

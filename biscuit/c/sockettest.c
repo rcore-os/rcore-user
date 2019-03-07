@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 void sendall(int fd, char *buf, size_t len, struct sockaddr_un *sa,
     socklen_t slen)

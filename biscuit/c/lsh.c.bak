@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 void mkargs(char *line, char *args[], size_t n)
 {

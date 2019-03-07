@@ -1,4 +1,4 @@
-#include <litc.h>
+#include <common.h>
 
 static void gcrun(char * const *cmd, long *_ngcs, long *_xput, double *_gcfrac)
 {
@@ -281,7 +281,7 @@ __attribute__((unused))
 static void usage()
 {
 	fprintf(stderr, "usage: %s [-n target gcs] [-c target gc frac]"
-	    " -x <0gc xput> <allocr>\n", __progname);
+	    " -x <0gc xput> <allocr>\n", "halp");
 	exit(-1);
 }
 

@@ -64,9 +64,7 @@
 #define SYS_FUTEX        31342
 #define SYS_GETTID       31343
 
-// tls is not fully support at the time
-//__thread int errno;
-int errno;
+__thread int errno;
 
 static int dolock = 1;
 
