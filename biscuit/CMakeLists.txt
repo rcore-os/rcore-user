@@ -39,7 +39,7 @@ endif ()
 set(CMAKE_ASM_COMPILER      ${PREFIX}gcc)
 set(CMAKE_C_COMPILER        ${PREFIX}gcc)
 set(CMAKE_RANLIB            ${PREFIX}ranlib)
-set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall -Werror -Wno-pointer-to-int-cast -Wno-format -MMD -MP -O -g -fPIC -std=gnu99")
+set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall -Werror -Wno-pointer-to-int-cast -Wno-format -MMD -MP -O -g -fPIC -static -std=gnu99")
 set(CMAKE_ASM_FLAGS         ${CMAKE_C_FLAGS})
 set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS}")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                  # override default value to get rid of '-rdynamic' on Linux
