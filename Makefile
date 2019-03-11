@@ -10,6 +10,7 @@ rust_bin_path := rust/target/$(arch)-rcore/$(mode)
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
 ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
+busybox := $(out_dir)/busybox
 
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
@@ -48,7 +49,10 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
 endif
 
-build: rust ucore biscuit
+$(busybox):
+	wget https://busybox.net/downloads/binaries/1.21.1/busybox-x86_64 -O $(busybox)
+
+build: rust ucore biscuit $(busybox)
 
 sfsimg: $(out_img)
 
