@@ -1,3 +1,5 @@
+#define __NEED_uintptr_t
+
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <err.h>
@@ -15,8 +17,11 @@
 #include <sys/param.h>
 #include <sys/un.h>
 #include <sys/reboot.h>
+#include <sys/resource.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <spawn.h>
 #include <unistd.h>
