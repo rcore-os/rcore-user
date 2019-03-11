@@ -57,7 +57,7 @@ install:
   - if [ $ARCH = x86_64 ]; then
     if [ $TRAVIS_OS_NAME = linux ]; then
     sudo apt update;
-    sudo apt install musl-tools;
+    sudo apt install musl-tools linux-headers-$(uname -r);
     elif [ $TRAVIS_OS_NAME = osx ]; then
     brew tap altkatz/homebrew-gcc_cross_compilers;
     brew install FiloSottile/musl-cross/musl-cross;
