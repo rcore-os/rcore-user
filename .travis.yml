@@ -44,6 +44,8 @@ install:
     wget https://developer.arm.com/-/media/Files/downloads/gnu-a/8.2-2018.11/$FILE.tar.xz;
     tar -xvf $FILE.tar.xz;
     export PATH=$PATH:$PWD/$FILE/bin;
+    sudo apt update;
+    sudo apt install musl-tools linux-headers-$(uname -r);
     elif [ $TRAVIS_OS_NAME = osx ]; then
     brew tap SergioBenitez/osxct;
     brew install aarch64-none-elf;
