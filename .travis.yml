@@ -20,7 +20,7 @@ env:
     - ARCH="riscv32" SRC="ucore"
     - ARCH="riscv64" SRC="ucore"
     - ARCH="i386" SRC="ucore"
-#    - ARCH="x86_64" SRC="ucore"
+    - ARCH="x86_64" SRC="ucore"
     - ARCH="aarch64" SRC="ucore"
     - ARCH="riscv32" SRC="rust"
     - ARCH="riscv64" SRC="rust"
@@ -55,8 +55,11 @@ install:
     fi;
     fi
   - if [ $ARCH = x86_64 ]; then
-    if [ $TRAVIS_OS_NAME = osx ]; then
+    if [ $TRAVIS_OS_NAME = linux ]; then
+    sudo apt install musl
+    elif [ $TRAVIS_OS_NAME = osx ]; then
     brew tap altkatz/homebrew-gcc_cross_compilers;
+    brew install FiloSottile/musl-cross/musl-cross 
     travis_wait brew install x64-elf-gcc;
     fi;
     fi
