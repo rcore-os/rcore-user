@@ -19,7 +19,7 @@ execute_process(
 # Find the headers
 find_path(KERNEL_HEADERS_DIR
   include/linux/user.h
-  PATHS /usr/lib/modules/${KERNEL_RELEASE}/build
+  PATHS /usr/lib/modules/${KERNEL_RELEASE}/build /usr/src/linux-headers-${KERNEL_RELEASE}
 )
 
 # Toolchain
