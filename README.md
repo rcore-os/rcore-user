@@ -5,17 +5,23 @@
 User programs for [rCore OS](https://github.com/wangrunji0408/RustOS).
 
 
-
 Now it has 3 parts:
 
 * `ucore`: C-lang, from the original [ucore_os_lab](https://github.com/chyyuu/ucore_os_plus)
-* `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a partial libc `litc`. (WIP)
+* `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a `musl` instead of original `litc`.
 * `rust`: Simple no_std Rust programs.
 
 ## Build
 
+To build biscuit programs, install musl toolchain first:
+
 ```bash
-make {ucore,biscuit,rust,all} arch={i386,x86_64,riscv32,riscv64,aarch64}
+$ sudo pacman -Syu musl # archlinux
+$ brew install FileSottile/musl-cross/musl-cross # macOS
+```
+
+```bash
+$ make {ucore,biscuit,rust,all} arch={i386,x86_64,riscv32,riscv64,aarch64}
 ```
 
 Output to `build/$(arch)`
