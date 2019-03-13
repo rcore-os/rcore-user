@@ -21,7 +21,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin
+.PHONY: all clean build rust ucore biscuit bin busybox
 
 all: build
 
@@ -50,7 +50,19 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 endif
 
 $(busybox):
-	wget https://busybox.net/downloads/binaries/1.21.1/busybox-x86_64 -O $(busybox)
+ifeq ($(arch), x86_64)
+	@wget https://raw.githubusercontent.com/docker-library/busybox/82bc0333a9ae148fbb4246bcbff1487b3fc0c510/musl/busybox.tar.xz -O busybox.tar.xz
+else ifeq ($(arch), aarch64)
+	@wget https://raw.githubusercontent.com/docker-library/busybox/a3f79e474f617f7ff008148555df93bc7ae4a9ab/musl/busybox.tar.xz -O busybox.tar.xz
+endif
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+	@mkdir -p tmp
+	@tar -x -C tmp -f busybox.tar.xz
+	@mv tmp/bin/busybox $(busybox)
+	@rm -rf tmp && rm busybox.tar.xz
+endif
+
+busybox: $(busybox)
 
 build: rust ucore biscuit $(busybox)
 
