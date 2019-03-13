@@ -16,8 +16,12 @@ Now it has 3 parts:
 To build biscuit programs, install musl toolchain first:
 
 ```bash
+# for ARCH linux
 $ sudo pacman -Syu musl # archlinux
-$ brew install FileSottile/musl-cross/musl-cross # macOS
+# for macOS
+$ brew install FileSottile/musl-cross/musl-cross 
+# for ubuntu 16.04, we should build gcc-musl for newest musl-1.1.21
+# please see build-gcc-musl.md
 ```
 
 ```bash
