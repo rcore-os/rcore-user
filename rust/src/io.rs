@@ -1,7 +1,6 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::{self, Write};
-use core::option::Option;
 
 use crate::syscall::{sys_read, sys_write};
 
@@ -25,13 +24,15 @@ pub fn print(args: fmt::Arguments) {
     StdOut.write_fmt(args).unwrap();
 }
 
-pub fn getc() -> Option<u8> {
+pub fn getc() -> u8 {
     let mut c = 0u8;
-    let ret = sys_read(STDIN, &mut c, 1);
-    match ret {
-        1 => Some(c),
-        0 => None,
-        _ => panic!(),
+    loop {
+        let len = sys_read(STDIN, &mut c, 1);
+        match len {
+            1 => return c,
+            0 => continue,
+            _ => panic!("read stdin len = {}", len),
+        }
     }
 }
 
@@ -47,7 +48,7 @@ pub fn get_line(history: &mut Vec<Vec<u8>>) -> String {
     let mut line_vec = Vec::with_capacity(512);
     let mut history_index = history.len();
     loop {
-        match getc().unwrap() {
+        match getc() {
             BS | DEL => {
                 // Backspace
                 if cursor > 0 {
@@ -78,9 +79,9 @@ pub fn get_line(history: &mut Vec<Vec<u8>>) -> String {
                 break;
             }
             ESC => {
-                match getc() .unwrap(){
+                match getc() {
                     b'[' => {
-                        match getc().unwrap() {
+                        match getc() {
                             b'D' => {
                                 // Left arrow
                                 if cursor > 0 {
