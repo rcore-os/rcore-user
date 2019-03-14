@@ -22,17 +22,18 @@ pub fn main() -> i32 {
         print!(">> ");
         let cmd = get_line(&mut history);
         // split cmd, make argc & argv
-        let cmd = cmd.replace(' ', "\0") + "\0";
-        let ptrs: Vec<*const u8> = cmd.split('\0')
-            .filter(|s| !s.is_empty()).map(|s| s.as_ptr()).collect();
+        let cmd = cmd.replace(' ', "\0");
+        let mut ptrs: Vec<usize> = cmd.split('\0')
+            .filter(|s| !s.is_empty()).map(|s| s.as_ptr() as usize).collect();
         if ptrs.is_empty() {
             continue;
         }
+        ptrs.push(0); // indicate the end of argv
 
         let pid = sys_fork();
         assert!(pid >= 0);
         if pid == 0 {
-            return sys_exec(ptrs[0], ptrs.as_ptr(), ptr::null());
+            return sys_exec(ptrs[0] as *const u8, ptrs.as_ptr() as *const *const u8, ptr::null());
         } else {
             let mut code: i32 = 0;
             sys_wait(pid as usize, &mut code);
