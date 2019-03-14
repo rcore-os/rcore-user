@@ -7,7 +7,7 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
         #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
             asm!("ecall"
             : "={x10}" (ret)
-            : "{x10}" (id), "{x11}" (arg0), "{x12}" (arg1), "{x13}" (arg2), "{x14}" (arg3), "{x15}" (arg4), "{x16}" (arg5)
+            : "{x17}" (id), "{x10}" (arg0), "{x11}" (arg1), "{x12}" (arg2), "{x13}" (arg3), "{x14}" (arg4), "{x15}" (arg5)
             : "memory"
             : "volatile");
         #[cfg(target_arch = "x86")]

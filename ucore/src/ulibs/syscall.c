@@ -32,24 +32,20 @@ syscall(int num, ...) {
           "S" (a[4])
         : "cc", "memory");
 #elif defined(__riscv_xlen)
+    register long a7 __asm__("a7") = num;
+	register long a0 __asm__("a0") = a[0];
+	register long a1 __asm__("a1") = a[1];
+	register long a2 __asm__("a2") = a[2];
+	register long a3 __asm__("a3") = a[3];
+	register long a4 __asm__("a4") = a[4];
+	register long a5 __asm__("a5") = a[5];
     asm volatile (
-    "lw a0, %1\n"
-    "lw a1, %2\n"
-    "lw a2, %3\n"
-    "lw a3, %4\n"
-    "lw a4, %5\n"
-    "lw a5, %6\n"
     "ecall\n"
-    "sw a0, %0"
-    : "=m" (ret)
-    : "m" (num),
-    "m" (a[0]),
-    "m" (a[1]),
-    "m" (a[2]),
-    "m" (a[3]),
-    "m" (a[4])
+    : "+r"(a0)
+    : "r"(a7), "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5)
     : "memory"
     );
+    ret = a0;
 #elif defined(__aarch64__)
     asm volatile (
         "ldr w8, %1\n"
