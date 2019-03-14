@@ -38,8 +38,8 @@ pub fn sys_exit(code: usize) -> ! {
 }
 
 
-pub fn sys_exec(name: *const u8, argc: usize, argv: *const *const u8) -> i32 {
-    sys_call(SyscallId::Exec, name as usize, argc, argv as usize, 0, 0, 0)
+pub fn sys_exec(name: *const u8, argv: *const *const u8, envp: *const *const u8) -> i32 {
+    sys_call(SyscallId::Exec, name as usize, argv as usize, envp as usize, 0, 0, 0)
 }
 
 pub fn sys_write(fd: usize, base: *const u8, len: usize) -> i32 {
@@ -107,27 +107,27 @@ pub fn sys_set_priority(priority: usize) -> i32 {
 
 #[allow(dead_code)]
 enum SyscallId {
-    Exit = 60,
-    Fork = 57,
-    Wait = 61,
-    Exec = 59,
-    Clone = 56,
-    Yield = 24,
-    Sleep = 35,
-    Kill = 62,
-    GetTime = 96,
-    GetPid = 39,
-    Mmap = 9,
-    Munmap = 11,
-    Open = 2,
-    Close = 3,
     Read = 0,
     Write = 1,
-    Seek = 8,
+    Open = 2,
+    Close = 3,
     Fstat = 4,
-    Fsync = 74,
-    GetCwd = 79,
-    GetDirEntry = 78,
+    Seek = 8,
+    Mmap = 9,
+    Munmap = 11,
+    Yield = 24,
     Dup2 = 33,
+    Sleep = 35,
+    GetPid = 39,
+    Clone = 56,
+    Fork = 57,
+    Exec = 59,
+    Exit = 60,
+    Wait = 61,
+    Kill = 62,
+    Fsync = 74,
+    GetDirEntry = 78,
+    GetCwd = 79,
+    GetTime = 96,
     SetPriority = 141,
 }

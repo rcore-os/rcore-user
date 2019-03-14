@@ -1,4 +1,5 @@
 use alloc::string::String;
+use alloc::vec::Vec;
 use core::fmt::{self, Write};
 use core::option::Option;
 
@@ -34,33 +35,140 @@ pub fn getc() -> Option<u8> {
     }
 }
 
-pub fn get_line() -> String {
-    let mut s = String::new();
+const BEL: u8 = 0x07u8;
+const BS: u8 = 0x08u8;
+const LF: u8 = 0x0au8;
+const CR: u8 = 0x0du8;
+const ESC: u8 = 0x1bu8;
+const DEL: u8 = 0x7fu8;
+
+pub fn get_line(history: &mut Vec<Vec<u8>>) -> String {
+    let mut cursor = 0;
+    let mut line_vec = Vec::with_capacity(512);
+    let mut history_index = history.len();
     loop {
-        let ret = getc();
-        match ret {
-            None => return s,
-            Some(byte) => {
-                let c = byte as char;
-                match c {
-                    '\x08' | '\x7f' /* '\b' */ => {
-                        if s.pop().is_some() {
-                            print!("\x08 \x08");
+        match getc().unwrap() {
+            BS | DEL => {
+                // Backspace
+                if cursor > 0 {
+                    cursor -= 1;
+                    line_vec.remove(cursor);
+
+                    putc(BS);
+                    for byte in &line_vec[cursor..] {
+                        putc(*byte);
+                    }
+                    putc(b' ');
+                    for _i in cursor..line_vec.len() {
+                        putc(ESC);
+                        putc(b'[');
+                        putc(b'D');
+                    }
+                    putc(ESC);
+                    putc(b'[');
+                    putc(b'D');
+                } else {
+                    putc(BEL);
+                }
+            }
+            CR | LF => {
+                // Return
+                putc(CR);
+                putc(LF);
+                break;
+            }
+            ESC => {
+                match getc() .unwrap(){
+                    b'[' => {
+                        match getc().unwrap() {
+                            b'D' => {
+                                // Left arrow
+                                if cursor > 0 {
+                                    cursor -= 1;
+                                    putc(ESC);
+                                    putc(b'[');
+                                    putc(b'D');
+                                } else {
+                                    putc(BEL);
+                                }
+                            }
+                            b'C' => {
+                                // Right arrow
+                                if cursor < line_vec.len() {
+                                    cursor += 1;
+                                    putc(ESC);
+                                    putc(b'[');
+                                    putc(b'C');
+                                } else {
+                                    putc(BEL);
+                                }
+                            }
+                            direction @ b'A' | direction @ b'B' => {
+                                if direction == b'A' && history_index > 0 {
+                                    // Up arrow
+                                    history_index -= 1;
+                                } else if direction == b'B' && history.len() > 0 // usize underflow
+                                    && history_index < history.len() - 1
+                                {
+                                    // Down arrow
+                                    history_index += 1;
+                                } else {
+                                    putc(BEL);
+                                    continue;
+                                }
+
+                                for _ in 0..line_vec.len() {
+                                    putc(ESC);
+                                    putc(b'[');
+                                    putc(b'D');
+                                }
+                                for _ in 0..line_vec.len() {
+                                    putc(b' ');
+                                }
+                                for _ in 0..line_vec.len() {
+                                    putc(ESC);
+                                    putc(b'[');
+                                    putc(b'D');
+                                }
+                                line_vec = history[history_index].clone();
+                                cursor = line_vec.len();
+                                for byte in &line_vec {
+                                    putc(*byte);
+                                }
+                            }
+                            _ => {
+                                putc(BEL);
+                            }
                         }
                     }
-                    ' '...'\x7e' => {
-                        s.push(c);
-                        print!("{}", c);
+                    _ => {
+                        putc(BEL);
                     }
-                    '\n' | '\r' => {
-                        print!("\n");
-                        return s;
-                    }
-                    _ => {}
                 }
+            }
+            byte if byte.is_ascii_graphic() || byte == b' ' => {
+                line_vec.insert(cursor, byte);
+                for byte in &line_vec[cursor..] {
+                    putc(*byte);
+                }
+                cursor += 1;
+                for _i in cursor..line_vec.len() {
+                    putc(ESC);
+                    putc(b'[');
+                    putc(b'D');
+                }
+            }
+            _ => {
+                // unrecognized characters
+                putc(BEL);
             }
         }
     }
+
+    if line_vec.len() > 0 {
+        history.push(line_vec.clone());
+    }
+    String::from_utf8(line_vec).unwrap_or_default()
 }
 
 pub fn putc(c: u8) {
