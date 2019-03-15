@@ -93,8 +93,19 @@ pub fn sys_getpid() -> i32 {
     sys_call(SyscallId::GetPid, 0, 0, 0, 0, 0, 0)
 }
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TimeSpec {
+    sec: u64,
+    nsec: u64,
+}
+
 pub fn sys_sleep(time: usize) -> i32 {
-    sys_call(SyscallId::Sleep, time, 0, 0, 0, 0, 0)
+    let ts = TimeSpec {
+        sec: time as u64,
+        nsec: 0
+    };
+    sys_call(SyscallId::Sleep, &ts as *const TimeSpec as usize, 0, 0, 0, 0, 0)
 }
 
 pub fn sys_get_time() -> i32 {
@@ -103,6 +114,10 @@ pub fn sys_get_time() -> i32 {
 
 pub fn sys_set_priority(priority: usize) -> i32 {
     sys_call(SyscallId::SetPriority, priority, 0, 0, 0, 0, 0)
+}
+
+pub fn sys_arch_prctl(code: i32, addr: usize) -> i32 {
+    sys_call(SyscallId::ArchPrctl, code as usize, addr, 0, 0, 0, 0)
 }
 
 #[allow(dead_code)]
@@ -130,4 +145,5 @@ enum SyscallId {
     GetCwd = 79,
     GetTime = 96,
     SetPriority = 141,
+    ArchPrctl = 158,
 }
