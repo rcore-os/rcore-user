@@ -5,7 +5,7 @@
 #[macro_use]
 extern crate rcore_user;
 
-use rcore_user::syscall::{sys_arch_prctl, sys_fork, sys_getpid, sys_sleep};
+use rcore_user::syscall::{sys_arch_prctl, sys_vfork, sys_getpid, sys_sleep};
 
 fn set_tls(tls: usize, pid: usize) {
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
@@ -39,8 +39,8 @@ fn get_tls() -> usize {
 pub fn main() {
     println!("I am going to set TLS specific registers");
     println!("And see if it changes between context switch");
-    sys_fork();
-    sys_fork();
+    sys_vfork();
+    sys_vfork();
     let pid = sys_getpid();
     for i in 0..10 {
         let magic = 0xcafebabe;

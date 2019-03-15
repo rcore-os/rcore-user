@@ -55,7 +55,8 @@ pub fn sys_open(path: &str, flags: usize) -> i32 {
     use core::mem::replace;
     let end = unsafe { &mut *(path.as_ptr().offset(path.len() as isize) as *mut u8) };
     let backup = replace(end, 0);
-    let ret = sys_call(SyscallId::Open, path.as_ptr() as usize, flags, 0, 0, 0, 0);
+    const AT_FDCWD: isize = -100;
+    let ret = sys_call(SyscallId::Openat, AT_FDCWD as usize, path.as_ptr() as usize, flags, 0, 0, 0);
     *end = backup;
     ret
 }
@@ -69,8 +70,17 @@ pub fn sys_dup2(fd1: usize, fd2: usize) -> i32 {
 }
 
 /// Fork the current process. Return the child's PID.
-pub fn sys_fork() -> i32 {
-    sys_call(SyscallId::Fork, 0, 0, 0, 0, 0, 0)
+pub fn sys_vfork() -> i32 {
+    let mut sp: usize = 0;
+    #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
+    unsafe {
+        asm!("mv $0, sp" : "=r" (sp) :: );
+    }
+    // TODO: more arch
+    const CLONE_VFORK: usize = 0x00004000;
+    const CLONE_VM: usize = 0x00000100;
+    const SIGCHILD: usize = 17;
+    sys_call(SyscallId::Clone, CLONE_VFORK | CLONE_VM | SIGCHILD, sp, 0, 0, 0, 0)
 }
 
 /// Wait the process exit.
@@ -120,11 +130,11 @@ pub fn sys_arch_prctl(code: i32, addr: usize) -> i32 {
     sys_call(SyscallId::ArchPrctl, code as usize, addr, 0, 0, 0, 0)
 }
 
+#[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 0,
     Write = 1,
-    Open = 2,
     Close = 3,
     Fstat = 4,
     Seek = 8,
@@ -135,7 +145,6 @@ enum SyscallId {
     Sleep = 35,
     GetPid = 39,
     Clone = 56,
-    Fork = 57,
     Exec = 59,
     Exit = 60,
     Wait = 61,
@@ -146,4 +155,33 @@ enum SyscallId {
     GetTime = 96,
     SetPriority = 141,
     ArchPrctl = 158,
+    Openat = 257,
+}
+
+#[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
+#[allow(dead_code)]
+enum SyscallId {
+    Read = 63,
+    Write = 64,
+    Openat = 56,
+    Close = 57,
+    Fstat = 80,
+    Seek = 62,
+    Mmap = 222,
+    Munmap = 215,
+    Yield = 124,
+    Dup2 = -1,
+    Sleep = 101,
+    GetPid = 172,
+    Clone = 220,
+    Exec = 221,
+    Exit = 93,
+    Wait = 260,
+    Kill = 129,
+    Fsync = 82,
+    GetDirEntry = -3,
+    GetCwd = 17,
+    GetTime = 169,
+    SetPriority = 140,
+    ArchPrctl = -4,
 }

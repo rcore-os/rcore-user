@@ -10,7 +10,7 @@ use alloc::vec::Vec;
 use core::ptr;
 
 use rcore_user::io::get_line;
-use rcore_user::syscall::{sys_exec, sys_fork, sys_wait};
+use rcore_user::syscall::{sys_exec, sys_vfork, sys_wait};
 
 // IMPORTANT: Must define main() like this
 #[no_mangle]
@@ -33,7 +33,7 @@ pub fn main() -> i32 {
         }
         ptrs.push(0); // indicate the end of argv
 
-        let pid = sys_fork();
+        let pid = sys_vfork();
         assert!(pid >= 0);
         if pid == 0 {
             return sys_exec(
