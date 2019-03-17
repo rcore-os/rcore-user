@@ -4,6 +4,8 @@
 #define T_SYSCALL           0x80
 
 /* syscall number */
+#if defined(__x86_64__) || defined(__i386__)
+
 #define SYS_exit            60
 #define SYS_fork            57
 #define SYS_wait            61
@@ -18,7 +20,7 @@
 #define SYS_munmap          11
 #define SYS_shmem           -1
 #define SYS_pgdir           -1
-#define SYS_open            2
+#define SYS_openat          257
 #define SYS_close           3
 #define SYS_read            0
 #define SYS_write           1
@@ -26,15 +28,47 @@
 #define SYS_fstat           5
 #define SYS_fsync           74
 #define SYS_getcwd          79
-#define SYS_getdirentry     78
-#define SYS_dup             33
+#define SYS_getdirentry64   217
+#define SYS_dup3            292
 /* ONLY FOR LAB6 */
 #define SYS_set_priority    141
+
+#else
+
+#define SYS_exit            93
+#define SYS_fork            -1
+#define SYS_wait            260
+#define SYS_exec            221
+#define SYS_clone           220
+#define SYS_yield           124
+#define SYS_sleep           101
+#define SYS_kill            129
+#define SYS_gettime         169
+#define SYS_getpid          172
+#define SYS_mmap            222
+#define SYS_munmap          215
+#define SYS_shmem           -1
+#define SYS_pgdir           -1
+#define SYS_openat          56
+#define SYS_close           57
+#define SYS_read            63
+#define SYS_write           64
+#define SYS_seek            62
+#define SYS_fstat           80
+#define SYS_fsync           82
+#define SYS_getcwd          17
+#define SYS_getdirentry64   61
+#define SYS_dup3            24
+/* ONLY FOR LAB6 */
+#define SYS_set_priority    140
+
+#endif
 
 /* SYS_fork flags */
 #define CLONE_VM            0x00000100  // set if VM shared between processes
 #define CLONE_THREAD        0x00000200  // thread group
 #define CLONE_FS            0x00000800  // set if shared between processes
+#define CLONE_VFORK         0x00004000  // set if the parent wants the child to wake it up on mm_release
 
 /* VFS flags */
 // flags for open: choose one of these

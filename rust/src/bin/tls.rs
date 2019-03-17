@@ -12,6 +12,10 @@ fn set_tls(tls: usize, pid: usize) {
     unsafe {
         asm!("mv tp, $0" : : "r"(tls));
     }
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        asm!("msr tpidr_el0, $0" : : "r"(tls));
+    }
     #[cfg(target_arch = "x86_64")]
     unsafe {
         static mut DATA: [usize; 1024] = [0; 1024];
@@ -26,6 +30,10 @@ fn get_tls() -> usize {
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
         asm!("mv $0, tp" : "=r"(tls) :);
+    }
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        asm!("mrs $0, tpidr_el0" : "=r"(tls) :);
     }
     #[cfg(target_arch = "x86_64")]
     unsafe {

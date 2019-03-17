@@ -47,6 +47,8 @@ install:
     sudo apt update;
     sudo apt install musl-tools linux-headers-$(uname -r);
     elif [ $TRAVIS_OS_NAME = osx ]; then
+    brew tap altkatz/homebrew-gcc_cross_compilers;
+    brew install FiloSottile/musl-cross/musl-cross --with-aarch64;
     brew tap SergioBenitez/osxct;
     brew install aarch64-none-elf;
     fi;

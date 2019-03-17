@@ -66,7 +66,7 @@ pub fn sys_close(fd: usize) -> i32 {
 }
 
 pub fn sys_dup2(fd1: usize, fd2: usize) -> i32 {
-    sys_call(SyscallId::Dup2, fd1, fd2, 0, 0, 0, 0)
+    sys_call(SyscallId::Dup3, fd1, fd2, 0, 0, 0, 0)
 }
 
 /// Fork the current process. Return the child's PID.
@@ -130,7 +130,7 @@ pub fn sys_arch_prctl(code: i32, addr: usize) -> i32 {
     sys_call(SyscallId::ArchPrctl, code as usize, addr, 0, 0, 0, 0)
 }
 
-#[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
+#[cfg(target_arch = "x86_64")]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 0,
@@ -141,7 +141,6 @@ enum SyscallId {
     Mmap = 9,
     Munmap = 11,
     Yield = 24,
-    Dup2 = 33,
     Sleep = 35,
     GetPid = 39,
     Clone = 56,
@@ -150,15 +149,16 @@ enum SyscallId {
     Wait = 61,
     Kill = 62,
     Fsync = 74,
-    GetDirEntry = 78,
     GetCwd = 79,
     GetTime = 96,
     SetPriority = 141,
     ArchPrctl = 158,
+    GetDirEntry64 = 217,
     Openat = 257,
+    Dup3 = 292,
 }
 
-#[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
+#[cfg(not(target_arch = "x86_64"))]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 63,
@@ -170,7 +170,7 @@ enum SyscallId {
     Mmap = 222,
     Munmap = 215,
     Yield = 124,
-    Dup2 = -1,
+    Dup3 = 24,
     Sleep = 101,
     GetPid = 172,
     Clone = 220,
@@ -179,7 +179,7 @@ enum SyscallId {
     Wait = 260,
     Kill = 129,
     Fsync = 82,
-    GetDirEntry = -3,
+    GetDirEntry64 = 61,
     GetCwd = 17,
     GetTime = 169,
     SetPriority = 140,

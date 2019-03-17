@@ -76,7 +76,8 @@ sys_exit(int error_code) {
 
 int
 sys_fork(void) {
-    return syscall(SYS_fork);
+    const int SIGCHILD = 17;
+    return syscall(SYS_clone, CLONE_VFORK | CLONE_VM | SIGCHILD, 0);
 }
 
 int
@@ -127,7 +128,8 @@ sys_exec(const char *name, int argc, const char **argv) {
 
 int
 sys_open(const char *path, uint32_t open_flags) {
-    return syscall(SYS_open, path, open_flags);
+    const int AT_FDCWD = -100;
+    return syscall(SYS_openat, AT_FDCWD, path, open_flags);
 }
 
 int
@@ -167,10 +169,10 @@ sys_getcwd(char *buffer, size_t len) {
 
 int
 sys_getdirentry(int fd, struct dirent *dirent) {
-    return syscall(SYS_getdirentry, fd, dirent);
+    return syscall(SYS_getdirentry64, fd, dirent);
 }
 
 int
 sys_dup(int fd1, int fd2) {
-    return syscall(SYS_dup, fd1, fd2);
+    return syscall(SYS_dup3, fd1, fd2);
 }
