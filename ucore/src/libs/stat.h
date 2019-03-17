@@ -3,6 +3,7 @@
 
 #include <defs.h>
 
+#if defined(__x86_64__) || defined(__i386__)
 struct stat {
     uint64_t	st_dev;
     uint64_t    st_ino;
@@ -25,6 +26,31 @@ struct stat {
     uint64_t	st_ctime;
     uint64_t	st_ctimensec;
 };
+#else
+struct stat {
+    uint64_t	st_dev;
+    uint64_t	st_ino;
+    uint32_t	st_mode;        // protection mode and file type
+    uint32_t	st_nlinks;      // number of hard links
+
+    uint32_t	st_uid;
+    uint32_t	st_gid;
+    uint64_t	st_rdev;
+    uint64_t	__pad;
+
+    uint64_t	st_size;        // file size (bytes)
+    uint32_t	st_blksize;
+    uint32_t	__pad2;
+    uint64_t	st_blocks;      // number of blocks file is using
+
+    uint64_t	st_atime;
+    uint64_t	st_atimensec;
+    uint64_t	st_mtime;
+    uint64_t	st_mtimensec;
+    uint64_t	st_ctime;
+    uint64_t	st_ctimensec;
+};
+#endif
 
 #define S_IFMT  00170000
 #define S_IFSOCK 0140000
