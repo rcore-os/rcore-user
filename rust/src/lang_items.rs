@@ -3,6 +3,7 @@ use crate::ALLOCATOR;
 
 use core::alloc::Layout;
 use core::panic::PanicInfo;
+use super::syscall::*;
 
 #[linkage = "weak"]
 #[no_mangle]
@@ -11,9 +12,9 @@ fn main() {
 }
 
 fn init_heap() {
-    const HEAP_SIZE: usize = 0x1000;
-    static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
-    unsafe { ALLOCATOR.lock().init(HEAP.as_ptr() as usize, HEAP_SIZE); }
+    const HEAP_SIZE: usize = 16 * 1024 * 1024;
+    let addr = sys_mmap(0, HEAP_SIZE, 0x3, 0x22, 0, 0) as usize;
+    unsafe { ALLOCATOR.lock().init(addr, HEAP_SIZE); }
 }
 
 #[no_mangle]

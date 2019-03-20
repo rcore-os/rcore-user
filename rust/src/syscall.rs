@@ -130,6 +130,19 @@ pub fn sys_arch_prctl(code: i32, addr: usize) -> i32 {
     sys_call(SyscallId::ArchPrctl, code as usize, addr, 0, 0, 0, 0)
 }
 
+pub fn sys_map_pci_device(vendor: usize, product: usize) -> i32 {
+    sys_call(SyscallId::MapPciDevice, vendor, product, 0, 0, 0, 0)
+}
+
+pub fn sys_get_paddr(vaddr: &[u64], paddr: &mut [u64]) -> i32 {
+    assert_eq!(vaddr.len(), paddr.len());
+    sys_call(SyscallId::GetPaddr, vaddr.as_ptr() as usize, paddr.as_ptr() as usize, vaddr.len(), 0, 0, 0)
+}
+
+pub fn sys_mmap(addr: usize, len: usize, prot: usize, flags: usize, fd: usize, offset: usize) -> i32 {
+    sys_call(SyscallId::Mmap, addr, len, prot, flags, fd, offset)
+}
+
 #[cfg(target_arch = "x86_64")]
 #[allow(dead_code)]
 enum SyscallId {
@@ -156,6 +169,9 @@ enum SyscallId {
     GetDirEntry64 = 217,
     Openat = 257,
     Dup3 = 292,
+    // custom
+    MapPciDevice = 999,
+    GetPaddr = 998,
 }
 
 #[cfg(not(target_arch = "x86_64"))]
@@ -184,4 +200,7 @@ enum SyscallId {
     GetTime = 169,
     SetPriority = 140,
     ArchPrctl = -4,
+    // custom
+    MapPciDevice = 999,
+    GetPaddr = 998,
 }
