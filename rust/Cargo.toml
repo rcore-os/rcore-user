@@ -5,4 +5,5 @@ authors = ["Runji Wang <wangrunji0408@163.com>"]
 edition = "2018"
 
 [dependencies]
-linked_list_allocator = "0.6"
+buddy_system_allocator = "0.1"
+isomorphic_drivers = { git = "https://github.com/rcore-os/isomorphic_drivers", default-features = false, features = ["log"]}
