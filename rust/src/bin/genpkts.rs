@@ -69,7 +69,8 @@ pub fn main() {
         0x0a, 0x00, 0x00, 0x02, // ip
         0x00, 0x16, 0x31, 0xff, 0xa4, 0x9f, // mac
         0x0a, 0x00, 0x00, 0x01]; // ip
-    let tx_batch = vec![&data[..]; 1024];
+    let size = 2048;
+    let tx_batch = vec![&data[..]; size];
     println!("IXGBE driver waiting for link up");
     while !ixgbe.is_link_up() {}
     println!("IXGBE driver link is up");
@@ -80,6 +81,8 @@ pub fn main() {
             0x00, 0x16, 0x31, 0xff, 0xa4, 0x9f, // mac
             0xff, 0xff]; // unknown
             */
-        ixgbe.msend(tx_batch.as_slice());
+        if ixgbe.msend(tx_batch.as_slice()) < size {
+            println!("Waiting for queue");
+        }
     }
 }
