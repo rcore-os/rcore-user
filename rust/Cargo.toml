@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 buddy_system_allocator = "0.1"
 isomorphic_drivers = { git = "https://github.com/rcore-os/isomorphic_drivers", default-features = false, features = ["log"]}
+smoltcp = { version = "0.5.0", default-features = false, features = ["alloc", "log", "proto-ipv4", "socket-tcp", "socket-raw"] }
