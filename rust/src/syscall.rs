@@ -20,7 +20,7 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
             asm!("syscall"
             : "={rax}" (ret)
             : "{rax}" (id), "{rdi}" (arg0), "{rsi}" (arg1), "{rdx}" (arg2), "{r10}" (arg3), "{r8}" (arg4), "{r9}" (arg5)
-            : "memory"
+            : "rcx" "r11" "memory"
             : "intel" "volatile");
         #[cfg(target_arch = "aarch64")]
             asm!("svc 0"

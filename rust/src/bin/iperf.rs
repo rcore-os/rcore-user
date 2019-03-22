@@ -189,7 +189,7 @@ pub fn main() {
     let data = [0u8; 204800];
     loop {
         tick += 1;
-        iface.poll(&mut sockets, Instant::from_millis(tick / 1000));
+        iface.poll(&mut sockets, Instant::from_millis(tick * 1000_000));
         {
             let mut socket = sockets.get::<TcpSocket>(tcp_handle);
             if let State::BEGIN = state {
