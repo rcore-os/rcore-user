@@ -2,6 +2,11 @@
 # mode = {debug, release}
 arch ?= riscv32
 mode ?= debug
+ifeq ($(arch), riscv64)
+	biscuit ?= no
+else
+	biscuit ?= yes
+endif
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 
@@ -11,6 +16,7 @@ rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(r
 ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
+
 
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
@@ -40,6 +46,7 @@ ifneq ($(arch), x86_64)
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
 endif
 
+ifeq ($(biscuit), yes)
 biscuit:
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
 	@echo Building biscuit programs
@@ -47,6 +54,7 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
+endif
 endif
 
 $(busybox):
