@@ -244,9 +244,6 @@ pub fn main() {
                     }
                 }
             }
-            if !socket.is_open() {
-
-            }
         }
 
         {
