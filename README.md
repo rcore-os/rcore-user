@@ -22,6 +22,7 @@ $ sudo pacman -Syu musl # archlinux
 $ brew install FileSottile/musl-cross/musl-cross 
 # for ubuntu 16.04, we should build gcc-musl for newest musl-1.1.21
 # please see build-gcc-musl.md
+# for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain)
 ```
 
 ```bash
