@@ -55,6 +55,7 @@ impl provider::Provider for Provider {
 // IMPORTANT: Must define main() like this
 #[no_mangle]
 pub fn main() {
+    enlarge_heap();
     println!("I am going to map IXGBE driver to user space");
     println!("Kernel network stack should not use it anymore");
     let addr = sys_map_pci_device(0x8086, 0x10fb);

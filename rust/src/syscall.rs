@@ -1,3 +1,5 @@
+use crate::ALLOCATOR;
+
 #[inline(always)]
 fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: usize, arg4: usize, arg5: usize) -> i32 {
     let id = syscall_id as usize;
@@ -30,6 +32,12 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
             : "volatile");
     }
     ret
+}
+
+pub fn enlarge_heap() {
+    const HEAP_SIZE: usize = 16 * 1024 * 1024;
+    let addr = sys_mmap(0, HEAP_SIZE, 0x3, 0x22, 0, 0) as usize;
+    unsafe { ALLOCATOR.lock().init(addr, HEAP_SIZE); }
 }
 
 pub fn sys_exit(code: usize) -> ! {
