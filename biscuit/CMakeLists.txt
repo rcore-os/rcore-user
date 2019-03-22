@@ -47,7 +47,11 @@ set(CMAKE_C_COMPILER        ${PREFIX}gcc)
 set(CMAKE_RANLIB            ${PREFIX}ranlib)
 set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall -Wno-pointer-to-int-cast -Wno-format -MMD -MP -O -g -fPIC -static -std=gnu99")
 set(CMAKE_ASM_FLAGS         ${CMAKE_C_FLAGS})
+if (${ARCH} STREQUAL riscv64)
+set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS}")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
+else ()
 set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS} -pthread")  # override default value to get rid of '-Wl,-search_paths_first -Wl,-headerpad_max_install_names'
+endif ()
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                  # override default value to get rid of '-rdynamic' on Linux
 
 if (KERNEL_HEADERS_DIR)
