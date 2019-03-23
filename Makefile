@@ -9,6 +9,7 @@ else
 endif
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
+out_qcow2 ?= build/$(arch).qcow2
 
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
@@ -74,10 +75,14 @@ busybox: $(busybox)
 
 build: rust ucore biscuit $(busybox)
 
-sfsimg: $(out_img)
+sfsimg: $(out_qcow2)
 
 $(out_img): build rcore-fs-fuse
 	@rcore-fs-fuse $@ $(out_dir) zip
+
+$(out_qcow2): $(out_img)
+	@qemu-img convert -f raw $< -O qcow2 $@
+	@qemu-img resize $@ +1G
 
 rcore-fs-fuse:
 ifeq ($(shell which rcore-fs-fuse),)
