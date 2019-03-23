@@ -76,12 +76,12 @@ build: rust ucore biscuit $(busybox)
 
 sfsimg: $(out_img)
 
-$(out_img): build mksfs
-	@mksfs zip $(out_dir) $@
+$(out_img): build rcore-fs-fuse
+	@rcore-fs-fuse $@ $(out_dir) zip
 
-mksfs:
-ifeq ($(shell which mksfs),)
-	@cargo install --git https://github.com/wangrunji0408/SimpleFileSystem-Rust --features="std"
+rcore-fs-fuse:
+ifeq ($(shell which rcore-fs-fuse),)
+	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --branch sefs
 endif
 
 clean:
