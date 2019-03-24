@@ -47,8 +47,8 @@ ifneq ($(arch), x86_64)
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
 endif
 
-ifeq ($(biscuit), yes)
 biscuit:
+ifeq ($(biscuit), yes)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build

@@ -30,6 +30,13 @@ env:
     - ARCH="x86_64" SRC="biscuit"
     - ARCH="aarch64" SRC="biscuit"
 
+
+# no musl gcc
+allow_failures:
+  matrix:
+    - ARCH="x86_64" SRC="biscuit"
+    - ARCH="aarch64" SRC="biscuit"
+
 install:
   - if [ $ARCH = riscv32 ] || [ $ARCH = riscv64 ]; then
     [ $TRAVIS_OS_NAME = linux ] && export FILE="riscv64-unknown-elf-gcc-8.1.0-2019.01.0-x86_64-linux-ubuntu14";

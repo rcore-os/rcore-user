@@ -26,7 +26,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "isomorphic_drivers"
 version = "0.1.0"
-source = "git+https://github.com/rcore-os/isomorphic_drivers#a564ac855887a823dac80529ec4138194583905d"
+source = "git+https://github.com/rcore-os/isomorphic_drivers#836e91fca59e4f4eb86a1f10c246d9c8cb5d1fad"
 dependencies = [
  "bitflags 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
