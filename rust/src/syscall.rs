@@ -1,4 +1,5 @@
 use crate::ALLOCATOR;
+use alloc::string::String;
 
 #[inline(always)]
 fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: usize, arg4: usize, arg5: usize) -> i32 {
@@ -111,6 +112,25 @@ pub fn sys_getpid() -> i32 {
     sys_call(SyscallId::GetPid, 0, 0, 0, 0, 0, 0)
 }
 
+/// Get the current working directory
+pub fn sys_getcwd() -> String {
+    let buffer = [0u8; 256];
+    sys_call(SyscallId::GetCwd, buffer.as_ptr() as usize, 256, 0, 0, 0, 0);
+    String::from_utf8(buffer.to_vec()).unwrap()
+}
+
+/// Change the current working directory
+pub fn sys_chdir(path: &str) {
+    let path = String::from(path) + "\0";
+    sys_call(SyscallId::Chdir, path.as_bytes().as_ptr() as usize, 0, 0, 0, 0, 0);
+}
+
+/// Check file accessibility
+pub fn sys_access(path: &str) -> i32 {
+    let path = String::from(path) + "\0";
+    sys_call(SyscallId::FAccessAt, -100isize as usize, path.as_bytes().as_ptr() as usize, 0, 0, 0, 0)
+}
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct TimeSpec {
@@ -171,11 +191,13 @@ enum SyscallId {
     Kill = 62,
     Fsync = 74,
     GetCwd = 79,
+    Chdir = 80,
     GetTime = 96,
     SetPriority = 141,
     ArchPrctl = 158,
     GetDirEntry64 = 217,
     Openat = 257,
+    FAccessAt = 269,
     Dup3 = 292,
     // custom
     MapPciDevice = 999,
@@ -187,14 +209,12 @@ enum SyscallId {
 enum SyscallId {
     Read = 63,
     Write = 64,
-    Openat = 56,
     Close = 57,
     Fstat = 80,
     Seek = 62,
     Mmap = 222,
     Munmap = 215,
     Yield = 124,
-    Dup3 = 24,
     Sleep = 101,
     GetPid = 172,
     Clone = 220,
@@ -203,11 +223,15 @@ enum SyscallId {
     Wait = 260,
     Kill = 129,
     Fsync = 82,
-    GetDirEntry64 = 61,
     GetCwd = 17,
+    Chdir = 49,
     GetTime = 169,
     SetPriority = 140,
     ArchPrctl = -4,
+    GetDirEntry64 = 61,
+    Openat = 56,
+    Dup3 = 24,
+    FAccessAt = 269,
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,

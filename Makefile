@@ -70,6 +70,9 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@mv tmp/bin/busybox $(busybox)
 	@rm -rf tmp && rm busybox.tar.xz
 endif
+ifeq ($(arch), riscv64)
+	@wget https://github.com/rcore-os/busybox-riscv-prebuilts/raw/master/busybox-1.30.1-riscv64/busybox -O $(busybox)
+endif
 
 busybox: $(busybox)
 
