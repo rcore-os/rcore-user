@@ -7,11 +7,12 @@ extern crate rcore_user;
 
 extern crate alloc;
 
-use rcore_user::syscall::*;
+use alloc::boxed::Box;
+use alloc::vec;
+use alloc::vec::Vec;
 use isomorphic_drivers::net::ethernet::intel::ixgbe;
 use isomorphic_drivers::provider;
-use alloc::prelude::*;
-use alloc::vec;
+use rcore_user::syscall::*;
 
 #[derive(Copy, Clone)]
 pub struct Provider;
@@ -51,7 +52,6 @@ impl provider::Provider for Provider {
     }
 }
 
-
 // IMPORTANT: Must define main() like this
 #[no_mangle]
 pub fn main() {
@@ -63,14 +63,16 @@ pub fn main() {
     println!("IXGBE driver up");
     loop {
         println!("IXGBE driver sending data");
-        let data = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // mac
+        let data = [
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // mac
             0x00, 0x16, 0x31, 0xff, 0xa4, 0x9f, // mac
             0x08, 0x06, // arp
-            0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x01,
-            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // mac
+            0x00, 0x01, 0x08, 0x00, 0x06, 0x04, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, // mac
             0x0a, 0x00, 0x00, 0x02, // ip
             0x00, 0x16, 0x31, 0xff, 0xa4, 0x9f, // mac
-            0x0a, 0x00, 0x00, 0x01]; // ip
+            0x0a, 0x00, 0x00, 0x01,
+        ]; // ip
         ixgbe.send(&data);
         sys_sleep(1);
     }

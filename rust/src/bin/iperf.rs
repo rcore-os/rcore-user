@@ -7,12 +7,14 @@ extern crate rcore_user;
 
 extern crate alloc;
 
-use rcore_user::syscall::*;
+use alloc::boxed::Box;
+use alloc::collections::BTreeMap;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use isomorphic_drivers::net::ethernet::intel::ixgbe;
 use isomorphic_drivers::provider;
-use alloc::prelude::*;
-use alloc::collections::BTreeMap;
-use alloc::vec;
+use rcore_user::syscall::*;
 
 use smoltcp::iface::*;
 use smoltcp::phy;
@@ -62,7 +64,7 @@ impl provider::Provider for Provider {
 
 #[derive(Clone)]
 struct IXGBEDriver {
-    inner: ixgbe::IXGBEDriver
+    inner: ixgbe::IXGBEDriver,
 }
 
 pub struct IXGBERxToken(Vec<u8>);
@@ -95,7 +97,7 @@ impl<'a> phy::Device<'a> for IXGBEDriver {
     fn capabilities(&self) -> DeviceCapabilities {
         let mut caps = DeviceCapabilities::default();
         caps.max_transmission_unit = ixgbe::IXGBEDriver::get_mtu(); // max MTU
-        //caps.max_transmission_unit = 1500; // max MTU
+                                                                    //caps.max_transmission_unit = 1500; // max MTU
         caps.max_burst_size = Some(256);
         // IP Rx checksum is offloaded with RXCSUM
         caps.checksum.ipv4 = Checksum::Tx;
@@ -136,7 +138,7 @@ enum State {
     DATA_SOCKET_CONNECT,
     DATA_COOKIE_SENT,
     TEST_START,
-    TEST_RUNNING
+    TEST_RUNNING,
 }
 
 // IMPORTANT: Must define main() like this
@@ -156,7 +158,7 @@ pub fn main() {
     let ethernet_addr = ixgbe.get_mac();
     let ip_addrs = [IpCidr::new(IpAddress::v4(10, 0, 0, 2), 24)];
     let neighbor_cache = NeighborCache::new(BTreeMap::new());
-    let mut iface = EthernetInterfaceBuilder::new(IXGBEDriver{ inner:ixgbe })
+    let mut iface = EthernetInterfaceBuilder::new(IXGBEDriver { inner: ixgbe })
         .ethernet_addr(EthernetAddress::from_bytes(&ethernet_addr.as_bytes()))
         .ip_addrs(ip_addrs)
         .neighbor_cache(neighbor_cache)
@@ -183,7 +185,7 @@ pub fn main() {
     let mut sockets = SocketSet::new(vec![]);
     let tcp_handle = sockets.add(tcp_socket);
     let tcp2_handle = sockets.add(tcp2_socket);
-    
+
     let mut tick = 0;
     let mut state = State::BEGIN;
     let mut last_state = State::BEGIN;
@@ -194,8 +196,12 @@ pub fn main() {
         {
             let mut socket = sockets.get::<TcpSocket>(tcp_handle);
             if let State::BEGIN = state {
-                socket.connect(IpEndpoint::new(IpAddress::v4(10, 0, 0, 1), 5201),
-                    IpEndpoint::new(IpAddress::v4(10, 0, 0, 2), 5201)).unwrap();
+                socket
+                    .connect(
+                        IpEndpoint::new(IpAddress::v4(10, 0, 0, 1), 5201),
+                        IpEndpoint::new(IpAddress::v4(10, 0, 0, 2), 5201),
+                    )
+                    .unwrap();
                 state = State::CONTROL_SOCKET_CONNECT;
             } else if let State::CONTROL_SOCKET_CONNECT = state {
                 if socket.may_send() {
@@ -250,8 +256,12 @@ pub fn main() {
         {
             let mut socket = sockets.get::<TcpSocket>(tcp2_handle);
             if let State::CREATE_STREAMS = state {
-                socket.connect(IpEndpoint::new(IpAddress::v4(10, 0, 0, 1), 5201),
-                    IpEndpoint::new(IpAddress::v4(10, 0, 0, 2), 5202)).unwrap();
+                socket
+                    .connect(
+                        IpEndpoint::new(IpAddress::v4(10, 0, 0, 1), 5201),
+                        IpEndpoint::new(IpAddress::v4(10, 0, 0, 2), 5202),
+                    )
+                    .unwrap();
                 state = State::DATA_SOCKET_CONNECT;
             } else if let State::DATA_SOCKET_CONNECT = state {
                 if socket.may_send() {
