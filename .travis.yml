@@ -13,7 +13,7 @@ cache:
 
 os:
   - linux
-  - osx
+  # - osx # too slow... disable it for now
 
 env:
   matrix:
@@ -54,7 +54,10 @@ install:
     tar -xvf $FILE.tar.xz;
     export PATH=$PATH:$PWD/$FILE/bin;
     sudo apt update;
-    sudo apt install musl-tools linux-headers-$(uname -r);
+    sudo apt install linux-headers-$(uname -r);
+    wget https://musl.cc/aarch64-linux-musl-cross.tgz;
+    tar -xvf aarc64-linux-musl-cross.tgz;
+    export PATH=$PATH:$PWD/aarch64-linux-musl-cross/bin;
     elif [ $TRAVIS_OS_NAME = osx ]; then
     brew tap SergioBenitez/osxct;
     brew install aarch64-none-elf;
@@ -69,7 +72,10 @@ install:
   - if [ $ARCH = x86_64 ]; then
     if [ $TRAVIS_OS_NAME = linux ]; then
     sudo apt update;
-    sudo apt install musl-tools linux-headers-$(uname -r);
+    sudo apt install linux-headers-$(uname -r);
+    wget https://musl.cc/x86_64-linux-musl-cross.tgz;
+    tar -xvf x86_64-linux-musl-cross.tgz;
+    export PATH=$PATH:$PWD/x86_64-linux-musl-cross/bin;
     elif [ $TRAVIS_OS_NAME = osx ]; then
     brew tap altkatz/homebrew-gcc_cross_compilers;
     brew install FiloSottile/musl-cross/musl-cross;
