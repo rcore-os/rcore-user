@@ -23,12 +23,7 @@ find_path(KERNEL_HEADERS_DIR
 )
 
 # Toolchain
-if (${ARCH} STREQUAL i386)
-    if(APPLE)
-        set(PREFIX          i386-elf-)
-    endif ()
-    set(CMAKE_C_FLAGS       "-m32 -mno-red-zone")
-elseif (${ARCH} STREQUAL x86_64)
+if (${ARCH} STREQUAL x86_64)
     set(PREFIX              x86_64-linux-musl-)
     set(CMAKE_C_FLAGS       "-m64 -mno-red-zone")
 elseif (${ARCH} STREQUAL riscv32)

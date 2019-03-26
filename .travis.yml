@@ -17,18 +17,20 @@ os:
 
 env:
   matrix:
-    - ARCH="riscv32" SRC="ucore"
-    - ARCH="riscv64" SRC="ucore"
-    - ARCH="i386" SRC="ucore"
     - ARCH="x86_64" SRC="ucore"
     - ARCH="aarch64" SRC="ucore"
-    - ARCH="riscv32" SRC="rust"
-    - ARCH="riscv64" SRC="rust"
-    - ARCH="i386" SRC="rust"
+    - ARCH="riscv32" SRC="ucore"
+    - ARCH="riscv64" SRC="ucore"
     - ARCH="x86_64" SRC="rust"
     - ARCH="aarch64" SRC="rust"
+    - ARCH="riscv32" SRC="rust"
+    - ARCH="riscv64" SRC="rust"
     - ARCH="x86_64" SRC="biscuit"
     - ARCH="aarch64" SRC="biscuit"
+    - ARCH="x86_64" SRC="nginx"
+    - ARCH="aarch64" SRC="nginx"
+    - ARCH="x86_64" SRC="redis"
+    - ARCH="aarch64" SRC="redis"
 
 
 allow_failures:
@@ -59,11 +61,6 @@ install:
     brew tap SergioBenitez/osxct;
     brew install aarch64-none-elf;
     brew install FiloSottile/musl-cross/musl-cross --with-aarch64;
-    fi;
-    fi
-  - if [ $ARCH = i386 ]; then
-    if [ $TRAVIS_OS_NAME = osx ]; then
-    brew install i386-elf-gcc;
     fi;
     fi
   - if [ $ARCH = x86_64 ]; then

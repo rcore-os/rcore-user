@@ -17,12 +17,7 @@ include_directories(src/libs src/ulibs ${ARCH_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${ARCH})
 
 # Toolchain
-if (${ARCH} STREQUAL i386)
-    if(APPLE)
-        set(PREFIX          i386-elf-)
-    endif ()
-    set(CMAKE_C_FLAGS       "-m32")
-elseif (${ARCH} STREQUAL x86_64)
+if (${ARCH} STREQUAL x86_64)
     if(APPLE)
         set(PREFIX          x86_64-elf-)
     endif ()

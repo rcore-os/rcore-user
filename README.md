@@ -26,8 +26,8 @@ $ brew install FileSottile/musl-cross/musl-cross
 ```
 
 ```bash
-$ make {ucore,biscuit,rust,all} arch={i386,x86_64,riscv32,riscv64,aarch64}
-$ make sfsimg arch={i386,x86_64,riscv32,riscv64,aarch64}
+$ make {ucore,biscuit,rust,all} arch={x86_64,riscv32,riscv64,aarch64}
+$ make sfsimg arch={x86_64,riscv32,riscv64,aarch64}
 ```
 
 Output to `build/$(arch)`
