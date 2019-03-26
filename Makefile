@@ -80,7 +80,7 @@ endif
 endif
 
 redis:
-ifneq ($(redis), on)
+ifeq ($(redis), on)
 ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
 	mkdir -p $(out_dir)
