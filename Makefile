@@ -27,7 +27,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox nginx
+.PHONY: all clean build rust ucore biscuit bin busybox nginx redis
 
 all: build
 
@@ -81,7 +81,12 @@ ifneq ($(shell uname), Darwin)
 	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
 endif
 
-build: rust ucore biscuit $(busybox) nginx
+redis:
+	@cd redis && make arch=$(arch) all
+	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
+	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
+
+build: rust ucore biscuit $(busybox) nginx redis
 
 sfsimg: $(out_qcow2)
 
