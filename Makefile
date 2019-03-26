@@ -77,11 +77,13 @@ busybox: $(busybox)
 
 nginx:
 ifneq ($(shell uname), Darwin)
+	mkdir -p $(out_dir)
 	@cd nginx && make arch=$(arch) all
 	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
 endif
 
 redis:
+	mkdir -p $(out_dir)
 	@cd redis && make arch=$(arch) all
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
