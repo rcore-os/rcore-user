@@ -71,18 +71,22 @@ endif
 busybox: $(busybox)
 
 nginx:
+ifneq ($(arch), riscv32)
 ifneq ($(shell uname), Darwin)
 	mkdir -p $(out_dir)
 	@cd nginx && make arch=$(arch) all
 	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
 endif
+endif
 
 redis:
+ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
 	mkdir -p $(out_dir)
 	@cd redis && make arch=$(arch) all
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
+endif
 endif
 
 build: rust ucore biscuit $(busybox) nginx redis
