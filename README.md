@@ -34,14 +34,14 @@ Output to `build/$(arch)`
 
 ## Support matrix
 
-|         | x86_64 | aarch64 | riscv32 | riscv64 |
-| ------- | ------ | ------- | ------- | ------- |
-| ucore   | n      | y       | y       | y       |
-| rust    | y      | y       | y       | y       |
-| biscuit | y      | y       | n       | y       |
-| nginx   | y      | y       | n       | y       |
-| redis   | y      | y       | y       | n       |
-| busybox | y      | y       | n       | y       |
+|                             | x86_64 | aarch64 | riscv32 | riscv64 |
+| --------------------------- | ------ | ------- | ------- | ------- |
+| ucore                       | n      | y       | y       | y       |
+| rust                        | y      | y       | y       | y       |
+| biscuit                     | y      | y       | n       | y       |
+| nginx                       | y      | y       | n       | y       |
+| redis (build with redis=on) | y      | y       | y       | n       |
+| busybox                     | y      | y       | n       | y       |
 
 
 
