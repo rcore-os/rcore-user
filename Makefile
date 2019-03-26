@@ -2,11 +2,6 @@
 # mode = {debug, release}
 arch ?= riscv32
 mode ?= debug
-ifeq ($(arch), riscv64)
-	biscuit ?= no
-else
-	biscuit ?= yes
-endif
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
@@ -47,8 +42,8 @@ ifneq ($(arch), x86_64)
 endif
 
 biscuit:
-ifeq ($(biscuit), yes)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
+ifneq ($(shell uname)-$(arch), Darwin-riscv64)
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make
@@ -83,10 +78,12 @@ ifneq ($(shell uname), Darwin)
 endif
 
 redis:
+ifneq ($(shell uname), Darwin)
 	mkdir -p $(out_dir)
 	@cd redis && make arch=$(arch) all
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
+endif
 
 build: rust ucore biscuit $(busybox) nginx redis
 
