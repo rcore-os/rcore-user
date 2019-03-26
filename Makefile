@@ -76,8 +76,10 @@ endif
 busybox: $(busybox)
 
 nginx:
-	@cd nginx && make arch=$(arch)
+ifneq ($(shell uname), Darwin)
+	@cd nginx && make arch=$(arch) all
 	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
+endif
 
 build: rust ucore biscuit $(busybox) nginx
 
