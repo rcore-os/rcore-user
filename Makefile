@@ -18,7 +18,6 @@ ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
 
-
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
 
@@ -28,7 +27,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox
+.PHONY: all clean build rust ucore biscuit bin busybox nginx
 
 all: build
 
@@ -76,7 +75,11 @@ endif
 
 busybox: $(busybox)
 
-build: rust ucore biscuit $(busybox)
+nginx:
+	@cd nginx && make arch=$(arch)
+	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
+
+build: rust ucore biscuit $(busybox) nginx
 
 sfsimg: $(out_qcow2)
 
