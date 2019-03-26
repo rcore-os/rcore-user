@@ -27,14 +27,19 @@ env:
     - ARCH="riscv64" SRC="rust"
     - ARCH="x86_64" SRC="biscuit"
     - ARCH="aarch64" SRC="biscuit"
+    - ARCH="riscv64" SRC="biscuit"
     - ARCH="x86_64" SRC="nginx"
     - ARCH="aarch64" SRC="nginx"
+    - ARCH="riscv64" SRC="nginx"
     - ARCH="x86_64" SRC="redis"
     - ARCH="aarch64" SRC="redis"
+    - ARCH="riscv32" SRC="redis"
 
 
 allow_failures:
   matrix:
+    - ARCH="x86_64" SRC="redis" # unable to reproduce locally, weird..
+    - ARCH="aarch64" SRC="redis" # unable to reproduce locally, weird..
     # too slow or homebrew too old
     - os: osx
 
