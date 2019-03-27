@@ -1,15 +1,16 @@
 # rCore-user
 
-[![Build Status](https://travis-ci.org/wangrunji0408/rcore_user.svg?branch=master)](https://travis-ci.org/wangrunji0408/rcore_user)
+[![Build Status](https://travis-ci.org/rcore-os/rcore-user.svg?branch=master)](https://travis-ci.org/rcore-os/rcore-user)
 
-User programs for [rCore OS](https://github.com/wangrunji0408/RustOS).
+User programs for [rCore OS](https://github.com/rcore-os/rCore).
 
 
-Now it has 3 parts:
+Now it has 4 parts:
 
 * `ucore`: C-lang, from the original [ucore_os_lab](https://github.com/chyyuu/ucore_os_plus)
 * `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a `musl` instead of original `litc`.
 * `rust`: Simple no_std Rust programs.
+* `nginx`, `redis`: Real world applications.
 
 ## Build
 
@@ -36,12 +37,12 @@ Output to `build/$(arch)`
 
 |                    | x86_64 | aarch64 | riscv32 | riscv64 |
 | ------------------ | ------ | ------- | ------- | ------- |
-| ucore              | n      | y       | y       | y       |
-| rust               | y      | y       | y       | y       |
-| biscuit            | y      | y       | n       | y       |
-| nginx (linux only) | y      | y       | n       | y       |
-| redis (linux only) | y      | y       | y       | n       |
-| busybox            | y      | y       | n       | y       |
+| ucore              | ❌      | ✅       | ✅       | ✅       |
+| rust               | ✅      | ✅       | ✅       | ✅       |
+| biscuit            | ✅      | ✅       | ❌       | ✅       |
+| nginx (linux only) | ✅      | ✅       | ❌       | ✅       |
+| redis (linux only) | ✅      | ✅       | ✅       | ❌       |
+| busybox            | ✅      | ✅       | ❌       | ✅       |
 
 
 
@@ -63,9 +64,3 @@ $ redis-cli -h 10.0.0.2 get abc
 ```
 
 Note: `redis-cli` in rCore is not working at the time.
-
-
-## Notice
-
-* The syscall ids have been set compatible with [Linux64](https://syscalls64.paolostivanin.com).
-* So the ucore part can not run on the original ucore.
