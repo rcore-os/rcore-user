@@ -10,6 +10,9 @@ bin_server := build/$(arch)/redis-server
 bin_cli_unstripped := build/$(arch)/redis-cli-unstripped
 bin_cli := build/$(arch)/redis-cli
 
+# $ARCH is also used in redis internal Makefile, avoid clashing
+undefine ARCH
+
 $(redis_tarball_path):
 	wget http://download.redis.io/releases/$(redis_tarball) -O $(redis_tarball_path)
 
@@ -18,6 +21,8 @@ $(redis_dir): $(redis_tarball_path)
 	cd $(build_dir) && tar xvf ../../$(redis_tarball_path)
 
 $(redis_dir)/src/redis-server: $(redis_dir)
+	# we do not support epoll at the time
+	sed -i 's/#define HAVE_EPOLL 1//' $(redis_dir)/src/config.h
 	cd $(redis_dir) && make CC=$(cc) MALLOC=libc
 
 $(bin_server_unstripped): $(redis_dir)/src/redis-server
