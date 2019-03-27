@@ -12,6 +12,10 @@ rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(r
 ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
+alpine_version_major := 3.9
+alpine_version_full := 3.9.2
+alpine_file := alpine-minirootfs-3.9.2-$(arch).tar.gz
+alpine := alpine/$(alpine_file)
 
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
@@ -22,7 +26,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox nginx redis
+.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine
 
 all: build
 
@@ -90,6 +94,15 @@ ifneq ($(shell uname), Darwin)
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
 	@cp redis/redis.conf $(out_dir)/redis.conf
 endif
+endif
+
+$(alpine):
+	wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
+
+alpine: $(alpine)
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+	@mkdir -p $(out_dir)
+	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 
 build: rust ucore biscuit $(busybox) nginx redis
