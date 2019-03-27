@@ -16,6 +16,7 @@ $(nginx_dir): $(nginx_tarball_path)
 	cd $(build_dir) && tar xvf ../../$(nginx_tarball_path)
 
 $(nginx_dir)/objs/nginx: $(nginx_dir)
+	sed -i 's/-Wl,-E//' $(nginx_dir)/auto/cc/conf
 	# cross compile, do not run
 	sed -i 's/ngx_feature_run=yes/ngx_feature_run=no/' $(nginx_dir)/auto/cc/name
 	sed -i 's/ngx_test="$$CC /ngx_test="gcc /' $(nginx_dir)/auto/types/sizeof
