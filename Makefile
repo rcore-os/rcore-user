@@ -82,10 +82,11 @@ endif
 redis:
 ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
-	mkdir -p $(out_dir)
+	@mkdir -p $(out_dir)
 	@cd redis && make arch=$(arch) all
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
+	@cp redis/redis.conf $(out_dir)/redis.conf
 endif
 endif
 
