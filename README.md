@@ -34,16 +34,35 @@ Output to `build/$(arch)`
 
 ## Support matrix
 
-|                             | x86_64 | aarch64 | riscv32 | riscv64 |
-| --------------------------- | ------ | ------- | ------- | ------- |
-| ucore                       | n      | y       | y       | y       |
-| rust                        | y      | y       | y       | y       |
-| biscuit                     | y      | y       | n       | y       |
-| nginx                       | y      | y       | n       | y       |
-| redis (build with redis=on) | y      | y       | y       | n       |
-| busybox                     | y      | y       | n       | y       |
+|                    | x86_64 | aarch64 | riscv32 | riscv64 |
+| ------------------ | ------ | ------- | ------- | ------- |
+| ucore              | n      | y       | y       | y       |
+| rust               | y      | y       | y       | y       |
+| biscuit            | y      | y       | n       | y       |
+| nginx (linux only) | y      | y       | n       | y       |
+| redis (linux only) | y      | y       | y       | n       |
+| busybox            | y      | y       | n       | y       |
 
 
+
+## How to use Redis
+
+After running commands above, you should be able to run redis-server in rCore. Then, start `redis-server` in rCore:
+
+```bash
+/> redis-server redis.conf
+```
+
+Then you should be able to connect to it using `redis-cli`:
+
+```bash
+$ redis-cli -h 10.0.0.2 set abc def
+OK
+$ redis-cli -h 10.0.0.2 get abc
+"def"
+```
+
+Note: `redis-cli` in rCore is not working at the time.
 
 
 ## Notice

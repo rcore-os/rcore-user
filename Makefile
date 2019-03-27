@@ -73,6 +73,7 @@ busybox: $(busybox)
 nginx:
 ifneq ($(arch), riscv32)
 ifneq ($(shell uname), Darwin)
+	@echo Building nginx
 	mkdir -p $(out_dir)
 	@cd nginx && make arch=$(arch) all
 	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
@@ -82,6 +83,7 @@ endif
 redis:
 ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
+	@echo Building redis
 	@mkdir -p $(out_dir)
 	@cd redis && make arch=$(arch) all
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
@@ -98,11 +100,13 @@ $(out_img): build rcore-fs-fuse
 	@rcore-fs-fuse $@ $(out_dir) zip
 
 $(out_qcow2): $(out_img)
+	@echo Generating sfsimg
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
 
 rcore-fs-fuse:
 ifeq ($(shell which rcore-fs-fuse),)
+	@echo Installing rcore-fs-fuse
 	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --branch sefs
 endif
 
