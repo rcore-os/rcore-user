@@ -78,9 +78,11 @@ nginx:
 ifneq ($(arch), riscv32)
 ifneq ($(shell uname), Darwin)
 	@echo Building nginx
-	mkdir -p $(out_dir)
+	mkdir -p $(out_dir)/usr/local/nginx/conf
+	mkdir -p $(out_dir)/usr/local/nginx/logs
 	@cd nginx && make arch=$(arch) all
-	@cp nginx/build/$(arch)/nginx $(out_dir)/nginx
+	@cp nginx/build/$(arch)/nginx $(out_dir)
+	@cp nginx/nginx.conf $(out_dir)/usr/local/nginx/conf
 endif
 endif
 
@@ -102,6 +104,7 @@ $(alpine):
 alpine: $(alpine)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@mkdir -p $(out_dir)
+	@echo "nameserver 101.6.6.6" > $(out_dir)/etc/resolv.conf
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 

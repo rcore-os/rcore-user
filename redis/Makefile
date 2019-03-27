@@ -16,11 +16,11 @@ undefine ARCH
 $(redis_tarball_path):
 	wget http://download.redis.io/releases/$(redis_tarball) -O $(redis_tarball_path)
 
-$(redis_dir): $(redis_tarball_path)
+$(redis_dir)/src/config.h: $(redis_tarball_path)
 	mkdir -p $(build_dir)
 	cd $(build_dir) && tar xvf ../../$(redis_tarball_path)
 
-$(redis_dir)/src/redis-server: $(redis_dir)
+$(redis_dir)/src/redis-server: $(redis_dir)/src/config.h
 	# we do not support epoll at the time
 	sed -i 's/#define HAVE_EPOLL 1//' $(redis_dir)/src/config.h
 	# our accept does not have backlog
@@ -34,7 +34,7 @@ $(bin_server): $(bin_server_unstripped)
 	cp $(bin_server_unstripped) $(bin_server)
 	$(strip) $(bin_server)
 
-$(bin_cli_unstripped): $(redis_dir)/src/redis-cli
+$(bin_cli_unstripped): $(redis_dir)/src/redis-server
 	cp $(redis_dir)/src/redis-cli $(bin_cli_unstripped)
 
 $(bin_cli): $(bin_cli_unstripped)

@@ -16,6 +16,7 @@ $(nginx_dir): $(nginx_tarball_path)
 	cd $(build_dir) && tar xvf ../../$(nginx_tarball_path)
 
 $(nginx_dir)/objs/nginx: $(nginx_dir)
+	# cross compile, do not run
 	sed -i 's/ngx_feature_run=yes/ngx_feature_run=no/' $(nginx_dir)/auto/cc/name
 	sed -i 's/ngx_test="$$CC /ngx_test="gcc /' $(nginx_dir)/auto/types/sizeof
 	cd $(nginx_dir) && ./configure --with-cc=$(cc) --with-cc-opt=-static --with-ld-opt=-static --without-pcre --without-http_rewrite_module --without-http_gzip_module --with-poll_module --without-http_upstream_zone_module
