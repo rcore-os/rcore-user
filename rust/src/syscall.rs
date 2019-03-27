@@ -231,7 +231,7 @@ enum SyscallId {
     GetDirEntry64 = 61,
     Openat = 56,
     Dup3 = 24,
-    FAccessAt = 269,
+    FAccessAt = 48,
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
