@@ -134,7 +134,7 @@ $(out_qcow2): $(out_img)
 rcore-fs-fuse:
 ifeq ($(shell which rcore-fs-fuse),)
 	@echo Installing rcore-fs-fuse
-	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev ff3dd7d
+	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev c611248
 endif
 
 clean:
