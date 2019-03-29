@@ -26,7 +26,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine
+.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine iperf3
 
 all: build
 
@@ -98,6 +98,13 @@ ifneq ($(shell uname), Darwin)
 endif
 endif
 
+iperf3:
+ifeq ($(arch), x86_64)
+	@echo Building iperf3
+	@cd iperf3 && make arch=$(arch) all
+	@cp iperf3/build/$(arch)/iperf3 $(out_dir)
+endif
+
 $(alpine):
 	wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
 
@@ -108,7 +115,7 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 
-build: rust ucore biscuit $(busybox) nginx redis
+build: rust ucore biscuit $(busybox) nginx redis iperf3
 
 sfsimg: $(out_qcow2)
 
