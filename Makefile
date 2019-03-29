@@ -101,6 +101,8 @@ endif
 iperf3:
 ifeq ($(arch), x86_64)
 	@echo Building iperf3
+	@mkdir -p $(out_dir)/dev
+	@dd if=/dev/urandom of=$(out_dir)/dev/urandom count=512
 	@cd iperf3 && make arch=$(arch) all
 	@cp iperf3/build/$(arch)/iperf3 $(out_dir)
 endif
@@ -110,7 +112,7 @@ $(alpine):
 
 alpine: $(alpine)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
-	@mkdir -p $(out_dir)
+	@mkdir -p $(out_dir)/etc
 	@echo "nameserver 101.6.6.6" > $(out_dir)/etc/resolv.conf
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif

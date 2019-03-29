@@ -20,7 +20,7 @@ $(iperf3_dir)/src/iperf3: $(iperf3_dir)
 	sed -i 's/-pg//' $(iperf3_dir)/src/Makefile.am
 	cd $(iperf3_dir) && autoreconf
 	cd $(iperf3_dir) && ./configure CC=$(cc) --disable-shared --enable-static --without-openssl --host $(arch)-linux-musl
-	cd $(iperf3_dir) && make
+	cd $(iperf3_dir) && make iperf3_CFLAGS="--static"
 
 $(bin_unstripped): $(iperf3_dir)/src/iperf3
 	cp $(iperf3_dir)/src/iperf3 $(bin_unstripped)
