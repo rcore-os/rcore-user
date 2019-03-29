@@ -100,11 +100,13 @@ endif
 
 iperf3:
 ifeq ($(arch), x86_64)
+ifneq ($(shell uname), Darwin)
 	@echo Building iperf3
 	@mkdir -p $(out_dir)/dev
 	@dd if=/dev/urandom of=$(out_dir)/dev/urandom count=512
 	@cd iperf3 && make arch=$(arch) all
 	@cp iperf3/build/$(arch)/iperf3 $(out_dir)
+endif
 endif
 
 $(alpine):
