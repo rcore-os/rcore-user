@@ -36,7 +36,7 @@ To build biscuit programs, install musl toolchain first:
 # 2.1 for macOS musl toolchain for x86_64(,aarch64)
 $ brew install FileSottile/musl-cross/musl-cross {--with-aarch64}
 # 2.2 for ubuntu 16.04, we should build gcc-musl for newest musl-1.1.21, please see build-gcc-musl.md for instructions
-# 2.3 for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain)
+# 2.3 for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain), however, this one might not be able to build redis on rv64 for lack of libatomic
 ```
 
 Then, build userspace programs for rCore:
@@ -57,7 +57,7 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 | rust               | ✅      | ✅       | ✅       | ✅       |
 | biscuit            | ✅      | ✅       | ❌       | ✅       |
 | nginx (linux only) | ✅      | ✅       | ❌       | ✅       |
-| redis (linux only) | ✅      | ✅       | ✅       | ❌       |
+| redis (linux only) | ✅      | ✅       | ✅       | ✅       |
 | busybox            | ✅      | ✅       | ❌       | ✅       |
 | alpine rootfs      | ✅      | ✅       | ❌       | ❌       |
 | iperf3             | ✅      | ❌       | ❌       | ❌       |
@@ -66,7 +66,7 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 ### How to use Redis
 
-If redis is dynamically linked to musl (default if you use commands above), you might need to copy `ld-musl-$(arch).so.1` to rootfs `/lib` . Alpine rootfs includes one as well.
+If redis is dynamically linked to musl (default if you use commands above), you might need to copy `ld-musl-$(arch).so.1` to rootfs `/lib` by yourself .Alpine rootfs includes one as well.
 
 After building redis, you should be able to run redis-server in rCore. Then, start `redis-server` in rCore:
 

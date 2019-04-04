@@ -87,7 +87,6 @@ endif
 endif
 
 redis:
-ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
 	@echo Building redis
 	@mkdir -p $(out_dir)
@@ -95,7 +94,6 @@ ifneq ($(shell uname), Darwin)
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
 	@cp redis/redis.conf $(out_dir)/redis.conf
-endif
 endif
 
 iperf3:
