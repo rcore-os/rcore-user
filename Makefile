@@ -46,14 +46,12 @@ ifneq ($(arch), x86_64)
 endif
 
 biscuit:
-ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64 mipsel))
 ifneq ($(shell uname)-$(arch), Darwin-riscv64)
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
-endif
 endif
 
 $(busybox):
@@ -75,7 +73,6 @@ endif
 busybox: $(busybox)
 
 nginx:
-ifneq ($(arch), riscv32)
 ifneq ($(shell uname), Darwin)
 	@echo Building nginx
 	mkdir -p $(out_dir)/usr/local/nginx/conf
@@ -83,7 +80,6 @@ ifneq ($(shell uname), Darwin)
 	@cd nginx && make arch=$(arch) all
 	@cp nginx/build/$(arch)/nginx $(out_dir)
 	@cp nginx/nginx.conf $(out_dir)/usr/local/nginx/conf
-endif
 endif
 
 redis:

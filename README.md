@@ -55,8 +55,8 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 | ------------------ | ------ | ------- | ------- | ------- | ------ |
 | ucore              | ❌     | ✅      | ✅     | ✅      | ✅    |
 | rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
-| biscuit            | ✅     | ✅      | ❌     | ✅      | ✅    |
-| nginx (linux only) | ✅     | ✅      | 🚧     | ✅      | 🚧    |
+| biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
+| nginx (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
 | redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
 | busybox            | ✅     | ✅      | ❌     | ✅      | 🚧    |
 | alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |

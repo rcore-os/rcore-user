@@ -23,7 +23,8 @@ $(nginx_dir)/objs/nginx: $(nginx_dir)
 	cd $(nginx_dir) && ./configure --with-cc=$(cc) --with-cc-opt=-static --with-ld-opt=-static --without-pcre --without-http_rewrite_module --without-http_gzip_module --with-poll_module --without-http_upstream_zone_module
 	cd $(nginx_dir) && printf "#ifndef NGX_SYS_NERR\n#define NGX_SYS_NERR  132\n#endif\n" >> objs/ngx_auto_config.h
 	cd $(nginx_dir) && printf "#ifndef NGX_HAVE_SVSVSHM\n#define NGX_HAVE_SYSVSHM  1\n#endif\n" >> objs/ngx_auto_config.h
-	cd $(nginx_dir) && make
+	# FIXME: overflow will occur on 32-bit platforms, this is only a temporary workaround
+	cd $(nginx_dir) && make CFLAGS="${CFLGAS} -Wno-error=overflow"
 
 $(bin_unstripped): $(nginx_dir)/objs/nginx
 	cp $(nginx_dir)/objs/nginx $(bin_unstripped)
