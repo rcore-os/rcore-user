@@ -53,14 +53,17 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 |                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
 | ------------------ | ------ | ------- | ------- | ------- | ------ |
-| ucore              | ✅     | ✅      | ✅     | ✅      | ✅    |
+| ucore              | ✅     | ✅      | ✅     | ✅      | ❗     |
 | rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
 | biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
-| nginx (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
+| nginx (linux only) | ✅     | ✅      | ❗      | ✅      | ❗      |
 | redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
-| busybox            | ✅     | ✅      | ❌     | ✅      | 🚧    |
+| busybox            | ✅     | ✅      | ✅     | ✅      | ✅    |
 | alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
 | iperf3             | ✅     | ❌      | ❌     | ❌      | ❌    |
+
+
+Note: ❗ means workarounds are used so that they may not work properly. ❌ means failure in compiling or not existed on such platform.
 
 ## How to run real world programs
 
