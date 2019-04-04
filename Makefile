@@ -37,13 +37,11 @@ rust:
 	@cp $(rust_bins) $(out_dir)/rust
 
 ucore:
-ifneq ($(arch), x86_64)
 	@echo Building ucore programs
 	@mkdir -p ucore/build
 	@cd ucore/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/ucore && mkdir -p $(out_dir)/ucore
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
-endif
 
 biscuit:
 ifneq ($(shell uname)-$(arch), Darwin-riscv64)

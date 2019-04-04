@@ -53,7 +53,7 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 |                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
 | ------------------ | ------ | ------- | ------- | ------- | ------ |
-| ucore              | ❌     | ✅      | ✅     | ✅      | ✅    |
+| ucore              | ✅     | ✅      | ✅     | ✅      | ✅    |
 | rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
 | biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
 | nginx (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
