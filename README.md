@@ -56,11 +56,11 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 | ucore              | ❌     | ✅      | ✅     | ✅      | ✅    |
 | rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
 | biscuit            | ✅     | ✅      | ❌     | ✅      | ✅    |
-| nginx (linux only) | ✅     | ✅      | ❌     | ✅      | ❓    |
-| redis (linux only) | ✅     | ✅      | ✅     | ✅      | ❓    |
-| busybox            | ✅     | ✅      | ❌     | ✅      | ❓    |
+| nginx (linux only) | ✅     | ✅      | 🚧     | ✅      | 🚧    |
+| redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
+| busybox            | ✅     | ✅      | ❌     | ✅      | 🚧    |
 | alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
-| iperf3             | ✅     | ❌      | ❌     | ❌      | ❓    |
+| iperf3             | ✅     | ❌      | ❌     | ❌      | ❌    |
 
 ## How to run real world programs
 
