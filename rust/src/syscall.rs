@@ -31,6 +31,12 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
             : "{x8}" (id), "{x0}" (arg0), "{x1}" (arg1), "{x2}" (arg2), "{x3}" (arg3), "{x4}" (arg4), "{x5}" (arg5)
             : "memory"
             : "volatile");
+        #[cfg(target_arch = "mips")]
+            asm!("syscall"
+            : "={v0}" (ret)
+            : "{t0}" (id), "{a0}" (arg0), "{a1}" (arg1), "{a2}" (arg2), "{a3}" (arg3), "{s0}" (arg4), "{s1}" (arg5)
+            : "memory"
+            : "volatile");
     }
     ret
 }

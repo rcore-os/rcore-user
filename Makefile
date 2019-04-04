@@ -1,4 +1,4 @@
-# arch = {riscv32, riscv64, x86_64, aarch64}
+# arch = {riscv32, riscv64, x86_64, aarch64, mipsel}
 # mode = {debug, release}
 arch ?= riscv32
 mode ?= debug
@@ -46,7 +46,7 @@ ifneq ($(arch), x86_64)
 endif
 
 biscuit:
-ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64 mipsel))
 ifneq ($(shell uname)-$(arch), Darwin-riscv64)
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build

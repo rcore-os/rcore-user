@@ -36,7 +36,7 @@ struct proghdr {
     uint64_t p_memsz;  // size of segment in memory (bigger if contains bss）
     uint64_t p_align;  // required alignment, invariably hardware page size
 };
-#elif __riscv_xlen == 32 || defined(__i386__)
+#elif __riscv_xlen == 32 || defined(__i386__) || defined(__mipsel)
 struct proghdr {
     uint32_t p_type;   // loadable code or data, dynamic linking info,etc.
     uint32_t p_offset; // file offset of segment

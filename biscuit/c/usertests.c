@@ -2803,7 +2803,11 @@ static void *_locker(void *v)
 		asm volatile("pause\n":::"memory");
 #elif defined(__aarch64__)
 		asm volatile("yield\n":::"memory");
+#else
+#warning Yield instruction is not implemented
+		{}
 #endif
+
 	pthread_mutex_t *m = (pthread_mutex_t *)v;
 	int i;
 	for (i = 0; i < ltimes; i++) {
@@ -2922,6 +2926,9 @@ static void _condtest(const int nt)
 			asm volatile("pause\n":::"memory");
 #elif defined(__aarch64__)
 			asm volatile("yield\n":::"memory");
+#else
+#warning Yield instruction is not implemented
+			{}
 #endif
 	}
 

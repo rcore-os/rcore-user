@@ -42,25 +42,25 @@ $ brew install FileSottile/musl-cross/musl-cross {--with-aarch64}
 Then, build userspace programs for rCore:
 
 ```bash
-$ make {ucore,biscuit,rust,nginx,redis,all} arch={x86_64,aarch64,riscv32,riscv64}
+$ make {ucore,biscuit,rust,nginx,redis,all} arch={x86_64,aarch64,riscv32,riscv64,mipsel}
 $ make alpine arch={x86_64,aarch64} # if you want to use alpine rootfs
-$ make sfsimg arch={x86_64,aarch64,riscv32,riscv64}
+$ make sfsimg arch={x86_64,aarch64,riscv32,riscv64,mipsel}
 ```
 
 A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 ## Support matrix
 
-|                    | x86_64 | aarch64 | riscv32 | riscv64 |
-| ------------------ | ------ | ------- | ------- | ------- |
-| ucore              | ❌      | ✅       | ✅       | ✅       |
-| rust               | ✅      | ✅       | ✅       | ✅       |
-| biscuit            | ✅      | ✅       | ❌       | ✅       |
-| nginx (linux only) | ✅      | ✅       | ❌       | ✅       |
-| redis (linux only) | ✅      | ✅       | ✅       | ❌       |
-| busybox            | ✅      | ✅       | ❌       | ✅       |
-| alpine rootfs      | ✅      | ✅       | ❌       | ❌       |
-| iperf3             | ✅      | ❌       | ❌       | ❌       |
+|                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
+| ------------------ | ------ | ------- | ------- | ------- | ------ |
+| ucore              | ❌     | ✅      | ✅     | ✅      | ✅    |
+| rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
+| biscuit            | ✅     | ✅      | ❌     | ✅      | ✅    |
+| nginx (linux only) | ✅     | ✅      | ❌     | ✅      | ❓    |
+| redis (linux only) | ✅     | ✅      | ✅     | ❌      | ❓    |
+| busybox            | ✅     | ✅      | ❌     | ✅      | ❓    |
+| alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
+| iperf3             | ✅     | ❌      | ❌     | ❌      | ❓    |
 
 ## How to run real world programs
 
