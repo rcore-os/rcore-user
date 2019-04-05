@@ -177,6 +177,22 @@ pub fn sys_mmap(addr: usize, len: usize, prot: usize, flags: usize, fd: usize, o
     sys_call(SyscallId::Mmap, addr, len, prot, flags, fd, offset)
 }
 
+pub fn sys_socket(domain: usize, socket_type: usize, protocol: usize) -> i32 {
+    sys_call(SyscallId::Socket, domain, socket_type, protocol, 0, 0, 0)
+}
+
+pub fn sys_setsockopt(fd: usize, level: usize, opt: usize, optval: usize, optlen: usize) -> i32 {
+    sys_call(SyscallId::SetSockOpt, fd, level, opt, optval, optlen, 0)
+}
+
+pub fn sys_sendto(fd: usize, base: *const u8, len: usize, flags: usize, addr: usize, addr_len: usize) -> i32 {
+    sys_call(SyscallId::SendTo, fd, base as usize, len, flags, addr, addr_len)
+}
+
+pub fn sys_ioctl(fd: usize, request: usize, arg1: usize) -> i32 {
+    sys_call(SyscallId::Ioctl, fd, request, arg1, 0, 0, 0)
+}
+
 #[cfg(target_arch = "x86_64")]
 #[allow(dead_code)]
 enum SyscallId {
@@ -187,9 +203,13 @@ enum SyscallId {
     Seek = 8,
     Mmap = 9,
     Munmap = 11,
+    Ioctl = 16,
     Yield = 24,
     Sleep = 35,
     GetPid = 39,
+    Socket = 41,
+    SendTo = 44,
+    SetSockOpt = 54,
     Clone = 56,
     Exec = 59,
     Exit = 60,
@@ -220,7 +240,11 @@ enum SyscallId {
     Seek = 62,
     Mmap = 222,
     Munmap = 215,
+    Ioctl = 29,
     Yield = 124,
+    Socket = 198,
+    SendTo = 206,
+    SetSockOpt = 208,
     Sleep = 101,
     GetPid = 172,
     Clone = 220,
