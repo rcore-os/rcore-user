@@ -17,6 +17,12 @@ fn init_heap() {
     unsafe { ALLOCATOR.lock().init(HEAP.as_ptr() as usize, HEAP_SIZE); }
 }
 
+/// MIPS use __start for entry point instead of _start
+#[no_mangle]
+pub extern "C" fn __start(argc: isize, argv: *const *const u8) -> ! {
+    _start(argc, argv)
+}
+
 #[no_mangle]
 pub extern "C" fn _start(_argc: isize, _argv: *const *const u8) -> ! {
     init_heap();
