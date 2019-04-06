@@ -5,7 +5,7 @@
 #[macro_use]
 extern crate rcore_user;
 
-use rcore_user::syscall::{sys_arch_prctl, sys_vfork, sys_getpid, sys_sleep};
+use rcore_user::syscall::{sys_arch_prctl, sys_getpid, sys_sleep, sys_vfork};
 
 fn set_tls(tls: usize, pid: usize) {
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]

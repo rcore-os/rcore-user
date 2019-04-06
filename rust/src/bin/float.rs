@@ -7,7 +7,6 @@ extern crate rcore_user;
 
 use rcore_user::syscall::*;
 
-
 // IMPORTANT: Must define main() like this
 #[no_mangle]
 pub fn main() {

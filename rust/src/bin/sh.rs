@@ -10,7 +10,7 @@ use alloc::vec::Vec;
 use core::ptr;
 
 use rcore_user::io::get_line;
-use rcore_user::syscall::{sys_exec, sys_vfork, sys_wait, sys_getcwd, sys_chdir, sys_access};
+use rcore_user::syscall::{sys_access, sys_chdir, sys_exec, sys_getcwd, sys_vfork, sys_wait};
 
 // IMPORTANT: Must define main() like this
 #[no_mangle]
