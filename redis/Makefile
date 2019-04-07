@@ -3,12 +3,18 @@ redis_tarball := redis-$(redis_version).tar.gz
 redis_tarball_path := src/redis-$(redis_version).tar.gz
 build_dir := build/$(arch)
 redis_dir := $(build_dir)/redis-$(redis_version)
-cc := $(arch)-linux-musl-gcc
-strip := $(arch)-linux-musl-strip
+prefix := $(arch)-linux-musl-
 bin_server_unstripped := build/$(arch)/redis-server-unstripped
 bin_server := build/$(arch)/redis-server
 bin_cli_unstripped := build/$(arch)/redis-cli-unstripped
 bin_cli := build/$(arch)/redis-cli
+
+ifeq ($(arch), mipsel)
+	prefix := mipsel-linux-musln32-
+endif
+
+cc := $(prefix)gcc
+strip := $(prefix)strip
 
 # $ARCH is also used in redis internal Makefile, avoid clashing
 undefine ARCH

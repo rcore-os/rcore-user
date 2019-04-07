@@ -3,10 +3,16 @@ nginx_tarball := nginx-$(nginx_version).tar.gz
 nginx_tarball_path := src/nginx-$(nginx_version).tar.gz
 build_dir := build/$(arch)
 nginx_dir := $(build_dir)/nginx-$(nginx_version)
-cc := $(arch)-linux-musl-gcc
-strip := $(arch)-linux-musl-strip
+prefix := $(arch)-linux-musl-
 bin_unstripped := build/$(arch)/nginx_unstripped
 bin := build/$(arch)/nginx
+
+ifeq ($(arch), mipsel)
+	prefix := mipsel-linux-musln32-
+endif
+
+cc := $(prefix)gcc
+strip := $(prefix)strip
 
 $(nginx_tarball_path):
 	wget https://nginx.org/download/$(nginx_tarball) -O $(nginx_tarball_path)

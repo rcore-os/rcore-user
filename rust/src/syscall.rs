@@ -4,7 +4,8 @@ use alloc::string::String;
 #[inline(always)]
 fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: usize, arg4: usize, arg5: usize) -> i32 {
     let id = syscall_id as usize;
-    let ret: i32;
+    let mut ret: i32;
+    let mut failed: i32 = 0;
 
     unsafe {
         #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
@@ -32,11 +33,18 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
             : "memory"
             : "volatile");
         #[cfg(target_arch = "mips")]
+        {
             asm!("syscall"
-            : "={v0}" (ret)
-            : "{t0}" (id), "{a0}" (arg0), "{a1}" (arg1), "{a2}" (arg2), "{a3}" (arg3), "{s0}" (arg4), "{s1}" (arg5)
+            // v0 for syscall id
+            : "={$2}" (ret), "={$7}" (failed)
+            // v0, a0, a1, a2, a3, a4, a5
+            : "{$2}" (id), "{$4}" (arg0), "{$5}" (arg1), "{$6}" (arg2), "{$7}" (arg3), "{$8}" (arg4), "{$9}" (arg5)
             : "memory"
             : "volatile");
+            if failed != 0 {
+                ret = - ret;
+            }
+        }
     }
     ret
 }

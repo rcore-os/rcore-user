@@ -2798,15 +2798,17 @@ static volatile int go;
 
 static void *_locker(void *v)
 {
-	while (go != 1)
+	while (go != 1) {
 #if defined(__x86_64__)
 		asm volatile("pause\n":::"memory");
 #elif defined(__aarch64__)
 		asm volatile("yield\n":::"memory");
+#elif defined(__mips__) || defined(__riscv32__) || defined(__riscv64__)
+		asm volatile("nop\n":::"memory");
 #else
 #warning Yield instruction is not implemented
-		{}
 #endif
+	}
 
 	pthread_mutex_t *m = (pthread_mutex_t *)v;
 	int i;
@@ -2921,15 +2923,17 @@ static void _condtest(const int nt)
 		go = 0;
 		if (pthread_create(&t[i], NULL, _condsleep, &args[i]))
 			errx(-1, "pthread_ create");
-		while (go == 0)
+		while (go == 0) {
 #if defined(__x86_64__)
 			asm volatile("pause\n":::"memory");
 #elif defined(__aarch64__)
 			asm volatile("yield\n":::"memory");
+#elif defined(__mips__) || defined(__riscv32__) || defined(__riscv64__)
+			asm volatile("nop\n":::"memory");
 #else
 #warning Yield instruction is not implemented
-			{}
 #endif
+		}
 	}
 
 	for (i = 0; i < nt; i++)

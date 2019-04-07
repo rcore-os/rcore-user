@@ -3,10 +3,16 @@ iperf3_tarball := iperf3-$(iperf3_version).tar.gz
 iperf3_tarball_path := src/$(iperf3_tarball)
 build_dir := build/$(arch)
 iperf3_dir := $(build_dir)/iperf-$(iperf3_version)
-cc := $(arch)-linux-musl-gcc
-strip := $(arch)-linux-musl-strip
+prefix := $(arch)-linux-musl-
 bin_unstripped := build/$(arch)/iperf3_unstripped
 bin := build/$(arch)/iperf3
+
+ifeq ($(arch), mipsel)
+	prefix := mipsel-linux-musln32-
+endif
+
+cc := $(prefix)gcc
+strip := $(prefix)strip
 
 $(iperf3_tarball_path):
 	wget https://github.com/esnet/iperf/archive/$(iperf3_version).tar.gz -O $(iperf3_tarball_path)
