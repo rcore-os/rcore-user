@@ -2,32 +2,40 @@ use crate::ALLOCATOR;
 use alloc::string::String;
 
 #[inline(always)]
-fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: usize, arg4: usize, arg5: usize) -> i32 {
+fn sys_call(
+    syscall_id: SyscallId,
+    arg0: usize,
+    arg1: usize,
+    arg2: usize,
+    arg3: usize,
+    arg4: usize,
+    arg5: usize,
+) -> i32 {
     let id = syscall_id as usize;
     let mut ret: i32;
     let mut failed: i32 = 0;
 
     unsafe {
         #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
-            asm!("ecall"
+        asm!("ecall"
             : "={x10}" (ret)
             : "{x17}" (id), "{x10}" (arg0), "{x11}" (arg1), "{x12}" (arg2), "{x13}" (arg3), "{x14}" (arg4), "{x15}" (arg5)
             : "memory"
             : "volatile");
         #[cfg(target_arch = "x86")]
-            asm!("int 0x80"
+        asm!("int 0x80"
             : "={eax}" (ret)
             : "{eax}" (id), "{edx}" (arg0), "{ecx}" (arg1), "{ebx}" (arg2), "{edi}" (arg3), "{esi}" (arg4)
             : "memory"
             : "intel" "volatile");
         #[cfg(target_arch = "x86_64")]
-            asm!("syscall"
+        asm!("syscall"
             : "={rax}" (ret)
             : "{rax}" (id), "{rdi}" (arg0), "{rsi}" (arg1), "{rdx}" (arg2), "{r10}" (arg3), "{r8}" (arg4), "{r9}" (arg5)
             : "rcx" "r11" "memory"
             : "intel" "volatile");
         #[cfg(target_arch = "aarch64")]
-            asm!("svc 0"
+        asm!("svc 0"
             : "={x0}" (ret)
             : "{x8}" (id), "{x0}" (arg0), "{x1}" (arg1), "{x2}" (arg2), "{x3}" (arg3), "{x4}" (arg4), "{x5}" (arg5)
             : "memory"
@@ -52,7 +60,9 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
 pub fn enlarge_heap() {
     const HEAP_SIZE: usize = 16 * 1024 * 1024;
     let addr = sys_mmap(0, HEAP_SIZE, 0x3, 0x22, 0, 0) as usize;
-    unsafe { ALLOCATOR.lock().init(addr, HEAP_SIZE); }
+    unsafe {
+        ALLOCATOR.lock().init(addr, HEAP_SIZE);
+    }
 }
 
 pub fn sys_exit(code: usize) -> ! {
@@ -60,9 +70,16 @@ pub fn sys_exit(code: usize) -> ! {
     unreachable!()
 }
 
-
 pub fn sys_exec(name: *const u8, argv: *const *const u8, envp: *const *const u8) -> i32 {
-    sys_call(SyscallId::Exec, name as usize, argv as usize, envp as usize, 0, 0, 0)
+    sys_call(
+        SyscallId::Exec,
+        name as usize,
+        argv as usize,
+        envp as usize,
+        0,
+        0,
+        0,
+    )
 }
 
 pub fn sys_write(fd: usize, base: *const u8, len: usize) -> i32 {
@@ -79,7 +96,15 @@ pub fn sys_open(path: &str, flags: usize) -> i32 {
     let end = unsafe { &mut *(path.as_ptr().offset(path.len() as isize) as *mut u8) };
     let backup = replace(end, 0);
     const AT_FDCWD: isize = -100;
-    let ret = sys_call(SyscallId::Openat, AT_FDCWD as usize, path.as_ptr() as usize, flags, 0, 0, 0);
+    let ret = sys_call(
+        SyscallId::Openat,
+        AT_FDCWD as usize,
+        path.as_ptr() as usize,
+        flags,
+        0,
+        0,
+        0,
+    );
     *end = backup;
     ret
 }
@@ -103,7 +128,15 @@ pub fn sys_vfork() -> i32 {
     const CLONE_VFORK: usize = 0x00004000;
     const CLONE_VM: usize = 0x00000100;
     const SIGCHILD: usize = 17;
-    sys_call(SyscallId::Clone, CLONE_VFORK | CLONE_VM | SIGCHILD, sp, 0, 0, 0, 0)
+    sys_call(
+        SyscallId::Clone,
+        CLONE_VFORK | CLONE_VM | SIGCHILD,
+        sp,
+        0,
+        0,
+        0,
+        0,
+    )
 }
 
 /// Wait the process exit.
@@ -136,13 +169,29 @@ pub fn sys_getcwd() -> String {
 /// Change the current working directory
 pub fn sys_chdir(path: &str) {
     let path = String::from(path) + "\0";
-    sys_call(SyscallId::Chdir, path.as_bytes().as_ptr() as usize, 0, 0, 0, 0, 0);
+    sys_call(
+        SyscallId::Chdir,
+        path.as_bytes().as_ptr() as usize,
+        0,
+        0,
+        0,
+        0,
+        0,
+    );
 }
 
 /// Check file accessibility
 pub fn sys_access(path: &str) -> i32 {
     let path = String::from(path) + "\0";
-    sys_call(SyscallId::FAccessAt, -100isize as usize, path.as_bytes().as_ptr() as usize, 0, 0, 0, 0)
+    sys_call(
+        SyscallId::FAccessAt,
+        -100isize as usize,
+        path.as_bytes().as_ptr() as usize,
+        0,
+        0,
+        0,
+        0,
+    )
 }
 
 #[repr(C)]
@@ -155,9 +204,17 @@ pub struct TimeSpec {
 pub fn sys_sleep(time: usize) -> i32 {
     let ts = TimeSpec {
         sec: time as u64,
-        nsec: 0
+        nsec: 0,
     };
-    sys_call(SyscallId::Sleep, &ts as *const TimeSpec as usize, 0, 0, 0, 0, 0)
+    sys_call(
+        SyscallId::Sleep,
+        &ts as *const TimeSpec as usize,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )
 }
 
 pub fn sys_get_time() -> i32 {
@@ -178,10 +235,25 @@ pub fn sys_map_pci_device(vendor: usize, product: usize) -> i32 {
 
 pub fn sys_get_paddr(vaddr: &[u64], paddr: &mut [u64]) -> i32 {
     assert_eq!(vaddr.len(), paddr.len());
-    sys_call(SyscallId::GetPaddr, vaddr.as_ptr() as usize, paddr.as_ptr() as usize, vaddr.len(), 0, 0, 0)
+    sys_call(
+        SyscallId::GetPaddr,
+        vaddr.as_ptr() as usize,
+        paddr.as_ptr() as usize,
+        vaddr.len(),
+        0,
+        0,
+        0,
+    )
 }
 
-pub fn sys_mmap(addr: usize, len: usize, prot: usize, flags: usize, fd: usize, offset: usize) -> i32 {
+pub fn sys_mmap(
+    addr: usize,
+    len: usize,
+    prot: usize,
+    flags: usize,
+    fd: usize,
+    offset: usize,
+) -> i32 {
     sys_call(SyscallId::Mmap, addr, len, prot, flags, fd, offset)
 }
 
@@ -193,8 +265,23 @@ pub fn sys_setsockopt(fd: usize, level: usize, opt: usize, optval: usize, optlen
     sys_call(SyscallId::SetSockOpt, fd, level, opt, optval, optlen, 0)
 }
 
-pub fn sys_sendto(fd: usize, base: *const u8, len: usize, flags: usize, addr: usize, addr_len: usize) -> i32 {
-    sys_call(SyscallId::SendTo, fd, base as usize, len, flags, addr, addr_len)
+pub fn sys_sendto(
+    fd: usize,
+    base: *const u8,
+    len: usize,
+    flags: usize,
+    addr: usize,
+    addr_len: usize,
+) -> i32 {
+    sys_call(
+        SyscallId::SendTo,
+        fd,
+        base as usize,
+        len,
+        flags,
+        addr,
+        addr_len,
+    )
 }
 
 pub fn sys_ioctl(fd: usize, request: usize, arg1: usize) -> i32 {
