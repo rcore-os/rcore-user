@@ -10,12 +10,11 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
-
 int main(int argc, char **argv)
 {
 	printf("hello audio world!\n");
     fprintf(stdout, "stdout test ok\n");
-    fprintf(1, "stdout number test ok\n");
-    fprintf(3, "audio number test ok\n");
+    fprintf(stderr, "audio test ok\n'");
+
 	return 0;
 }
