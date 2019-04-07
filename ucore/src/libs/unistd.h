@@ -34,7 +34,7 @@
 #define SYS_set_priority    141
 
 #elif defined(__mips__)
-#define MIPS_SYSCALL        6000
+#define MIPS_SYSCALL        4000
 #define SYS_exit            (MIPS_SYSCALL + 1)
 #define SYS_fork            (MIPS_SYSCALL + 2)
 #define SYS_wait            (MIPS_SYSCALL + 114)
