@@ -13,7 +13,7 @@ fn sys_call(
 ) -> i32 {
     let id = syscall_id as usize;
     let mut ret: i32;
-    let mut failed: i32 = 0;
+    let failed: i32;
 
     unsafe {
         #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
@@ -325,7 +325,46 @@ enum SyscallId {
     GetPaddr = 998,
 }
 
-#[cfg(not(target_arch = "x86_64"))]
+// only for mips N32 abi
+// see https://git.linux-mips.org/cgit/ralf/linux.git/tree/arch/mips/include/uapi/asm/unistd.h
+#[cfg(target_arch = "mips")]
+#[allow(dead_code)]
+enum SyscallId {
+    Read = 4003,
+    Write = 4004,
+    Close = 4006,
+    Fstat = 4198,
+    Seek = 4018,
+    Mmap = 4090,
+    Munmap = 4091,
+    Ioctl = 4054,
+    Yield = 4162,
+    Sleep = 4166,
+    GetPid = 4020,
+    Socket = 4183,
+    SendTo = 4180,
+    SetSockOpt = 4181,
+    Clone = 4120,
+    Exec = 4011,
+    Exit = 4001,
+    Wait = 4007,
+    Kill = 4037,
+    Fsync = 4118,
+    GetCwd = 4203,
+    Chdir = 4012,
+    GetTime = 4078,
+    SetPriority = 4097,
+    ArchPrctl = -1,
+    GetDirEntry64 = 4219,
+    Openat = 4288,
+    FAccessAt = 4300,
+    Dup3 = 4327,
+    // custom
+    MapPciDevice = 999,
+    GetPaddr = 998,
+}
+
+#[cfg(any(all(target_arch = "x86_64", target_arch = "mips")))]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 63,
