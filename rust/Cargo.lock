@@ -84,7 +84,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "treebitmap"
 version = "0.3.1"
-source = "git+https://github.com/jiegec/treebitmap#9c0ddcfaed0c960fb86a66c2b5abb5af70d6f1d1"
+source = "git+https://github.com/jiegec/treebitmap#a89d725c1308719e327993dc5c5c0357c43dccf1"
 
 [[package]]
 name = "volatile"
