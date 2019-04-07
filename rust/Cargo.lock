@@ -62,6 +62,7 @@ dependencies = [
  "buddy_system_allocator 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "isomorphic_drivers 0.1.0 (git+https://github.com/rcore-os/isomorphic_drivers)",
  "smoltcp 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "treebitmap 0.3.1 (git+https://github.com/jiegec/treebitmap)",
 ]
 
 [[package]]
@@ -81,6 +82,11 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "treebitmap"
+version = "0.3.1"
+source = "git+https://github.com/jiegec/treebitmap#9c0ddcfaed0c960fb86a66c2b5abb5af70d6f1d1"
+
+[[package]]
 name = "volatile"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -96,4 +102,5 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum managed 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)" = "fdcec5e97041c7f0f1c5b7d93f12e57293c831c646f4cc7a5db59460c7ea8de6"
 "checksum smoltcp 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fef582369edb298c6c41319a544ca9c4e83622f226055ccfcb35974fbb55ed34"
 "checksum spin 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "44363f6f51401c34e7be73db0db371c04705d35efbe9f7d6082e03a921a32c55"
+"checksum treebitmap 0.3.1 (git+https://github.com/jiegec/treebitmap)" = "<none>"
 "checksum volatile 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "6af0edf5b4faacc31fc51159244d78d65ec580f021afcef7bd53c04aeabc7f29"

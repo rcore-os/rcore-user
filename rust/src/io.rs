@@ -194,7 +194,7 @@ impl fmt::Write for StdOut {
 pub const O_RDONLY: usize = 0; // open for reading only
 pub const O_WRONLY: usize = 1; // open for writing only
 pub const O_RDWR: usize = 2; // open for reading and writing
-// then or in any of these:
+                             // then or in any of these:
 pub const O_CREAT: usize = 0x00000004; // create file if it does not exist
 pub const O_EXCL: usize = 0x00000008; // error if O_CREAT and the file exists
 pub const O_TRUNC: usize = 0x00000010; // truncate file upon open
