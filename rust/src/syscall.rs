@@ -347,7 +347,7 @@ enum SyscallId {
     Clone = 4120,
     Exec = 4011,
     Exit = 4001,
-    Wait = 4007,
+    Wait = 4114,
     Kill = 4037,
     Fsync = 4118,
     GetCwd = 4203,

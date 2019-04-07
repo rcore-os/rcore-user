@@ -37,7 +37,7 @@
 #define MIPS_SYSCALL        6000
 #define SYS_exit            (MIPS_SYSCALL + 1)
 #define SYS_fork            (MIPS_SYSCALL + 2)
-#define SYS_wait            (MIPS_SYSCALL + 7)
+#define SYS_wait            (MIPS_SYSCALL + 114)
 #define SYS_exec            (MIPS_SYSCALL + 11)
 #define SYS_clone           (MIPS_SYSCALL + 120)
 #define SYS_yield           (MIPS_SYSCALL + 162)
