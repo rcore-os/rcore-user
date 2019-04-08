@@ -19,12 +19,12 @@ main(void) {
     }
 
     for (; n > 0; n --) {
-        if (wait() != 0) {
+        if (wait() <= 0) {
             panic("wait stopped early\n");
         }
     }
 
-    if (wait() == 0) {
+    if (wait() > 0) {
         panic("wait got too many\n");
     }
 
