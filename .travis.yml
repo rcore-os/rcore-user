@@ -21,6 +21,7 @@ env:
     - ARCH="aarch64" SRC="all"
     - ARCH="riscv32" SRC="all"
     - ARCH="riscv64" SRC="all"
+    - ARCH="mipsel" SRC="all"
 
 matrix:
   allow_failures:
@@ -42,7 +43,7 @@ install:
     if [ $TRAVIS_OS_NAME = linux ]; then
     export FILE="gcc-arm-8.2-2018.11-x86_64-aarch64-elf";
     wget https://developer.arm.com/-/media/Files/downloads/gnu-a/8.2-2018.11/$FILE.tar.xz;
-    tar -xvf $FILE.tar.xz;
+    tar -xf $FILE.tar.xz;
     export PATH=$PATH:$PWD/$FILE/bin;
     sudo apt update;
     sudo apt install linux-headers-$(uname -r);
@@ -73,7 +74,7 @@ install:
     sudo apt update;
     sudo apt install linux-headers-$(uname -r);
     wget https://musl.cc/riscv32-linux-musl-cross.tgz;
-    tar -xvf riscv32-linux-musl-cross.tgz;
+    tar -xf riscv32-linux-musl-cross.tgz;
     export PATH=$PATH:$PWD/riscv32-linux-musl-cross/bin;
     fi;
     fi
@@ -82,8 +83,17 @@ install:
     sudo apt update;
     sudo apt install linux-headers-$(uname -r);
     wget https://musl.cc/riscv64-linux-musl-cross.tgz;
-    tar -xvf riscv64-linux-musl-cross.tgz;
+    tar -xf riscv64-linux-musl-cross.tgz;
     export PATH=$PATH:$PWD/riscv64-linux-musl-cross/bin;
+    fi;
+    fi
+  - if [ $ARCH = mipsel ]; then
+    if [ $TRAVIS_OS_NAME = linux ]; then
+    sudo apt update;
+    sudo apt install linux-headers-$(uname -r);
+    wget https://musl.cc/mipsel-linux-musln32-cross.tgz;
+    tar -xvf mipsel-linux-musln32-cross.tgz;
+    export PATH=$PATH:$PWD/mipsel-linux-musln32-cross/bin;
     fi;
     fi
 

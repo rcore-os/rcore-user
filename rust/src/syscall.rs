@@ -364,7 +364,7 @@ enum SyscallId {
     GetPaddr = 998,
 }
 
-#[cfg(any(all(target_arch = "x86_64", target_arch = "mips")))]
+#[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 63,
