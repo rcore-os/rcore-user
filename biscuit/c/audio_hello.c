@@ -13,8 +13,14 @@
 int main(int argc, char **argv)
 {
 	printf("hello audio world!\n");
-    fprintf(stdout, "stdout test ok\n");
-    fprintf(stderr, "audio test ok\n'");
+    int fd;
+    fd = open("/dev/stdout", O_WRONLY);
+    if (fd < 0) {
+        fprintf(stdout, "fail to open /dev/stdout");
+        return 1;
+    }
+
+    write(fd, "write through device file!\n", 27); 
 
 	return 0;
 }
