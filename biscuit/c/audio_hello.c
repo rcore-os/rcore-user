@@ -14,6 +14,7 @@ int main(int argc, char **argv)
 {
 	printf("hello audio world!\n");
     int fd;
+    fprintf(stderr, "test on gpio (stderr -> Audio)");
     fd = open("/dev/stdout", O_WRONLY);
     if (fd < 0) {
         fprintf(stdout, "fail to open /dev/stdout");
