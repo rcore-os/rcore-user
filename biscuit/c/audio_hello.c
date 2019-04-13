@@ -30,16 +30,17 @@ int main(int argc, char **argv)
         fprintf(stdout, "fail to open /dev/gpio");
         return 1;
     }
-    if (ioctl(fd_gpio, 10, NULL) != 0) {
+    if (ioctl(fd_gpio, 1, NULL) != 0) {
         fprintf(stdout, "fail to use ioctl on /dev/gpio");
         return 1;
     }
     write(fd_gpio, "1", 1);
-    if (ioctl(fd_gpio, 20, NULL) != 0) {
+    if (ioctl(fd_gpio, 2, NULL) != 0) {
         fprintf(stdout, "fail to use ioctl on /dev/gpio");
         return 1;
     }
     write(fd_gpio, "1", 1);
+    fprintf(stdout, "this is new sfsimg 2\n");
 
 	return 0;
 }
