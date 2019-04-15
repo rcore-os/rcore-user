@@ -325,6 +325,11 @@ enum SyscallId {
     GetPaddr = 998,
 }
 
+#[cfg(target_arch = "mips")]
+pub fn sys_set_theaad_area(tls: usize) {
+    sys_call(SyscallId::SetThreadArea, tls, 0, 0, 0, 0, 0);
+}
+
 // only for mips N32 abi
 // see https://git.linux-mips.org/cgit/ralf/linux.git/tree/arch/mips/include/uapi/asm/unistd.h
 #[cfg(target_arch = "mips")]
@@ -354,6 +359,7 @@ enum SyscallId {
     Chdir = 4012,
     GetTime = 4078,
     SetPriority = 4097,
+    SetThreadArea = 4283,
     ArchPrctl = -1,
     GetDirEntry64 = 4219,
     Openat = 4288,
@@ -364,7 +370,7 @@ enum SyscallId {
     GetPaddr = 998,
 }
 
-#[cfg(any(all(target_arch = "x86_64", target_arch = "mips")))]
+#[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
 #[allow(dead_code)]
 enum SyscallId {
     Read = 63,

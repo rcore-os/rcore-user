@@ -7,6 +7,9 @@ extern crate rcore_user;
 
 use rcore_user::syscall::{sys_arch_prctl, sys_getpid, sys_sleep, sys_vfork};
 
+#[cfg(target_arch = "mips")]
+use rcore_user::syscall::sys_set_theaad_area;
+
 fn set_tls(tls: usize, pid: usize) {
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
@@ -23,6 +26,8 @@ fn set_tls(tls: usize, pid: usize) {
         // set fs base
         sys_arch_prctl(0x1002, &DATA[pid] as *const usize as usize);
     }
+    #[cfg(target_arch = "mips")]
+    sys_set_theaad_area(tls);
 }
 
 fn get_tls() -> usize {
@@ -38,6 +43,10 @@ fn get_tls() -> usize {
     #[cfg(target_arch = "x86_64")]
     unsafe {
         asm!("mov %fs:0, $0" : "=r"(tls) :);
+    }
+    #[cfg(target_arch = "mips")]
+    unsafe {
+        asm!("rdhwr $0, $$29" : "=r"(tls) :);
     }
     tls
 }
