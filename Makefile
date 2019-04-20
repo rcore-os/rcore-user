@@ -44,14 +44,12 @@ ucore:
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
 
 biscuit:
-ifneq ($(shell uname)-$(arch), Darwin-riscv64)
-ifneq ($(shell uname)-$(arch), Darwin-aarch64)
+ifneq ($(shell uname)-$(arch), Darwin-$(filter $(arch), riscv32 riscv64 aarch64))
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
-endif
 endif
 
 $(busybox):
