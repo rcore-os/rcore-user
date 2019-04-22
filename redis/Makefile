@@ -32,7 +32,8 @@ $(redis_dir)/src/redis-server: $(redis_dir)/src/config.h
 	# our accept does not have backlog
 	sed -i 's/#define MAX_ACCEPTS_PER_CALL 1000/#define MAX_ACCEPTS_PER_CALL 1/' $(redis_dir)/src/networking.c
 	# note: on some platforms gcc seems to forget linking with libatomic, fix it anyway
-	cd $(redis_dir) && make CC=$(cc) LDFLAGS="${LDFLAGS} -latomic -static" MALLOC=libc
+	sed -i 's/-ldl -pthread -lrt/-ldl -pthread -lrt -latomic/' $(redis_dir)/src/Makefile
+	cd $(redis_dir) && make CC=$(cc) LDFLAGS="${LDFLAGS} -static" MALLOC=libc
 
 $(bin_server_unstripped): $(redis_dir)/src/redis-server
 	cp $(redis_dir)/src/redis-server $(bin_server_unstripped)
