@@ -13,8 +13,8 @@ ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
 alpine_version_major := 3.9
-alpine_version_full := 3.9.2
-alpine_file := alpine-minirootfs-3.9.2-$(arch).tar.gz
+alpine_version_full := 3.9.3
+alpine_file := alpine-minirootfs-3.9.3-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
 rust_build_args := --target targets/$(arch)-rcore.json
@@ -111,7 +111,8 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 
-build: rust ucore biscuit $(busybox) nginx redis iperf3
+#build: rust ucore biscuit $(busybox) nginx redis iperf3
+build: rust alpine
 
 sfsimg: $(out_qcow2)
 
