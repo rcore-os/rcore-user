@@ -111,7 +111,13 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 
-#build: rust ucore biscuit $(busybox) nginx redis iperf3
+test:
+	@echo setup test DIR
+	@mkdir -p $(out_dir)
+	@cp -r testsuits_alpine $(out_dir)/
+	@mv $(out_dir)/testsuits_alpine $(out_dir)/test
+
+#build: rust ucore biscuit $(busybox) nginx redis iperf3 test
 build: rust alpine
 
 sfsimg: $(out_qcow2)
