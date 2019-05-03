@@ -8906,7 +8906,7 @@ int main(int argc, char **argv)
 
     int fd_dsp;
     fd_dsp = open("/dev/dsp", O_WRONLY);
-    if (fd_gpio < 0) {
+    if (fd_dsp < 0) {
         printf("fail to open /dev/dsp");
         return 1;
     }
