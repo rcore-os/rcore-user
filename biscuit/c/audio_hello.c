@@ -8910,7 +8910,10 @@ int main(int argc, char **argv)
         printf("fail to open /dev/dsp");
         return 1;
     }
+    ioctl(fd_dsp, 0, NULL);
     write(fd_dsp, sound, sizeof(sound));
+    ioctl(fd_dsp, 1, NULL);
+    printf("finish writing %d\n", sizeof(sound));
 
 	return 0;
 }
