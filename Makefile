@@ -6,6 +6,8 @@ out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
+rcore_fs_fuse_revision ?= 585eb61
+
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
@@ -118,7 +120,7 @@ test:
 	@mv $(out_dir)/testsuits_alpine $(out_dir)/test
 
 #build: rust ucore biscuit $(busybox) nginx redis iperf3 test
-build: rust alpine
+build: rust alpine $(busybox)
 
 sfsimg: $(out_qcow2)
 
@@ -131,9 +133,9 @@ $(out_qcow2): $(out_img)
 	@qemu-img resize $@ +1G
 
 rcore-fs-fuse:
-ifeq ($(shell which rcore-fs-fuse),)
+ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
 	@echo Installing rcore-fs-fuse
-	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev 41ccb16
+	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev $(rcore_fs_fuse_revision) --force
 endif
 
 clean:
