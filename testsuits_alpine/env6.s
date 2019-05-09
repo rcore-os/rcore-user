@@ -1,4 +1,4 @@
-	.file	"env1.c"
+	.file	"env6.c"
 	.text
 	.comm	env,8,8
 	.section	.rodata

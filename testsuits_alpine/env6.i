@@ -1,10 +1,10 @@
-# 1 "env1.c"
+# 1 "env6.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
 # 31 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 32 "<command-line>" 2
-# 1 "env1.c"
+# 1 "env6.c"
 # 1 "/usr/include/fortify/stdlib.h" 1 3 4
 # 20 "/usr/include/fortify/stdlib.h" 3 4
 
@@ -143,7 +143,7 @@ void *memalign(size_t, size_t);
 int getloadavg(double *, int);
 int clearenv(void);
 # 23 "/usr/include/fortify/stdlib.h" 2 3 4
-# 2 "env1.c" 2
+# 2 "env6.c" 2
 # 1 "/usr/include/fortify/stdio.h" 1 3 4
 # 20 "/usr/include/fortify/stdio.h" 3 4
 __extension__
@@ -302,7 +302,7 @@ char *fgetln(FILE *, size_t *);
 int asprintf(char **, const char *, ...);
 int vasprintf(char **, const char *, __isoc_va_list);
 # 23 "/usr/include/fortify/stdio.h" 2 3 4
-# 3 "env1.c" 2
+# 3 "env6.c" 2
 # 1 "/usr/include/fortify/unistd.h" 1 3 4
 # 20 "/usr/include/fortify/unistd.h" 3 4
 __extension__
@@ -473,10 +473,10 @@ int getentropy(void *, size_t);
 # 1 "/usr/include/bits/posix.h" 1 3 4
 # 253 "/usr/include/unistd.h" 2 3 4
 # 23 "/usr/include/fortify/unistd.h" 2 3 4
-# 4 "env1.c" 2
+# 4 "env6.c" 2
 
 
-# 5 "env1.c"
+# 5 "env6.c"
 extern char **environ;
 char **env ;
 int main()
@@ -496,9 +496,9 @@ printf("USER=%s\n",getenv("USER"));
 
 
 char * argv[]={"env2", 
-# 23 "env1.c" 3 4
+# 23 "env6.c" 3 4
                       ((void*)0)
-# 23 "env1.c"
+# 23 "env6.c"
                           };
 execve("./env2",argv,env);
 return 0;
