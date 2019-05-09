@@ -7,6 +7,7 @@ out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
 rcore_fs_fuse_revision ?= 585eb61
+endif
 
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
@@ -104,7 +105,7 @@ endif
 endif
 
 $(alpine):
-	wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
+	-wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
 
 alpine: $(alpine)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
@@ -114,13 +115,13 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 endif
 
 test:
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@echo setup test DIR
 	@mkdir -p $(out_dir)
-	@cp -r testsuits_alpine $(out_dir)/
-	@mv $(out_dir)/testsuits_alpine $(out_dir)/test
+	@cp -r testsuits_alpine $(out_dir)/test
+endif
 
-#build: rust ucore biscuit $(busybox) nginx redis iperf3 test
-build: rust alpine $(busybox)
+build: rust ucore biscuit $(busybox) nginx redis iperf3 test
 
 sfsimg: $(out_qcow2)
 
