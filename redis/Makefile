@@ -3,12 +3,18 @@ redis_tarball := redis-$(redis_version).tar.gz
 redis_tarball_path := src/redis-$(redis_version).tar.gz
 build_dir := build/$(arch)
 redis_dir := $(build_dir)/redis-$(redis_version)
-cc := $(arch)-linux-musl-gcc
-strip := $(arch)-linux-musl-strip
+prefix := $(arch)-linux-musl-
 bin_server_unstripped := build/$(arch)/redis-server-unstripped
 bin_server := build/$(arch)/redis-server
 bin_cli_unstripped := build/$(arch)/redis-cli-unstripped
 bin_cli := build/$(arch)/redis-cli
+
+ifeq ($(arch), mipsel)
+	prefix := mipsel-linux-musln32-
+endif
+
+cc := $(prefix)gcc
+strip := $(prefix)strip
 
 # $ARCH is also used in redis internal Makefile, avoid clashing
 undefine ARCH
@@ -25,7 +31,9 @@ $(redis_dir)/src/redis-server: $(redis_dir)/src/config.h
 	sed -i 's/#define HAVE_EPOLL 1//' $(redis_dir)/src/config.h
 	# our accept does not have backlog
 	sed -i 's/#define MAX_ACCEPTS_PER_CALL 1000/#define MAX_ACCEPTS_PER_CALL 1/' $(redis_dir)/src/networking.c
-	cd $(redis_dir) && make CC=$(cc) MALLOC=libc
+	# note: on some platforms gcc seems to forget linking with libatomic, fix it anyway
+	sed -i 's/-ldl -pthread -lrt/-ldl -pthread -lrt -latomic/' $(redis_dir)/src/Makefile
+	cd $(redis_dir) && make CC=$(cc) LDFLAGS="${LDFLAGS} -static" MALLOC=libc
 
 $(bin_server_unstripped): $(redis_dir)/src/redis-server
 	cp $(redis_dir)/src/redis-server $(bin_server_unstripped)

@@ -65,6 +65,22 @@ syscall(int num, ...) {
            "m" (a[4])
         : "cc", "memory"
       );
+#elif defined(__mips__)
+// mips n32 abi
+	register long a0 __asm__("$4") = a[0];
+	register long a1 __asm__("$5") = a[1];
+	register long a2 __asm__("$6") = a[2];
+	register long a3 __asm__("$7") = a[3];
+    register long a4 __asm__("$8") = a[4];
+    register long a5 __asm__("$9") = a[5];
+	register long v0 __asm__("$2");
+	__asm__ __volatile__ (
+		"addu $2,$0,%2 ; syscall"
+		: "=&r"(v0), "=r"(a3)
+        : "ir"(num), "0"(v0), "1"(a3), "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5)
+		: "$1", "$3", "$10", "$11", "$12", "$13",
+		  "$14", "$15", "$24", "$25", "hi", "lo", "memory");
+    ret = a3 ? -v0 : v0;
 #endif
     return ret;
 }

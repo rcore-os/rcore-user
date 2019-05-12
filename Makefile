@@ -1,10 +1,12 @@
-# arch = {riscv32, riscv64, x86_64, aarch64}
+# arch = {riscv32, riscv64, x86_64, aarch64, mipsel}
 # mode = {debug, release}
 arch ?= riscv32
 mode ?= debug
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
+
+rcore_fs_fuse_revision ?= 585eb61
 
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
@@ -13,8 +15,8 @@ ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
 alpine_version_major := 3.9
-alpine_version_full := 3.9.2
-alpine_file := alpine-minirootfs-3.9.2-$(arch).tar.gz
+alpine_version_full := 3.9.3
+alpine_file := alpine-minirootfs-3.9.3-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
 rust_build_args := --target targets/$(arch)-rcore.json
@@ -37,23 +39,19 @@ rust:
 	@cp $(rust_bins) $(out_dir)/rust
 
 ucore:
-ifneq ($(arch), x86_64)
 	@echo Building ucore programs
 	@mkdir -p ucore/build
 	@cd ucore/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/ucore && mkdir -p $(out_dir)/ucore
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
-endif
 
 biscuit:
-ifeq ($(arch), $(filter $(arch), x86_64 aarch64 riscv64))
-ifneq ($(shell uname)-$(arch), Darwin-riscv64)
+ifneq ($(shell uname)-$(arch), Darwin-$(filter $(arch), riscv32 riscv64 aarch64))
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
-endif
 endif
 
 $(busybox):
@@ -68,14 +66,13 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@mv tmp/bin/busybox $(busybox)
 	@rm -rf tmp && rm busybox.tar.xz
 endif
-ifeq ($(arch), riscv64)
-	@wget https://github.com/rcore-os/busybox-riscv-prebuilts/raw/master/busybox-1.30.1-riscv64/busybox -O $(busybox)
+ifeq ($(arch), $(filter $(arch), riscv64 riscv32 mipsel))
+	@wget https://github.com/rcore-os/busybox-prebuilts/raw/master/busybox-1.30.1-${arch}/busybox -O $(busybox)
 endif
 
 busybox: $(busybox)
 
 nginx:
-ifneq ($(arch), riscv32)
 ifneq ($(shell uname), Darwin)
 	@echo Building nginx
 	mkdir -p $(out_dir)/usr/local/nginx/conf
@@ -84,10 +81,8 @@ ifneq ($(shell uname), Darwin)
 	@cp nginx/build/$(arch)/nginx $(out_dir)
 	@cp nginx/nginx.conf $(out_dir)/usr/local/nginx/conf
 endif
-endif
 
 redis:
-ifneq ($(arch), riscv64)
 ifneq ($(shell uname), Darwin)
 	@echo Building redis
 	@mkdir -p $(out_dir)
@@ -95,7 +90,6 @@ ifneq ($(shell uname), Darwin)
 	@cp redis/build/$(arch)/redis-server $(out_dir)/redis-server
 	@cp redis/build/$(arch)/redis-cli $(out_dir)/redis-cli
 	@cp redis/redis.conf $(out_dir)/redis.conf
-endif
 endif
 
 iperf3:
@@ -110,7 +104,7 @@ endif
 endif
 
 $(alpine):
-	wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
+	-wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
 
 alpine: $(alpine)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
@@ -119,7 +113,14 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xvf ../../$(alpine)
 endif
 
-build: rust ucore biscuit $(busybox) nginx redis iperf3
+test:
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+	@echo setup test DIR
+	@mkdir -p $(out_dir)
+	@cp -r testsuits_alpine $(out_dir)/test
+endif
+
+build: rust ucore biscuit $(busybox) nginx redis iperf3 test
 
 sfsimg: $(out_qcow2)
 
@@ -132,9 +133,9 @@ $(out_qcow2): $(out_img)
 	@qemu-img resize $@ +1G
 
 rcore-fs-fuse:
-ifeq ($(shell which rcore-fs-fuse),)
+ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
 	@echo Installing rcore-fs-fuse
-	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev ff3dd7d
+	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev $(rcore_fs_fuse_revision) --force
 endif
 
 clean:

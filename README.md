@@ -36,37 +36,41 @@ To build biscuit programs, install musl toolchain first:
 # 2.1 for macOS musl toolchain for x86_64(,aarch64)
 $ brew install FileSottile/musl-cross/musl-cross {--with-aarch64}
 # 2.2 for ubuntu 16.04, we should build gcc-musl for newest musl-1.1.21, please see build-gcc-musl.md for instructions
-# 2.3 for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain)
+# 2.3 for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain), however, this one might not be able to build redis on rv64 for lack of libatomic
 ```
 
 Then, build userspace programs for rCore:
 
 ```bash
-$ make {ucore,biscuit,rust,nginx,redis,all} arch={x86_64,aarch64,riscv32,riscv64}
+$ make {ucore,biscuit,rust,nginx,redis,all} arch={x86_64,aarch64,riscv32,riscv64,mipsel}
 $ make alpine arch={x86_64,aarch64} # if you want to use alpine rootfs
-$ make sfsimg arch={x86_64,aarch64,riscv32,riscv64}
+$ make test arch={x86_64} # test alpine real apps, e.g. python, gcc, rust, go, lua, etc.(need rootfs with these real apps)
+$ make sfsimg arch={x86_64,aarch64,riscv32,riscv64,mipsel}
 ```
 
 A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 ## Support matrix
 
-|                    | x86_64 | aarch64 | riscv32 | riscv64 |
-| ------------------ | ------ | ------- | ------- | ------- |
-| ucore              | ❌      | ✅       | ✅       | ✅       |
-| rust               | ✅      | ✅       | ✅       | ✅       |
-| biscuit            | ✅      | ✅       | ❌       | ✅       |
-| nginx (linux only) | ✅      | ✅       | ❌       | ✅       |
-| redis (linux only) | ✅      | ✅       | ✅       | ❌       |
-| busybox            | ✅      | ✅       | ❌       | ✅       |
-| alpine rootfs      | ✅      | ✅       | ❌       | ❌       |
-| iperf3             | ✅      | ❌       | ❌       | ❌       |
+|                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
+| ------------------ | ------ | ------- | ------- | ------- | ------ |
+| ucore              | ✅     | ✅      | ✅     | ✅      | ❗     |
+| rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
+| biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
+| nginx (linux only) | ✅     | ✅      | ❗      | ✅      | ❗      |
+| redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
+| busybox            | ✅     | ✅      | ✅     | ✅      | ✅    |
+| alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
+| iperf3             | ✅     | ❌      | ❌     | ❌      | ❌    |
+| test             	 | ✅     | ❌      | ❌     | ❌      | ❌    |
+
+Note: ❗ means workarounds are used so that they may not work properly. ❌ means failure in compiling or not existed on such platform.
 
 ## How to run real world programs
 
 ### How to use Redis
 
-If redis is dynamically linked to musl (default if you use commands above), you might need to copy `ld-musl-$(arch).so.1` to rootfs `/lib` . Alpine rootfs includes one as well.
+If redis is dynamically linked to musl (default if you use commands above), you might need to copy `ld-musl-$(arch).so.1` to rootfs `/lib` by yourself .Alpine rootfs includes one as well.
 
 After building redis, you should be able to run redis-server in rCore. Then, start `redis-server` in rCore:
 
@@ -156,3 +160,21 @@ Built within rCore
 ```
 
 Note: the long linker args can be replaced by invoking gcc instead later when we fix the problem. If you encountered `rcore-fs-fuse` panicking, consider upgrading it to latest version.
+
+
+### How to test real alpine apps
+#### simple test for alpine minifs with little apps
+```bash
+1. make alpine arch=x86_64
+2. make test arch=x86_64
+3. make sfsimg arch=x86_64
+4. cd $(RCORE_ROOT)/kernel; make run arch=x86_64 mode=release
+```
+
+#### test gcc/go/python2/python3/ruby/lua/java/rust
+```bash
+1. download x86_64.qcow2.realapps.xz from cloud tsinghua
+2. xz -d x86_64.qcow2.realapps.xz; mv x86_64.qcow2.realapps x86_64.qcow2
+3. mv x86_64.qcow2 $(RCORE_ROOT)/user/build
+4. cd $(RCORE_ROOT)/kernel; make run arch=x86_64 mode=release
+```

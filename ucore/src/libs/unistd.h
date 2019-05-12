@@ -33,6 +33,35 @@
 /* ONLY FOR LAB6 */
 #define SYS_set_priority    141
 
+#elif defined(__mips__)
+#define MIPS_SYSCALL        4000
+#define SYS_exit            (MIPS_SYSCALL + 1)
+#define SYS_fork            (MIPS_SYSCALL + 2)
+#define SYS_wait            (MIPS_SYSCALL + 114)
+#define SYS_exec            (MIPS_SYSCALL + 11)
+#define SYS_clone           (MIPS_SYSCALL + 120)
+#define SYS_yield           (MIPS_SYSCALL + 162)
+#define SYS_sleep           (MIPS_SYSCALL + 166)
+#define SYS_kill            (MIPS_SYSCALL + 37)
+#define SYS_gettime         (MIPS_SYSCALL + 78)
+#define SYS_getpid          (MIPS_SYSCALL + 20)
+#define SYS_mmap            (MIPS_SYSCALL + 90)
+#define SYS_munmap          (MIPS_SYSCALL + 91)
+#define SYS_shmem           (-1)
+#define SYS_pgdir           (-1)
+#define SYS_openat          (MIPS_SYSCALL + 288)
+#define SYS_close           (MIPS_SYSCALL + 6)
+#define SYS_read            (MIPS_SYSCALL + 3)
+#define SYS_write           (MIPS_SYSCALL + 4)
+#define SYS_seek            (MIPS_SYSCALL + 18)
+#define SYS_fstat           (MIPS_SYSCALL + 198)
+#define SYS_fsync           (MIPS_SYSCALL + 118)
+#define SYS_getcwd          (MIPS_SYSCALL + 203)
+#define SYS_getdirentry64   (MIPS_SYSCALL + 219)
+#define SYS_dup3            (MIPS_SYSCALL + 327)
+/* ONLY FOR LAB6 */
+#define SYS_set_priority    141
+
 #else
 
 #define SYS_exit            93

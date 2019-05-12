@@ -34,7 +34,7 @@ void dprint(int fd, char *par, int left, int rec)
 			spec = 's';
 		else
 			spec = '-';
-		printf("%crwxr-xr-x %ld %s\n", spec, st.st_size, de->d_name);
+		printf("%crwxr-xr-x %ld %s\n", spec, (long)st.st_size, de->d_name);
 	}
 	if (!rec) {
 		if (closedir(dir) == -1)
