@@ -2,6 +2,8 @@
 #include <string.h>
 #include <ulib.h>
 
+#if defined(__mips__) || defined(__x86_64__)
+
 #define WIDTH 800
 #define HEIGHT 600
 
@@ -113,3 +115,12 @@ int main(void) {
     }
     return 0;
 }
+
+#else
+
+int main(void) {
+    cprintf("This program can only run on platforms with floating point support.\n");
+    return 0;
+}
+
+#endif
