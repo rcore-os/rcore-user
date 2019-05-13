@@ -6,7 +6,7 @@ out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
-rcore_fs_fuse_revision ?= 585eb61
+rcore_fs_fuse_revision ?= 351d382
 
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
