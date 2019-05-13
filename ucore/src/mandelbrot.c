@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <ulib.h>
 
 #define WIDTH 800
@@ -6,7 +7,7 @@
 
 char buf[WIDTH];
 
-volatile char* frame_buf = 0xA2000000;
+volatile char* frame_buf = (volatile char*) 0xA2000000;
 int w = WIDTH, h = HEIGHT, x, y;
 //each iteration, it calculates: newz = oldz*oldz + p, where p is the current pixel, and oldz stars at the origin
 float pr, pi; //real and imaginary part of the pixel p
@@ -16,7 +17,7 @@ float newRe, newIm, oldRe, oldIm; //real and imaginary parts of new and old z
 void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
     cprintf("plot\n");
     //loop through every pixel
-    char* line_addr = frame_buf;
+    volatile char *line_addr = frame_buf;
     for (y = 0; y < h; y++) {
         if (y % skip) {
             memcpy(line_addr, line_addr - WIDTH, WIDTH);
@@ -60,10 +61,10 @@ int main(void) {
     float zoom = 1, moveX = -0.5, moveY = 0; //you can change these to zoom and change position
     int maxIterations = 255; //after how much iterations the function should stop
     int skip = 4;
-    char c;
+    int c;
     plot(moveX, moveY, zoom, maxIterations, skip);
 
-    while ((c = getchar) > 0) {
+    while ((c = getchar()) > 0) {
         cprintf(" %d\n", c);
         if (c == 'x') {
             skip = 1;
@@ -103,7 +104,7 @@ int main(void) {
             cprintf("r - Reset\n");
             cprintf("p - Print this help\n");
         } else {
-            cprintf("not recognized.\n");
+            cprintf("Unrecognized input: %d.\n", c);
         }
         plot(moveX, moveY, zoom, maxIterations, skip);
         skip = 4;
