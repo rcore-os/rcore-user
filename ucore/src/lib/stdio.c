@@ -17,7 +17,7 @@ fputch(char c, int *cnt, int fd) {
  * */
 static void
 cputch(int c, int *cnt) {
-    fputch(c, cnt, 1);
+    fputch(c, cnt, stdout);
 }
 
 /* *
@@ -84,4 +84,15 @@ fprintf(int fd, const char *fmt, ...) {
     va_end(ap);
 
     return cnt;
+}
+
+int
+getchar(void) {
+    char c;
+    long result = read(stdin, &c, sizeof(char));
+    if (result < 0) {
+        return -1;
+    } else {
+        return c;
+    }
 }
