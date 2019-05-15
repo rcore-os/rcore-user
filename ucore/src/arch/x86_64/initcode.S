@@ -2,11 +2,11 @@
 .globl _start
 _start:
     # set ebp for backtrace
-    movl $0x0, %ebp
+    movq $0x0, %rbp
 
     # move down the esp register
     # since it may cause page fault in backtrace
-    subl $0x20, %esp
+    subq $0x20, %rsp
 
     # call user-program function
     # according to fastcall ABI, the first 6 parameters are in registes
