@@ -1,11 +1,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <ulib.h>
+#include <unistd.h>
+#include <syscall.h>
 
 #if defined(__mips__) || defined(__x86_64__)
 
+#if defined(__x86_64__)
+#define WIDTH 1024
+#define HEIGHT 768
+#else
 #define WIDTH 800
 #define HEIGHT 600
+#endif
 
 char buf[WIDTH];
 
@@ -60,6 +67,10 @@ void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
 }
 
 int main(void) {
+#if defined(__x86_64__)
+    int fd = sys_open("/dev/fb0", O_WRONLY);
+    frame_buf = (volatile char *)sys_mmap(0, WIDTH * HEIGHT * 3, PROT_WRITE, 0, fd, 0);
+#endif
     float zoom = 1, moveX = -0.5, moveY = 0; //you can change these to zoom and change position
     int maxIterations = 255; //after how much iterations the function should stop
     int skip = 4;

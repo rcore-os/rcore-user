@@ -19,18 +19,20 @@ syscall(int num, ...) {
     }
     va_end(ap);
 
-#if defined(__i386__)
+#if defined(__x86_64__)
+    register long r10 __asm__("r10") = a[3];
+    register long r8 __asm__("r8") = a[4];
+
     asm volatile (
-        "int %1;"
+        "syscall"
         : "=a" (ret)
-        : "i" (T_SYSCALL),
-          "a" (num),
-          "d" (a[0]),
-          "c" (a[1]),
-          "b" (a[2]),
-          "D" (a[3]),
-          "S" (a[4])
-        : "cc", "memory");
+        : "a" (num),
+          "D" (a[0]),
+          "S" (a[1]),
+          "d" (a[2]),
+          "r" (r10),
+          "r" (r8)
+        : "rcx", "r11", "memory");
 #elif defined(__riscv_xlen)
     register long a7 __asm__("a7") = num;
 	register long a0 __asm__("a0") = a[0];
@@ -191,4 +193,9 @@ sys_getdirentry(int fd, struct dirent *dirent) {
 int
 sys_dup(int fd1, int fd2) {
     return syscall(SYS_dup3, fd1, fd2);
+}
+
+void *
+sys_mmap(void *addr, size_t len, int prot, int flags, int fd, size_t offset) {
+    return syscall(SYS_mmap, addr, len, prot, flags, fd, offset);
 }

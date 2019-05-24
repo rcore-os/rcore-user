@@ -126,5 +126,7 @@
 #define EXEC_MAX_ARG_NUM    32
 #define EXEC_MAX_ARG_LEN    4095
 
+#define PROT_WRITE           2
+
 #endif /* !__LIBS_UNISTD_H__ */
 
