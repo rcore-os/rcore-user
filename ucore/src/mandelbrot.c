@@ -9,15 +9,17 @@
 #if defined(__x86_64__)
 #define WIDTH 1024
 #define HEIGHT 768
+#define BPP 3
 #else
 #define WIDTH 800
 #define HEIGHT 600
+#define BPP 1
 #endif
 
-char buf[WIDTH];
+char buf[WIDTH * BPP];
 
 volatile char* frame_buf = (volatile char*) 0xA2000000;
-int w = WIDTH, h = HEIGHT, x, y;
+int w = WIDTH, h = HEIGHT, x, y, i;
 //each iteration, it calculates: newz = oldz*oldz + p, where p is the current pixel, and oldz stars at the origin
 float pr, pi; //real and imaginary part of the pixel p
 float newRe, newIm, oldRe, oldIm; //real and imaginary parts of new and old z
@@ -29,13 +31,15 @@ void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
     volatile char *line_addr = frame_buf;
     for (y = 0; y < h; y++) {
         if (y % skip) {
-            memcpy(line_addr, line_addr - WIDTH, WIDTH);
-            line_addr += WIDTH;
+            memcpy(line_addr, line_addr - WIDTH * BPP, WIDTH * BPP);
+            line_addr += WIDTH * BPP;
             continue;
         }
         for (x = 0; x < w; x++) {
             if (x % skip) {
-                buf[x] = buf[x - 1];
+                for (i = 0;i < BPP;i++) {
+                    buf[x * BPP + i] = buf[(x - 1) * BPP + i];
+                }
                 continue;
             }
             // calculate the initial real and imaginary part of z, based on the pixel location and zoom and position values
@@ -59,17 +63,19 @@ void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
 
             int color = i * 255 / maxIterations;
 
-            buf[x] = (color << 5) | (color << 2) | (color >> 1);
+            for (i = 0;i < BPP;i++) {
+                buf[x * BPP + i] = (color << 5) | (color << 2) | (color >> 1);
+            }
         }
-        memcpy(line_addr, buf, WIDTH);
-        line_addr += WIDTH;
+        memcpy(line_addr, buf, WIDTH * BPP);
+        line_addr += WIDTH * BPP;
     }
 }
 
 int main(void) {
 #if defined(__x86_64__)
     int fd = sys_open("/dev/fb0", O_WRONLY);
-    frame_buf = (volatile char *)sys_mmap(0, WIDTH * HEIGHT * 3, PROT_WRITE, 0, fd, 0);
+    frame_buf = (volatile char *)sys_mmap(0, WIDTH * HEIGHT * BPP, PROT_WRITE, 0, fd, 0);
 #endif
     float zoom = 1, moveX = -0.5, moveY = 0; //you can change these to zoom and change position
     int maxIterations = 255; //after how much iterations the function should stop
