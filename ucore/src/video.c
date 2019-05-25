@@ -1,21 +1,31 @@
 #include <stdio.h>
 #include <file.h>
 #include <unistd.h>
+#include <syscall.h>
 
-#ifdef __mips__
+#if defined(__mips__) || defined(__x86_64__)
 
 // the c file is included ON PURPOSE
 #include <bad_apple.c>
 
 
+
+#if defined(__x86_64__)
+#define SCREEN_W 1024
+#define SCREEN_H 768
+#define BPP 3
+#else
+#define SCREEN_W 800
+#define SCREEN_H 600
+#define BPP 1
+
 #define OFFLOAD
+#endif
 
 #define WIN_SIZE 256
 #define READ_BUF 30000
 #define VID_W 800 
 #define VID_H 600
-#define SCREEN_W 800
-#define SCREEN_H 600
 
 volatile char* frame_buf = (volatile char*) 0xA2000000;
 
@@ -49,7 +59,9 @@ void printwin() {
 }
 
 static inline void out_byte(unsigned int b) {
-    *((int*) &frame_buf[x * SCREEN_W + y]) = b;
+    for (int i = 0;i < BPP;i++) {
+        *((int*) &frame_buf[(x * SCREEN_W + y) * BPP + i]) = b;
+    }
     y += 4;
     if (y == VID_W) {
         x = (x + 1) % VID_H;
@@ -119,6 +131,10 @@ void decompress(int n) {
 }
 
 int main() {
+#if defined(__x86_64__)
+    int fd = sys_open("/dev/fb0", O_WRONLY);
+    frame_buf = (volatile char *)sys_mmap(0, SCREEN_W * SCREEN_H * BPP, PROT_WRITE, 0, fd, 0);
+#endif
     decompress(BAD_APPLE_SIZE);
     cprintf("%d\n", inf);
     return 0;
