@@ -13,7 +13,7 @@ cache:
 
 os:
   - linux
-  # - osx # too slow... disable it for now
+  - osx
 
 env:
   matrix:
@@ -23,78 +23,23 @@ env:
     - ARCH="riscv64" SRC="all"
     - ARCH="mipsel" SRC="all"
 
-matrix:
-  allow_failures:
-    - env: ARCH="x86_64" SRC="redis" # unable to reproduce locally, weird..
-    - env: ARCH="aarch64" SRC="redis" # unable to reproduce locally, weird..
-    - env: ARCH="riscv32" SRC="redis" # unable to reproduce locally, weird..
-    # too slow or homebrew too old
-    - os: osx
-
 install:
-  - if [ $ARCH = riscv32 ] || [ $ARCH = riscv64 ]; then
-    [ $TRAVIS_OS_NAME = linux ] && export FILE="riscv64-unknown-elf-gcc-8.1.0-2019.01.0-x86_64-linux-ubuntu14";
-    [ $TRAVIS_OS_NAME = osx   ] && export FILE="riscv64-unknown-elf-gcc-8.1.0-2019.01.0-x86_64-apple-darwin";
-    wget https://static.dev.sifive.com/dev-tools/$FILE.tar.gz;
-    tar xf $FILE.tar.gz;
-    export PATH=$PATH:$PWD/$FILE/bin;
+  - if [ $TRAVIS_OS_NAME = osx ]; then
+    brew install isl;
     fi
-  - if [ $ARCH = aarch64 ]; then
+  - if [ 1 ]; then
+    [ $ARCH = riscv32 ] && export FILE="riscv32-linux-musl-cross";
+    [ $ARCH = riscv64 ] && export FILE="riscv64-linux-musl-cross";
+    [ $ARCH = mipsel  ] && export FILE="mipsel-linux-musln32-cross";
+    [ $ARCH = aarch64 ] && export FILE="aarch64-linux-musl-cross";
+    [ $ARCH = x86_64  ] && export FILE="x86_64-linux-musl-cross";
     if [ $TRAVIS_OS_NAME = linux ]; then
-    export FILE="gcc-arm-8.2-2018.11-x86_64-aarch64-elf";
-    wget https://developer.arm.com/-/media/Files/downloads/gnu-a/8.2-2018.11/$FILE.tar.xz;
-    tar -xf $FILE.tar.xz;
-    export PATH=$PATH:$PWD/$FILE/bin;
-    sudo apt update;
-    sudo apt install linux-headers-$(uname -r);
-    wget https://musl.cc/aarch64-linux-musl-cross.tgz;
-    tar -xvf aarch64-linux-musl-cross.tgz;
-    export PATH=$PATH:$PWD/aarch64-linux-musl-cross/bin;
+      wget https://musl.cc/$FILE.tgz;
     elif [ $TRAVIS_OS_NAME = osx ]; then
-    brew tap SergioBenitez/osxct;
-    brew install aarch64-none-elf;
-    brew install FiloSottile/musl-cross/musl-cross --with-aarch64;
+      wget https://mac.musl.cc/$FILE.tgz;
     fi;
-    fi
-  - if [ $ARCH = x86_64 ]; then
-    if [ $TRAVIS_OS_NAME = linux ]; then
-    sudo apt update;
-    sudo apt install linux-headers-$(uname -r);
-    wget https://musl.cc/x86_64-linux-musl-cross.tgz;
-    tar -xvf x86_64-linux-musl-cross.tgz;
-    export PATH=$PATH:$PWD/x86_64-linux-musl-cross/bin;
-    elif [ $TRAVIS_OS_NAME = osx ]; then
-    brew tap altkatz/homebrew-gcc_cross_compilers;
-    brew install FiloSottile/musl-cross/musl-cross;
-    travis_wait brew install x64-elf-gcc;
-    fi;
-    fi
-  - if [ $ARCH = riscv32 ]; then
-    if [ $TRAVIS_OS_NAME = linux ]; then
-    sudo apt update;
-    sudo apt install linux-headers-$(uname -r);
-    wget https://musl.cc/riscv32-linux-musl-cross.tgz;
-    tar -xf riscv32-linux-musl-cross.tgz;
-    export PATH=$PATH:$PWD/riscv32-linux-musl-cross/bin;
-    fi;
-    fi
-  - if [ $ARCH = riscv64 ]; then
-    if [ $TRAVIS_OS_NAME = linux ]; then
-    sudo apt update;
-    sudo apt install linux-headers-$(uname -r);
-    wget https://musl.cc/riscv64-linux-musl-cross.tgz;
-    tar -xf riscv64-linux-musl-cross.tgz;
-    export PATH=$PATH:$PWD/riscv64-linux-musl-cross/bin;
-    fi;
-    fi
-  - if [ $ARCH = mipsel ]; then
-    if [ $TRAVIS_OS_NAME = linux ]; then
-    sudo apt update;
-    sudo apt install linux-headers-$(uname -r);
-    wget https://musl.cc/mipsel-linux-musln32-cross.tgz;
-    tar -xvf mipsel-linux-musln32-cross.tgz;
-    export PATH=$PATH:$PWD/mipsel-linux-musln32-cross/bin;
-    fi;
+    tar -xf $FILE.tgz;
+    export PATH=$PATH:$PWD/$FILE/bin;
     fi
 
 

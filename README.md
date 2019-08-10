@@ -28,16 +28,9 @@ Now it has 4 parts:
 
 ## Build
 
-To build biscuit programs, install musl toolchain first:
+Install prebuilt musl toolchain from [musl.cc](https://musl.cc).
 
-```bash
-# 1. to download prebuilt binaries in Linux, visit [musl.cc](https://musl.cc)
-# 2. to build musl toolchains from source:
-# 2.1 for macOS musl toolchain for x86_64(,aarch64)
-$ brew install FileSottile/musl-cross/musl-cross {--with-aarch64}
-# 2.2 for ubuntu 16.04, we should build gcc-musl for newest musl-1.1.21, please see build-gcc-musl.md for instructions
-# 2.3 for riscv musl toolchain, please install [musl-riscv-toolchain](https://github.com/jiegec/musl-riscv-toolchain), however, this one might not be able to build redis on rv64 for lack of libatomic
-```
+See Travis script 'install' section for details.
 
 Then, build userspace programs for rCore:
 

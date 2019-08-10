@@ -14,9 +14,9 @@ rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(r
 ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
-alpine_version_major := 3.9
-alpine_version_full := 3.9.3
-alpine_file := alpine-minirootfs-3.9.3-$(arch).tar.gz
+alpine_version_major := 3.10
+alpine_version_full := 3.10.1
+alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
 rust_build_args := --target targets/$(arch)-rcore.json
@@ -41,32 +41,29 @@ rust:
 ucore:
 	@echo Building ucore programs
 	@mkdir -p ucore/build
-	@cd ucore/build && cmake $(cmake_build_args) .. && make
+	@cd ucore/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/ucore && mkdir -p $(out_dir)/ucore
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
 
 biscuit:
-ifneq ($(shell uname)-$(arch), Darwin-$(filter $(arch), riscv32 riscv64 aarch64))
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
-	@cd biscuit/build && cmake $(cmake_build_args) .. && make
+	@cd biscuit/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
-endif
 
 $(busybox):
 ifeq ($(arch), x86_64)
-	@wget https://raw.githubusercontent.com/docker-library/busybox/82bc0333a9ae148fbb4246bcbff1487b3fc0c510/musl/busybox.tar.xz -O busybox.tar.xz
+	@wget https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl/busybox-x86_64 -O $(busybox)
 else ifeq ($(arch), aarch64)
 	@wget https://raw.githubusercontent.com/docker-library/busybox/a3f79e474f617f7ff008148555df93bc7ae4a9ab/musl/busybox.tar.xz -O busybox.tar.xz
-endif
-ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@mkdir -p tmp
 	@tar -x -C tmp -f busybox.tar.xz
 	@mv tmp/bin/busybox $(busybox)
 	@rm -rf tmp && rm busybox.tar.xz
-endif
-ifeq ($(arch), $(filter $(arch), riscv64 riscv32 mipsel))
+else ifeq ($(arch), mipsel)
+	@wget https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl/busybox-mipsel -O $(busybox)
+else ifeq ($(arch), $(filter $(arch), riscv64 riscv32))
 	@wget https://github.com/rcore-os/busybox-prebuilts/raw/master/busybox-1.30.1-${arch}/busybox -O $(busybox)
 endif
 
@@ -104,13 +101,13 @@ endif
 endif
 
 $(alpine):
-	-wget "http://dl-cdn.alpinelinux.org/alpine/v3.9/releases/$(arch)/$(alpine_file)" -O $(alpine)
+	-wget "http://dl-cdn.alpinelinux.org/alpine/v$(alpine_version_major)/releases/$(arch)/$(alpine_file)" -O $(alpine)
 
 alpine: $(alpine)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@mkdir -p $(out_dir)/etc
 	@echo "nameserver 101.6.6.6" > $(out_dir)/etc/resolv.conf
-	@cd $(out_dir) && tar xvf ../../$(alpine)
+	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
 test:
