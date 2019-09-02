@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <syscall.h>
 
-#if defined(__mips__) || defined(__x86_64__)
+#if !defined(__riscv__)
 
 // the c file is included ON PURPOSE
 #include <bad_apple.c>
@@ -14,17 +14,19 @@
 #define SCREEN_W 1024
 #define SCREEN_H 768
 #define BPP 3
+typedef unsigned int pixel_t;
 #else
-#define SCREEN_W 800
-#define SCREEN_H 600
-#define BPP 1
+#define SCREEN_W 1280
+#define SCREEN_H 720
+#define BPP 2
+typedef unsigned int pixel_t;
 
 #define OFFLOAD
 #endif
 
 #define WIN_SIZE 256
 #define READ_BUF 30000
-#define VID_W 800 
+#define VID_W 800
 #define VID_H 600
 
 volatile char* frame_buf = (volatile char*) 0xA2000000;
@@ -32,7 +34,7 @@ volatile char* frame_buf = (volatile char*) 0xA2000000;
 unsigned char win[WIN_SIZE];
 int win_e = 0;
 int win_n = 0;
-unsigned char *buf = BAD_APPLE_BIN;
+const unsigned char *buf = BAD_APPLE_BIN;
 
 int inf = 0;
 int x = 0;
@@ -58,10 +60,9 @@ void printwin() {
     cprintf("\n");
 }
 
-static inline void out_byte(unsigned int b) {
-    for (int i = 0;i < BPP;i++) {
-        *((int*) &frame_buf[(x * SCREEN_W + y) * BPP + i]) = b;
-    }
+static inline void out_byte(pixel_t b) {
+    if (x < SCREEN_H && y < SCREEN_W)
+        *((pixel_t*) &frame_buf[(x * SCREEN_W + y) * BPP]) = b;
     y += 4;
     if (y == VID_W) {
         x = (x + 1) % VID_H;
@@ -69,37 +70,9 @@ static inline void out_byte(unsigned int b) {
     }
 }
 
-static inline void expand_byte(unsigned short b) {
-    #ifdef OFFLOAD
-    *((short*) &frame_buf[x * SCREEN_W + y]) = (b >> 4);
-    y += 4;
-    if (y == VID_W) {
-        x = (x + 1) % VID_H;
-        y = 0;
-    }
-    *((short*) &frame_buf[x * SCREEN_W + y]) = b;
-    y += 4;
-    if (y == VID_W) {
-        x = (x + 1) % VID_H;
-        y = 0;
-    }
-    #else
-    //cprintf("inflated: %d %hhx \n", inf, b);
-    inf += 1;
-    unsigned char mask = 128;
-    unsigned int inflate_buf = 0;
-    for (int i = 0; i < 4; i++) {
-        inflate_buf |= (((mask >> i) & b) ? 0xff : 0x00) << (8*i);
-    }
-    out_byte(inflate_buf);
-    inflate_buf = 0;
-    mask = 8;
-    for (int i = 0; i < 4; i++) {
-        inflate_buf |= (((mask >> i) & b) ? 0xff : 0x00) << (8*i);
-    }
-    out_byte(inflate_buf);
-    return;
-    #endif
+static inline void expand_pixel(unsigned char color) {
+    pixel_t packed_color = color > 0 ? (1llu << (BPP * 8)) - 1 : 0;
+    out_byte(packed_color);
 }
 
 void decompress(int n) {
@@ -120,10 +93,12 @@ void decompress(int n) {
         for (j = 0; j < real; j++) {
             unsigned char c = win[(old_win + idx + j) % WIN_SIZE];
             //cprintf("from win %hhx\n", c);
-            expand_byte((unsigned short) c);
+            expand_pixel(c >> 4);
+            expand_pixel(c & 0xf);
             put_in_win(c);
         }
-        expand_byte(byte);
+        expand_pixel(byte >> 4);
+        expand_pixel(byte & 0xf);
         put_in_win(byte);
         //printwin();
     }
@@ -131,7 +106,7 @@ void decompress(int n) {
 }
 
 int main() {
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(__aarch64__)
     int fd = sys_open("/dev/fb0", O_WRONLY);
     frame_buf = (volatile char *)sys_mmap(0, SCREEN_W * SCREEN_H * BPP, PROT_WRITE, 0, fd, 0);
 #endif
@@ -143,7 +118,7 @@ int main() {
 #else
 
 int main() {
-    cprintf("This program can only be run on MIPS platform.\n");
+    cprintf("This program can not be run on RISCV platform.\n");
     return 0;
 }
 
