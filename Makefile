@@ -6,8 +6,10 @@ out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
+prebuilt_version ?= 0.1
 rcore_fs_fuse_revision ?= 351d382
 
+prebuilt_tar := build/$(arch)_v$(prebuilt_version).tar.gz
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
@@ -15,7 +17,7 @@ ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
 alpine_version_major := 3.10
-alpine_version_full := 3.10.1
+alpine_version_full := 3.10.2
 alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
@@ -117,7 +119,16 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cp -r testsuits_alpine $(out_dir)/test
 endif
 
-build: rust ucore biscuit $(busybox) nginx redis iperf3 test
+ifeq ($(prebuilt), 1)
+build: $(prebuilt_tar)
+	@tar -xzf $< -C build
+else
+build: alpine rust ucore biscuit busybox nginx redis iperf3 test
+endif
+
+$(prebuilt_tar):
+	@mkdir -p build
+	@wget https://github.com/rcore-os/rcore-user/releases/download/v$(prebuilt_version)/$(arch).tar.gz -O $@
 
 sfsimg: $(out_qcow2)
 
