@@ -1,6 +1,6 @@
 sudo: false
 
-dist: xenial
+dist: bionic
 
 language: rust
 
@@ -17,11 +17,11 @@ os:
 
 env:
   matrix:
-    - ARCH="x86_64" SRC="all"
-    - ARCH="aarch64" SRC="all"
-    - ARCH="riscv32" SRC="all"
-    - ARCH="riscv64" SRC="all"
-    - ARCH="mipsel" SRC="all"
+    - ARCH="x86_64"
+    - ARCH="aarch64"
+    - ARCH="riscv32"
+    - ARCH="riscv64"
+    - ARCH="mipsel"
 
 install:
   - if [ $TRAVIS_OS_NAME = osx ]; then
@@ -48,4 +48,14 @@ before_script:
   - (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
 
 script:
-  - make $SRC arch=$ARCH
+  - make tar arch=$ARCH
+
+deploy:
+  provider: releases
+  api_key:
+    secure: nAnbGCNxvAIBGwIIzzxBdtIKcPJoSZEpJucCXSf1z55CWeODdkALGT4w5tcVRWIM0B/U/x0aC90UvxpLNmPcnhKU6G5Ovm7Y/ygrtjW2AuPgTOorY5KLc6sOGMma6XYcUl9zp3A5QJyQ919myu0+PEhLKv2rOwkxpdHeUqQY3okT7p6VOqtoMCiF8flxo79coTXFM+imEWyuy+CJ/l+34RZhhMjljJh6LTJ+6WATZCD849Jikt5w/vyX3YohuVxS5teLMdy/MwomAWVfRCC0UELHngMwNQic5xTf+l3lNxRB8uK/JJ6VLtiZVxSYXcZhBx26aL0mBaQvto0qyN6g8PApzFII7QvGz+bnUnUHlBgWM9/GTJHsRqS+s4Vw8albAJD0DQz/EtaICdsicGjXgJitcKE5WMY0ttuCMEV0VIxpFTf9bpN6hJQezNolw0iVdgMNjgPeHcEe/PoH59kraS9pz4vpelaPi+Fwf9YINA/Dgvo+gAjsikc1UTPg7tnRevc2b05mHGcLDTTYJ9ic4cjihZaJfxCreIHK9XwxViLE0PoKhtjV930I4rgDWu6A4By/E0m71B7BlOOWdsckLZInQ14U4D4T//F123X3zSDWqtpReqIrFLRzQGrv8/abZYbDnOstWQARJlknPjVdkCBTJ5mIuRgXa4z59PbvYP8=
+  file: build/$ARCH.tar.gz
+  skip_cleanup: true
+  on:
+    repo: rcore-os/rcore-user
+    tags: true

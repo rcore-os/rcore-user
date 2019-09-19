@@ -129,6 +129,9 @@ $(out_qcow2): $(out_img)
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
 
+tar: build
+	@cd build && tar -czf $(arch).tar.gz $(arch)
+
 rcore-fs-fuse:
 ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
 	@echo Installing rcore-fs-fuse
