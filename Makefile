@@ -15,6 +15,7 @@ rust_bin_path := rust/target/$(arch)-rcore/$(mode)
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
 ucore_bin_path := ucore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
+app_bin_path := app/build/$(arch)
 busybox := $(out_dir)/busybox
 alpine_version_major := 3.10
 alpine_version_full := 3.10.2
@@ -27,10 +28,12 @@ cmake_build_args := -DARCH=$(arch)
 ifeq ($(mode), release)
 rust_build_args += --release
 cmake_build_args += -DCMAKE_BUILD_TYPE=Release
+else ifeq ($(mode), debug)
+cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine iperf3
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3
 
 all: build
 
@@ -53,6 +56,13 @@ biscuit:
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
+
+app:
+	@echo Building custom test programs
+	@mkdir -p app/build
+	@cd app/build && cmake $(cmake_build_args) .. && make -j
+	@rm -rf $(out_dir)/app && mkdir -p $(out_dir)/app
+	@cp $(app_bin_path)/* $(out_dir)/app
 
 $(busybox):
 ifeq ($(arch), x86_64)
@@ -123,7 +133,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit busybox nginx redis iperf3 test
+build: alpine rust ucore biscuit app busybox nginx redis iperf3 test
 endif
 
 $(prebuilt_tar):
@@ -151,5 +161,5 @@ endif
 
 clean:
 	@cd rust && cargo clean
-	@rm -rf biscuit/build ucore/build
+	@rm -rf biscuit/build ucore/build app/build
 	@rm -rf $(out_dir)

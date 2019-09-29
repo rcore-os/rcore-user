@@ -48,7 +48,7 @@ before_script:
   - (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
 
 script:
-  - make tar arch=$ARCH
+  - make tar arch=$ARCH mode=release
 
 deploy:
   provider: releases
