@@ -40,6 +40,106 @@ static const char * const error_string[MAXERROR + 1] = {
     [E_NOTEMPTY]            "directory is not empty",
 };
 
+static inline int isdigit(int c)
+{
+	return '0' <= c && c <= '9';
+}
+
+static int skip_atoi(const char **s)
+{
+	int i = 0;
+
+	while (isdigit(**s))
+		i = i * 10 + *((*s)++) - '0';
+	return i;
+}
+
+#define ZEROPAD	1		/* pad with zero */
+#define SIGN	2		/* unsigned/signed long */
+#define PLUS	4		/* show plus */
+#define SPACE	8		/* space if plus */
+#define LEFT	16		/* left justified */
+#define SMALL	32		/* Must be 32 == 0x20 */
+#define SPECIAL	64		/* 0x */
+
+#define __do_div(n, base) ({ \
+int __res; \
+__res = ((unsigned long) n) % (unsigned) base; \
+n = ((unsigned long) n) / (unsigned) base; \
+__res; })
+
+static char *number(char *str, long num, int base, int size, int precision,
+		    int type)
+{
+	/* we are called with base 8, 10 or 16, only, thus don't need "G..."  */
+	static const char digits[16] = "0123456789ABCDEF"; /* "GHIJKLMNOPQRSTUVWXYZ"; */
+
+	char tmp[66];
+	char c, sign, locase;
+	int i;
+
+	/* locase = 0 or 0x20. ORing digits or letters with 'locase'
+	 * produces same digits or (maybe lowercased) letters */
+	locase = (type & SMALL);
+	if (type & LEFT)
+		type &= ~ZEROPAD;
+	if (base < 2 || base > 16)
+		return NULL;
+	c = (type & ZEROPAD) ? '0' : ' ';
+	sign = 0;
+	if (type & SIGN) {
+		if (num < 0) {
+			sign = '-';
+			num = -num;
+			size--;
+		} else if (type & PLUS) {
+			sign = '+';
+			size--;
+		} else if (type & SPACE) {
+			sign = ' ';
+			size--;
+		}
+	}
+	if (type & SPECIAL) {
+		if (base == 16)
+			size -= 2;
+		else if (base == 8)
+			size--;
+	}
+	i = 0;
+	if (num == 0)
+		tmp[i++] = '0';
+	else
+		while (num != 0)
+			tmp[i++] = (digits[__do_div(num, base)] | locase);
+	if (i > precision)
+		precision = i;
+	size -= precision;
+	if (!(type & (ZEROPAD + LEFT)))
+		while (size-- > 0)
+			*str++ = ' ';
+	if (sign)
+		*str++ = sign;
+	if (type & SPECIAL) {
+		if (base == 8)
+			*str++ = '0';
+		else if (base == 16) {
+			*str++ = '0';
+			*str++ = ('X' | locase);
+		}
+	}
+	if (!(type & LEFT))
+		while (size-- > 0)
+			*str++ = c;
+	while (i < precision--)
+		*str++ = '0';
+	while (i-- > 0)
+		*str++ = tmp[i];
+	while (size-- > 0)
+		*str++ = ' ';
+	return str;
+}
+
 /* *
  * printnum - print a number (base <= 16) in reverse order
  * @putch:      specified putch function, print a single character
@@ -132,166 +232,180 @@ printfmt(void (*putch)(int, void*, int), int fd, void *putdat, const char *fmt, 
  * Call this function if you are already dealing with a va_list.
  * Or you probably want printfmt() instead.
  * */
-void
-vprintfmt(void (*putch)(int, void*, int), int fd, void *putdat, const char *fmt, va_list ap) {
-    register const char *p;
-    register int ch, err;
-    unsigned long long num;
-    int base, width, precision, lflag, altflag;
 
-    while (1) {
-        while ((ch = *(unsigned char *)fmt ++) != '%') {
-            if (ch == '\0') {
-                return;
-            }
-            putch(ch, putdat, fd);
-        }
+void 
+vprintfmt(void (*putch)(int, void*, int), int fd, void *putdat, const char *fmt, va_list ap)
+{
+	int len;
+	unsigned long num;
+	int i, base;
+	char buf[1024];
+	char *str;
+	const char *s;
 
-        // Process a %-escape sequence
-        char padc = ' ';
-        width = precision = -1;
-        lflag = altflag = 0;
+	int flags;		/* flags to number() */
 
-    reswitch:
-        switch (ch = *(unsigned char *)fmt ++) {
+	int field_width;	/* width of output field */
+	int precision;		/* min. # of digits for integers; max
+				   number of chars for from string */
+	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
 
-        // flag to pad on the right
-        case '-':
-            padc = '-';
-            goto reswitch;
+	for (str = buf; *fmt; ++fmt) {
+		if (*fmt != '%') {
+			*str++ = *fmt;
+			continue;
+		}
 
-        // flag to pad with 0's instead of spaces
-        case '0':
-            padc = '0';
-            goto reswitch;
+		/* process flags */
+		flags = 0;
+	      repeat:
+		++fmt;		/* this also skips first '%' */
+		switch (*fmt) {
+		case '-':
+			flags |= LEFT;
+			goto repeat;
+		case '+':
+			flags |= PLUS;
+			goto repeat;
+		case ' ':
+			flags |= SPACE;
+			goto repeat;
+		case '#':
+			flags |= SPECIAL;
+			goto repeat;
+		case '0':
+			flags |= ZEROPAD;
+			goto repeat;
+		}
 
-        // width field
-        case '1' ... '9':
-            for (precision = 0; ; ++ fmt) {
-                precision = precision * 10 + ch - '0';
-                ch = *fmt;
-                if (ch < '0' || ch > '9') {
-                    break;
-                }
-            }
-            goto process_precision;
+		/* get field width */
+		field_width = -1;
+		if (isdigit(*fmt))
+			field_width = skip_atoi(&fmt);
+		else if (*fmt == '*') {
+			++fmt;
+			/* it's the next argument */
+			field_width = va_arg(ap, int);
+			if (field_width < 0) {
+				field_width = -field_width;
+				flags |= LEFT;
+			}
+		}
 
-        case '*':
-            precision = va_arg(ap, int);
-            goto process_precision;
+		/* get the precision */
+		precision = -1;
+		if (*fmt == '.') {
+			++fmt;
+			if (isdigit(*fmt))
+				precision = skip_atoi(&fmt);
+			else if (*fmt == '*') {
+				++fmt;
+				/* it's the next argument */
+				precision = va_arg(ap, int);
+			}
+			if (precision < 0)
+				precision = 0;
+		}
 
-        case '.':
-            if (width < 0)
-                width = 0;
-            goto reswitch;
+		/* get the conversion qualifier */
+		qualifier = -1;
+		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
+			qualifier = *fmt;
+			++fmt;
+		}
 
-        case '#':
-            altflag = 1;
-            goto reswitch;
+		/* default base */
+		base = 10;
 
-        process_precision:
-            if (width < 0)
-                width = precision, precision = -1;
-            goto reswitch;
+		switch (*fmt) {
+		case 'c':
+			if (!(flags & LEFT))
+				while (--field_width > 0)
+					*str++ = ' ';
+			*str++ = (unsigned char)va_arg(ap, int);
+			while (--field_width > 0)
+				*str++ = ' ';
+			continue;
 
-        // long flag (doubled for long long)
-        case 'l':
-            lflag ++;
-            goto reswitch;
+		case 's':
+			s = va_arg(ap, char *);
+			len = strnlen(s, precision);
 
-        // character
-        case 'c':
-            putch(va_arg(ap, int), putdat, fd);
-            break;
+			if (!(flags & LEFT))
+				while (len < field_width--)
+					*str++ = ' ';
+			for (i = 0; i < len; ++i)
+				*str++ = *s++;
+			while (len < field_width--)
+				*str++ = ' ';
+			continue;
 
-        // error message
-        case 'e':
-            err = va_arg(ap, int);
-            if (err < 0) {
-                err = -err;
-            }
-            if (err > MAXERROR || (p = error_string[err]) == NULL) {
-                printfmt(putch, fd, putdat, "error %d", err);
-            }
-            else {
-                printfmt(putch, fd, putdat, "%s", p);
-            }
-            break;
+		case 'p':
+			if (field_width == -1) {
+				field_width = 2 * sizeof(void *);
+				flags |= ZEROPAD;
+			}
+			str = number(str,
+				     (unsigned long)va_arg(ap, void *), 16,
+				     field_width, precision, flags);
+			continue;
 
-        // string
-        case 's':
-            if ((p = va_arg(ap, char *)) == NULL) {
-                p = "(null)";
-            }
-            if (width > 0 && padc != '-') {
-                for (width -= strnlen(p, precision); width > 0; width --) {
-                    putch(padc, putdat, fd);
-                }
-            }
-            for (; (ch = *p ++) != '\0' && (precision < 0 || -- precision >= 0); width --) {
-                if (altflag && (ch < ' ' || ch > '~')) {
-                    putch('?', putdat, fd);
-                }
-                else {
-                    putch(ch, putdat, fd);
-                }
-            }
-            for (; width > 0; width --) {
-                putch(' ', putdat, fd);
-            }
-            break;
+		case 'n':
+			if (qualifier == 'l') {
+				long *ip = va_arg(ap, long *);
+				*ip = (str - buf);
+			} else {
+				int *ip = va_arg(ap, int *);
+				*ip = (str - buf);
+			}
+			continue;
 
-        // (signed) decimal
-        case 'd':
-            num = getint(&ap, lflag);
-            if ((long long)num < 0) {
-                putch('-', putdat, fd);
-                num = -(long long)num;
-            }
-            base = 10;
-            goto number;
+		case '%':
+			*str++ = '%';
+			continue;
 
-        // unsigned decimal
-        case 'u':
-            num = getuint(&ap, lflag);
-            base = 10;
-            goto number;
+			/* integer number formats - set up the flags and "break" */
+		case 'o':
+			base = 8;
+			break;
 
-        // (unsigned) octal
-        case 'o':
-            num = getuint(&ap, lflag);
-            base = 8;
-            goto number;
+		case 'x':
+			flags |= SMALL;
+		case 'X':
+			base = 16;
+			break;
 
-        // pointer
-        case 'p':
-            putch('0', putdat, fd);
-            putch('x', putdat, fd);
-            num = (unsigned long long)(uintptr_t)va_arg(ap, void *);
-            base = 16;
-            goto number;
+		case 'd':
+		case 'i':
+			flags |= SIGN;
+		case 'u':
+			break;
 
-        // (unsigned) hexadecimal
-        case 'x':
-            num = getuint(&ap, lflag);
-            base = 16;
-        number:
-            printnum(putch, fd, putdat, num, base, width, padc);
-            break;
-
-        // escaped '%' character
-        case '%':
-            putch(ch, putdat, fd);
-            break;
-
-        // unrecognized escape sequence - just print it literally
-        default:
-            putch('%', putdat, fd);
-            for (fmt --; fmt[-1] != '%'; fmt --)
-                /* do nothing */;
-            break;
-        }
-    }
+		default:
+			*str++ = '%';
+			if (*fmt)
+				*str++ = *fmt;
+			else
+				--fmt;
+			continue;
+		}
+		if (qualifier == 'l')
+			num = va_arg(ap, unsigned long);
+		else if (qualifier == 'h') {
+			num = (unsigned short)va_arg(ap, int);
+			if (flags & SIGN)
+				num = (short)num;
+		} else if (flags & SIGN)
+			num = va_arg(ap, int);
+		else
+			num = va_arg(ap, unsigned int);
+		str = number(str, num, base, field_width, precision, flags);
+	}
+	*str = '\0';
+	for (str = buf; *str; ++str) {
+		putch(*str, putdat, fd);
+	}
+	putch('\0', putdat, fd);
 }
 
 /* sprintbuf is used to save enough information of a buffer */
