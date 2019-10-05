@@ -6,7 +6,7 @@ out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
-prebuilt_version ?= 0.1
+prebuilt_version ?= 0.1.1
 rcore_fs_fuse_revision ?= 351d382
 
 prebuilt_tar := build/$(arch)_v$(prebuilt_version).tar.gz
