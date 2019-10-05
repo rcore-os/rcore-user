@@ -3,7 +3,7 @@
 
 int
 main(void) {
-    int pid, ret, i ,j;
+    int pid, ret;
     cprintf("I am the parent. Forking the child...\n");
     pid = fork();
     if (pid== 0) {
@@ -23,7 +23,7 @@ main(void) {
     assert((ret = kill(pid)) == 0);
     cprintf("kill returns %d\n", ret);
 
-    assert((ret = waitpid(pid, NULL)) == 0);
+    assert((ret = waitpid(pid, NULL)) == pid);
     cprintf("wait returns %d\n", ret);
 
     cprintf("spin may pass.\n");
