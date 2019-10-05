@@ -23,10 +23,12 @@ env:
     - ARCH="riscv64"
     - ARCH="mipsel"
 
+addons:
+  homebrew:
+    packages:
+      - isl
+
 install:
-  - if [ $TRAVIS_OS_NAME = osx ]; then
-    brew install isl;
-    fi
   - if [ 1 ]; then
     [ $ARCH = riscv32 ] && export FILE="riscv32-linux-musl-cross";
     [ $ARCH = riscv64 ] && export FILE="riscv64-linux-musl-cross";
