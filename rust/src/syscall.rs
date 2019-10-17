@@ -265,6 +265,24 @@ pub fn sys_setsockopt(fd: usize, level: usize, opt: usize, optval: usize, optlen
     sys_call(SyscallId::SetSockOpt, fd, level, opt, optval, optlen, 0)
 }
 
+pub fn sys_listen(fd: usize, backlog: usize) -> i32{
+    sys_call(SyscallId::Listen, fd, backlog, 0, 0, 0, 0)
+}
+
+pub fn sys_bind(fd: usize, addr: usize, addr_len: usize) -> i32 {
+    sys_call(SyscallId::Bind, fd, addr, addr_len, 0, 0, 0)
+}
+
+pub fn sys_accept(fd: usize, addr: usize, addr_len: usize) -> i32 {
+    sys_call(SyscallId::Accept, fd, addr, addr_len, 0, 0, 0)
+}
+
+pub fn sys_recvfrom(fd: usize, base: usize, len: usize, flags: usize,
+        addr: usize, addr_len: usize) -> i32{
+    sys_call(SyscallId::RecvFrom, fd, base, len, flags, addr, addr_len)
+}
+
+
 pub fn sys_sendto(
     fd: usize,
     base: *const u8,
@@ -288,6 +306,40 @@ pub fn sys_ioctl(fd: usize, request: usize, arg1: usize) -> i32 {
     sys_call(SyscallId::Ioctl, fd, request, arg1, 0, 0, 0)
 }
 
+
+pub fn sys_poll(ufds: usize, nfds: usize, timeout: usize) -> i32 {
+    sys_call(SyscallId::Poll, ufds, nfds, timeout, 0, 0, 0)
+}
+
+
+pub fn sys_ppoll(ufds: usize, nfds: usize, timeout: usize) -> i32 {
+    sys_call(SyscallId::Ppoll, ufds, nfds, timeout, 0, 0, 0)
+}
+
+pub fn sys_epoll_create1(flags: usize) -> i32 {
+    sys_call(SyscallId::EpollCreate1, flags, 0, 0, 0, 0, 0)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+pub fn sys_epoll_create(size: usize) -> i32 {
+    sys_call(SyscallId::EpollCreate, size, 0, 0, 0, 0, 0)
+}
+
+pub fn sys_epoll_ctl(epfd: usize, op: usize, fd: usize, event: usize) -> i32{
+    sys_call(SyscallId::EpollCtl, epfd, op, fd, event, 0, 0)
+}
+
+pub fn sys_epoll_pwait(epfd: usize, events: usize, maxevents: usize, timeout: usize, sigmask: usize) -> i32 {
+    sys_call(SyscallId::EpollPwait, epfd, events, maxevents, timeout, sigmask, 0)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+pub fn sys_epoll_wait(epfd: usize, events: usize, maxevents: usize, timeout: usize) -> i32 {
+    sys_call(SyscallId::EpollWait, epfd, events, maxevents, timeout, 0, 0)
+}
+
+
+
 #[cfg(target_arch = "x86_64")]
 #[allow(dead_code)]
 enum SyscallId {
@@ -303,7 +355,11 @@ enum SyscallId {
     Sleep = 35,
     GetPid = 39,
     Socket = 41,
+    Accept = 43,
     SendTo = 44,
+    Bind = 49, 
+    Listen = 50,
+    RecvFrom = 45,
     SetSockOpt = 54,
     Clone = 56,
     Exec = 59,
@@ -323,6 +379,17 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Poll = 7,
+    Ppoll = 271,
+    Select = 23,
+    Pselect6 = 270,
+    EpollCreate = 213,
+    EpollCreate1 = 291,
+    EpollWait = 232,
+    EpollPwait = 281,
+    EpollCtl = 233,
+
 }
 
 #[cfg(target_arch = "mips")]
@@ -347,8 +414,12 @@ enum SyscallId {
     Sleep = 4166,
     GetPid = 4020,
     Socket = 4183,
+    Listen = 4174,
     SendTo = 4180,
+    RecvFrom = 4176,
     SetSockOpt = 4181,
+    Bind = 4169,
+    Accept = 4168,
     Clone = 4120,
     Exec = 4011,
     Exit = 4001,
@@ -368,6 +439,16 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Poll = 4188,
+    Ppoll = 4302,
+    Pselect6 = 4301,
+    EpollCreate = 4248,
+    EpollCreate1 = 4326,
+    EpollWait = 4250,
+    EpollPwait = 4313,
+    EpollCtl = 4249,
+
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
@@ -384,6 +465,10 @@ enum SyscallId {
     Yield = 124,
     Socket = 198,
     SendTo = 206,
+    Bind = 200,
+    Listen = 201,
+    Accept = 202,
+    RecvFrom = 207,
     SetSockOpt = 208,
     Sleep = 101,
     GetPid = 172,
@@ -405,4 +490,11 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Ppoll = 73,
+    Pselect6 = 72,
+    EpollCreate1 = 20,
+    EpollCtl = 21,
+    EpollPwait = 22,
+
 }

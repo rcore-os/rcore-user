@@ -1,4 +1,3 @@
-
 #![no_std]
 #![no_main]
 #![feature(alloc)]
@@ -8,38 +7,11 @@ extern crate alloc;
 extern crate rcore_user;
 
 
-
 use alloc::vec::Vec;
 use core::ptr;
 
 use rcore_user::io::get_line;
-
-
-use rcore_user::syscall::{sys_sleep, sys_vfork, sys_wait, sys_get_time, sys_exit};
-
-
-pub fn sleep(time: usize) -> i32 {
-    sys_sleep(time)
-}
-
-pub fn gettime_msec() -> u32{
-    sys_get_time() as u32
-}
-
-pub fn fork() -> i32 {
-    sys_vfork()
-}
-
-pub fn waitpid(pid: usize, code: *mut i32) -> i32 {
-    sys_wait(pid, code)
-}
-
-pub fn exit(error_code: usize) {
-    sys_exit(error_code);
-    println!("BUG: exit failed.");
-    while true {};
-}
-
+use rcore_user::ulib::{sleep, gettime_msec, fork, waitpid, exit};
 
 
 fn sleepy(pid: usize) {
