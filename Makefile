@@ -14,6 +14,7 @@ rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(arch)-rcore/$(mode)
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
 ucore_bin_path := ucore/build/$(arch)
+videocore_bin_path := videocore/build/$(arch)
 biscuit_bin_path := biscuit/build/$(arch)
 busybox := $(out_dir)/busybox
 alpine_version_major := 3.10
@@ -30,7 +31,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Release
 endif
 
 
-.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine iperf3
+.PHONY: all clean build rust ucore biscuit bin busybox nginx redis alpine iperf3 videocore
 
 all: build
 
@@ -46,6 +47,12 @@ ucore:
 	@cd ucore/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/ucore && mkdir -p $(out_dir)/ucore
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
+
+videocore:
+	@echo Building videocore programs
+	@cd videocore && make arch=$(arch)
+	@rm -rf $(out_dir)/videocore && mkdir -p $(out_dir)/videocore
+	@cp $(videocore_bin_path)/gles/* $(out_dir)/videocore	
 
 biscuit:
 	@echo Building biscuit programs
@@ -123,7 +130,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit busybox nginx redis iperf3 test
+build: alpine rust ucore biscuit busybox nginx redis iperf3 test videocore
 endif
 
 $(prebuilt_tar):

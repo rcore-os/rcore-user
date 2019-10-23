@@ -11,6 +11,7 @@ main(void) {
             cprintf("I am child %d\n", n);
             exit(0);
         }
+        cprintf("I am child %d, pid %d\n", n, pid);
         assert(pid > 0);
     }
 
