@@ -20,7 +20,7 @@ main(void) {
         sleepy(pid1);
     }
     
-    assert(waitpid(pid1, &exit_code) == 0 && exit_code == 0);
+    assert(waitpid(pid1, &exit_code) == pid1 && exit_code == 0);
     cprintf("use %04d msecs.\n", gettime_msec() - time);
     cprintf("sleep pass.\n");
     return 0;

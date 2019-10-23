@@ -5,10 +5,19 @@
 #include <ulib.h>
 #include <unistd.h>
 
+char buf[1024];
+int buf_pos = 0;
+
 static void
 fputch(char c, int *cnt, int fd) {
-    write(fd, &c, sizeof(char));
-    (*cnt) ++;
+    if(c != '\0'){
+        buf[buf_pos++] = c;
+    }
+    else{
+        (*cnt) = buf_pos;
+        write(fd, buf, buf_pos);
+        buf_pos = 0;
+    }
 }
 
 /* *

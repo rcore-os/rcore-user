@@ -118,7 +118,7 @@ runcmd(char *cmd) {
     static char argv0[BUFSIZE];
     const char *argv[EXEC_MAX_ARG_NUM + 1];
     char *t;
-    int argc, token, ret, p[2];
+    int argc, token, ret, p[2] = {0};
 again:
     argc = 0;
     while (1) {
@@ -240,7 +240,7 @@ main(int argc, char **argv) {
             exit(ret);
         }
         assert(pid >= 0);
-        if (waitpid(pid, &ret) == 0) {
+        if (waitpid(pid, &ret) == pid) {
             if (ret == 0 && shcwd[0] != '\0') {
                 ret = 0;
             }

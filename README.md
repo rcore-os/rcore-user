@@ -22,6 +22,7 @@ Now it has 4 parts:
 * `ucore`: C-lang, from the original [ucore_os_lab](https://github.com/chyyuu/ucore_os_plus)
 * `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a `musl` instead of original `litc`.
 * `rust`: Simple no_std Rust programs.
+* `app`: C-lang, custom test programs based on `musl`.
 * `nginx`, `redis`, `busybox`, `alpine`, `gcc`: Real world applications.
 
 
@@ -50,6 +51,7 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 | ucore              | ✅     | ✅      | ✅     | ✅      | ❗     |
 | rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
 | biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
+| app                | ✅     | ✅      | ✅     | ✅      | ✅    |
 | nginx (linux only) | ✅     | ✅      | ❗      | ✅      | ❗      |
 | redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
 | busybox            | ✅     | ✅      | ✅     | ✅      | ✅    |
