@@ -20,7 +20,7 @@ $(nginx_tarball_path):
 $(nginx_dir): $(nginx_tarball_path)
 	mkdir -p $(build_dir)
 	cd $(build_dir) && tar xvf ../../$(nginx_tarball_path)
-
+	
 $(nginx_dir)/objs/nginx: $(nginx_dir)
 	sed -i 's/-Wl,-E//' $(nginx_dir)/auto/cc/conf
 	# cross compile, do not run

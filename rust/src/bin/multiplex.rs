@@ -9,7 +9,10 @@ extern crate rcore_user;
 
 use alloc::string::String;
 use rcore_user::syscall::{sys_read, sys_setsockopt, sys_socket, sys_accept, sys_bind, sys_listen, sys_recvfrom};
-use rcore_user::syscall::{sys_poll, sys_ppoll};
+use rcore_user::syscall::{sys_ppoll, sys_epoll_create1, sys_epoll_ctl, sys_epoll_pwait};
+
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+use rcore_user::syscall::{sys_poll};
 
 
 #[repr(C)]
@@ -38,6 +41,56 @@ pub struct PollFd {
     revents: u16,
 }
 
+#[repr(C)]
+union EPOLLDATAT {
+    ptr: u64,
+    fd: i32,
+    v32: u32,
+    v64: u64,
+}
+
+#[repr(packed)]
+pub struct EpollEvent {
+    events: u32,    /* Epoll events */
+    data: EPOLLDATAT,      /* User data variable */
+}
+
+impl core::default::Default for EpollEvent {
+    fn default() -> EpollEvent {
+        EpollEvent {
+            events: 0, 
+            data: EPOLLDATAT {
+                ptr : 0
+            }
+        }
+    }
+}
+
+
+#[repr(i32)]
+pub enum EPollCtlOp {
+    EPOLLCTLADD = 1,    /* Add a file descriptor to the interface.  */
+    EPOLLCTLDEL = 2,    /* Remove a file descriptor from the interface.  */
+    EPOLLCTLMOD = 3,    /* Change file descriptor epoll_event structure.  */
+}
+
+impl EpollEvent {
+    const EPOLLIN: u32 = 0x001;
+    const EPOLLPRI: u32 = 0x002;
+    const EPOLLOUT: u32 = 0x004;
+    const EPOLLRDNORM: u32 = 0x040;
+    const EPOLLRDBAND: u32 = 0x080;
+    const EPOLLWRNORM: u32 = 0x100;
+    const EPOLLWRBAND: u32 = 0x200;
+    const EPOLLMSG: u32 = 0x400;
+    const EPOLLERR: u32 = 0x008;
+    const EPOLLHUP: u32 = 0x010;
+    const EPOLLRDHUP: u32 = 0x2000;
+    const EPOLLEXCLUSIVE: u32 = 1 << 28;
+    const EPOLLWAKEUP: u32 = 1 << 29;
+    const EPOLLONESHOT: u32 = 1 << 30;
+    const EPOLLET: u32 = 1 << 31;
+}
 
 
 #[repr(C)]
@@ -56,22 +109,18 @@ pub struct SockAddrIn {
     pub sin_zero: [u8; 8],
 }
 
-
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct AddressFamily(u16);
-impl AddressFamily {
+#[repr(u16)]
+pub enum AddressFamily{
     /// Unspecified
-    pub const Unspecified: u16 = 0;
+    Unspecified = 0,
     /// Unix domain sockets
-    pub const Unix: u16 = 1;
+    Unix= 1,
     /// Internet IP Protocol
-    pub const Internet: u16 = 2;
+    Internet = 2,
     /// Netlink
-    pub const Netlink: u16 = 16;
+     Netlink = 16,
     /// Packet family
-    pub const Packet: u16 = 17;
+     Packet = 17,
 }
 
 #[repr(C)]
@@ -89,13 +138,13 @@ impl SocketType {
 
 
 
-fn poll(ufds: *mut PollFd, nfds: usize, timeout: usize) -> i32{
-    sys_poll(ufds as *const u32 as usize, nfds, timeout)
-}
+// fn poll(ufds: *mut PollFd, nfds: usize, timeout: usize) -> i32{
+//     sys_poll(ufds , nfds, timeout)
+// }
 
-fn ppoll(ufds: *mut PollFd, nfds: usize, timeout: *const TimeSpec) -> i32 {
-    sys_ppoll(ufds as *const u32 as usize, nfds, timeout as *const u32 as usize)
-}
+// fn ppoll(ufds: *mut PollFd, nfds: usize, timeout: *const TimeSpec) -> i32 {
+//     sys_ppoll(ufds as *const u32 as usize, nfds, timeout as *const u32 as usize)
+// }
 
 
 
@@ -107,7 +156,7 @@ fn create_socket(id :u16) -> (usize, SockAddrIn) {
         sin_addr: 0,
         sin_zero: [0u8; 8],
     };;
-    servaddr.sin_family = AddressFamily::Internet;
+    servaddr.sin_family = AddressFamily::Internet as u16;
     servaddr.sin_port = id;
     servaddr.sin_addr = 0;
         
@@ -134,8 +183,6 @@ fn create_socket(id :u16) -> (usize, SockAddrIn) {
 }
 
 fn test_ppoll(){
-    let _ = create_socket(18207);
-
     let (listensocket, servaddr) = create_socket(18463);
     println!("create socket {}  , listening on 0.0.0.0, port 8008, use telnet to connect", listensocket);
 
@@ -152,12 +199,12 @@ fn test_ppoll(){
     };
 
     let mut fds = [std_fd, socket_fd];
-    let timeout = 3000;
+    let timeout = 5000;
     const buf_sz: usize = 1024;
     let mut buf_read = [0u8; buf_sz];
 	
 
-	let ret = poll(fds.as_mut_ptr(), 2, timeout as i32 as usize);
+	let ret = sys_poll(fds.as_mut_ptr() as *const u32 as usize, 2, timeout as i32 as usize);
 	
     if ret < 0{
         println!("error happened");
@@ -195,10 +242,118 @@ fn test_ppoll(){
     }
 }
 
+fn test_epoll(){
+    let (listensocket_8008, servaddr_8008) = create_socket(18463);
+
+    let (listensocket_8007, servaddr_8007) = create_socket(18207);
+    println!("create socket {} {} , listening on 0.0.0.0, port 8007 and 8008", listensocket_8007, listensocket_8008);
+
+    let epfd = sys_epoll_create1(0);
+    if epfd < 0 {
+        println!("epoll_create error");
+    } else {
+        println!("epoll_create : {}", epfd);
+    }
+
+    const MAX_EVENTS: usize = 10;
+    let mut ev: EpollEvent = EpollEvent::default();
+    let mut events: [EpollEvent; MAX_EVENTS] = Default::default();
+
+    ev.events = EpollEvent::EPOLLIN;
+    ev.data.fd = listensocket_8007 as i32;
+    if sys_epoll_ctl(epfd as usize, EPollCtlOp::EPOLLCTLADD as usize, listensocket_8007 as usize, &ev as *const EpollEvent as usize) == -1 {
+        println!("epoll_ctl add socket error");
+    }
+
+    ev.events = EpollEvent::EPOLLIN;
+    ev.data.fd = listensocket_8008 as i32;
+    if sys_epoll_ctl(epfd as usize, EPollCtlOp::EPOLLCTLADD as usize, listensocket_8008 as usize, &ev as *const EpollEvent as usize) == -1 {
+        println!("epoll_ctl add socket error");
+    }
+
+    ev.events = EpollEvent::EPOLLIN;
+    ev.data.fd = 0;
+    if sys_epoll_ctl(epfd as usize, EPollCtlOp::EPOLLCTLADD as usize, 0, &ev as *const EpollEvent as usize) == -1 {
+        println!("epoll_ctl add socket error");
+    }
+
+    let timeout = 5000;
+    const buf_sz: usize = 1024;
+    let mut buf_read = [0u8; buf_sz];
+    
+    let ret = sys_epoll_pwait(epfd as usize, events.as_mut_ptr() as *const EpollEvent as usize, MAX_EVENTS, timeout as i32 as usize, 0);
+    
+    if ret < 0{
+        println!("error happened");
+    } else if ret == 0 {
+        println!("poll run out of time: {}ms ", timeout);
+    } else {
+        println!("epoll return value: {}", ret);
+        for i in 0..ret {
+            unsafe {
+                println!("fd: {}", events[i as usize].data.fd);
+                if events[i as usize].data.fd == 0 {
+                    println!("stdin is readable: ");
+                    sys_read(0, buf_read.as_mut_ptr(), buf_sz);
+                    println!("input: {}", String::from_utf8_lossy(&buf_read));
+                }
+                if events[i as usize].data.fd == listensocket_8007 as i32 {
+                    println!("port 8007 is readable");
+                    let client: SockAddrIn = SockAddrIn{
+                        sin_family:0,
+                        sin_port: 0,
+                        sin_addr: 0,
+                        sin_zero: [0u8; 8],
+                    };
+                    let lenaddr: u32 = 16u32;
+                    let conn = sys_accept(listensocket_8007, &client as *const SockAddrIn as usize, &lenaddr as *const u32 as usize);
+
+                    if conn == -1 {
+                        println!("accept error");
+                    }
+                    sys_recvfrom(conn as usize, buf_read.as_ptr() as usize, buf_sz as usize, 0,
+                        &servaddr_8007 as *const SockAddrIn as usize, &lenaddr as *const u32 as usize);
+                    println!("recv data: {}", String::from_utf8_lossy(&buf_read));
+                }
+                if events[i as usize].data.fd == listensocket_8008 as i32 {
+                    println!("port 8008 is readable");
+                    let client: SockAddrIn = SockAddrIn{
+                        sin_family:0,
+                        sin_port: 0,
+                        sin_addr: 0,
+                        sin_zero: [0u8; 8],
+                    };
+                    let lenaddr: u32 = 16u32;
+                    let conn = sys_accept(listensocket_8008, &client as *const SockAddrIn as usize, &lenaddr as *const u32 as usize);
+
+                    if conn == -1 {
+                        println!("accept error");
+                    }
+
+                    let mut ev: EpollEvent = EpollEvent::default();
+                    ev.events = EpollEvent::EPOLLIN;
+                    ev.data.fd = conn;
+                    if sys_epoll_ctl(epfd as usize, EPollCtlOp::EPOLLCTLADD as usize, conn as usize, &ev as *const EpollEvent as usize) == -1 {
+                        println!("epoll_ctl add socket error");
+                    }
+
+                    let ret = sys_epoll_pwait(epfd as usize, events.as_mut_ptr() as *const EpollEvent as usize, MAX_EVENTS, timeout as i32 as usize, 0);
+                    println!("second epoll return {}", ret);
+    
+                    sys_recvfrom(conn as usize, buf_read.as_ptr() as usize, buf_sz as usize, 0,
+                        &servaddr_8008 as *const SockAddrIn as usize, &lenaddr as *const u32 as usize);
+                    println!("recv data: {}", String::from_utf8_lossy(&buf_read));
+                }
+            }
+        }
+    }
+}
+
+
 
 // IMPORTANT: Must define main() like this
 #[no_mangle]
 pub fn main(){
-    test_ppoll();
-
+//    test_ppoll();
+    test_epoll();
 }
