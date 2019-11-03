@@ -50,7 +50,7 @@ fn sys_call(
             : "memory"
             : "volatile");
             if failed != 0 {
-                ret = - ret;
+                ret = -ret;
             }
         }
     }
@@ -194,13 +194,6 @@ pub fn sys_access(path: &str) -> i32 {
     )
 }
 
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct TimeSpec {
-    sec: u64,
-    nsec: u64,
-}
-
 pub fn sys_sleep(time: usize) -> i32 {
     let ts = TimeSpec {
         sec: time as u64,
@@ -265,6 +258,45 @@ pub fn sys_setsockopt(fd: usize, level: usize, opt: usize, optval: usize, optlen
     sys_call(SyscallId::SetSockOpt, fd, level, opt, optval, optlen, 0)
 }
 
+pub fn sys_listen(fd: usize, backlog: usize) -> i32 {
+    sys_call(SyscallId::Listen, fd, backlog, 0, 0, 0, 0)
+}
+
+pub fn sys_bind(fd: usize, addr: *const SockAddrIn, addr_len: usize) -> i32 {
+    sys_call(SyscallId::Bind, fd, addr as usize, addr_len, 0, 0, 0)
+}
+
+pub fn sys_accept(fd: usize, addr: *mut SockAddrIn, addr_len: *mut u32) -> i32 {
+    sys_call(
+        SyscallId::Accept,
+        fd,
+        addr as usize,
+        addr_len as usize,
+        0,
+        0,
+        0,
+    )
+}
+
+pub fn sys_recvfrom(
+    fd: usize,
+    base: *mut u8,
+    len: usize,
+    flags: usize,
+    addr: *mut SockAddrIn,
+    addr_len: *mut u32,
+) -> i32 {
+    sys_call(
+        SyscallId::RecvFrom,
+        fd,
+        base as usize,
+        len,
+        flags,
+        addr as usize,
+        addr_len as usize,
+    )
+}
+
 pub fn sys_sendto(
     fd: usize,
     base: *const u8,
@@ -288,6 +320,72 @@ pub fn sys_ioctl(fd: usize, request: usize, arg1: usize) -> i32 {
     sys_call(SyscallId::Ioctl, fd, request, arg1, 0, 0, 0)
 }
 
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+pub fn sys_poll(ufds: *mut PollFd, nfds: usize, timeout: usize) -> i32 {
+    sys_call(SyscallId::Poll, ufds as usize, nfds, timeout, 0, 0, 0)
+}
+
+pub fn sys_ppoll(ufds: *mut PollFd, nfds: usize, timeout: *const TimeSpec) -> i32 {
+    sys_call(
+        SyscallId::Ppoll,
+        ufds as usize,
+        nfds,
+        timeout as usize,
+        0,
+        0,
+        0,
+    )
+}
+
+pub fn sys_epoll_create1(flags: usize) -> i32 {
+    sys_call(SyscallId::EpollCreate1, flags, 0, 0, 0, 0, 0)
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+pub fn sys_epoll_create(size: usize) -> i32 {
+    sys_call(SyscallId::EpollCreate, size, 0, 0, 0, 0, 0)
+}
+
+pub fn sys_epoll_ctl(epfd: usize, op: usize, fd: usize, event: *const EpollEvent) -> i32 {
+    sys_call(SyscallId::EpollCtl, epfd, op, fd, event as usize, 0, 0)
+}
+
+pub fn sys_epoll_pwait(
+    epfd: usize,
+    events: *mut EpollEvent,
+    maxevents: usize,
+    timeout: usize,
+    sigmask: usize,
+) -> i32 {
+    sys_call(
+        SyscallId::EpollPwait,
+        epfd,
+        events as usize,
+        maxevents,
+        timeout,
+        sigmask,
+        0,
+    )
+}
+
+#[cfg(any(target_arch = "x86_64", target_arch = "mips"))]
+pub fn sys_epoll_wait(
+    epfd: usize,
+    events: *mut EpollEvent,
+    maxevents: usize,
+    timeout: usize,
+) -> i32 {
+    sys_call(
+        SyscallId::EpollWait,
+        epfd,
+        events as usize,
+        maxevents,
+        timeout,
+        0,
+        0,
+    )
+}
+
 #[cfg(target_arch = "x86_64")]
 #[allow(dead_code)]
 enum SyscallId {
@@ -303,7 +401,11 @@ enum SyscallId {
     Sleep = 35,
     GetPid = 39,
     Socket = 41,
+    Accept = 43,
     SendTo = 44,
+    Bind = 49,
+    Listen = 50,
+    RecvFrom = 45,
     SetSockOpt = 54,
     Clone = 56,
     Exec = 59,
@@ -323,6 +425,16 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Poll = 7,
+    Ppoll = 271,
+    Select = 23,
+    Pselect6 = 270,
+    EpollCreate = 213,
+    EpollCreate1 = 291,
+    EpollWait = 232,
+    EpollPwait = 281,
+    EpollCtl = 233,
 }
 
 #[cfg(target_arch = "mips")]
@@ -347,8 +459,12 @@ enum SyscallId {
     Sleep = 4166,
     GetPid = 4020,
     Socket = 4183,
+    Listen = 4174,
     SendTo = 4180,
+    RecvFrom = 4176,
     SetSockOpt = 4181,
+    Bind = 4169,
+    Accept = 4168,
     Clone = 4120,
     Exec = 4011,
     Exit = 4001,
@@ -368,6 +484,15 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Poll = 4188,
+    Ppoll = 4302,
+    Pselect6 = 4301,
+    EpollCreate = 4248,
+    EpollCreate1 = 4326,
+    EpollWait = 4250,
+    EpollPwait = 4313,
+    EpollCtl = 4249,
 }
 
 #[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
@@ -384,6 +509,10 @@ enum SyscallId {
     Yield = 124,
     Socket = 198,
     SendTo = 206,
+    Bind = 200,
+    Listen = 201,
+    Accept = 202,
+    RecvFrom = 207,
     SetSockOpt = 208,
     Sleep = 101,
     GetPid = 172,
@@ -405,4 +534,75 @@ enum SyscallId {
     // custom
     MapPciDevice = 999,
     GetPaddr = 998,
+
+    Ppoll = 73,
+    Pselect6 = 72,
+    EpollCreate1 = 20,
+    EpollCtl = 21,
+    EpollPwait = 22,
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TimeSpec {
+    pub sec: u64,
+    pub nsec: u64,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct SockAddrIn {
+    pub sin_family: u16,
+    pub sin_port: u16,
+    pub sin_addr: u32,
+    pub sin_zero: [u8; 8],
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct PollFd {
+    pub fd: u32,
+    pub events: u16,
+    pub revents: u16,
+}
+
+#[repr(C)]
+pub union EPOLLDATAT {
+    pub ptr: u64,
+    pub fd: i32,
+    pub v32: u32,
+    pub v64: u64,
+}
+
+#[repr(packed)]
+pub struct EpollEvent {
+    pub events: u32,      /* Epoll events */
+    pub data: EPOLLDATAT, /* User data variable */
+}
+
+impl core::default::Default for EpollEvent {
+    fn default() -> EpollEvent {
+        EpollEvent {
+            events: 0,
+            data: EPOLLDATAT { ptr: 0 },
+        }
+    }
+}
+
+impl EpollEvent {
+    pub const IN: u32 = 0x001;
+    pub const PRI: u32 = 0x002;
+    pub const OUT: u32 = 0x004;
+    pub const RDNORM: u32 = 0x040;
+    pub const RDBAND: u32 = 0x080;
+    pub const WRNORM: u32 = 0x100;
+    pub const WRBAND: u32 = 0x200;
+    pub const MSG: u32 = 0x400;
+    pub const ERR: u32 = 0x008;
+    pub const HUP: u32 = 0x010;
+    pub const RDHUP: u32 = 0x2000;
+    pub const EXCLUSIVE: u32 = 1 << 28;
+    pub const WAKEUP: u32 = 1 << 29;
+    pub const ONESHOT: u32 = 1 << 30;
+    pub const ET: u32 = 1 << 31;
 }
