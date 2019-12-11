@@ -4,7 +4,6 @@
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 #![feature(linkage)]
-#![feature(compiler_builtins_lib)]
 
 extern crate alloc;
 
@@ -12,6 +11,7 @@ extern crate alloc;
 pub mod io;
 pub mod lang_items;
 pub mod syscall;
+pub mod ulib;
 
 use buddy_system_allocator::LockedHeap;
 
