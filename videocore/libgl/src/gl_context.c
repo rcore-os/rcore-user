@@ -62,7 +62,7 @@ struct gl_context *gl_context_create(void)
 
 	memset(ctx, 0, sizeof(struct gl_context));
 
-	int fd = open("gpu0:", O_RDWR);
+	int fd = open("/dev/gpu0", O_RDWR);
 	if (fd == 0)
 		return NULL;
 
@@ -107,7 +107,7 @@ int gl_create_window(struct gl_context *ctx)
 	struct fb_var_screeninfo *var = &screen->var;
 
 	int ret = 0;
-	int fd = open("fb0:", O_RDWR);
+	int fd = open("/dev/fb0", O_RDWR);
 	if (fd == 0) {
 		return -ENODEV;
 	}
