@@ -3,12 +3,11 @@
 
 #include <list.h>
 #include <types.h>
-#include <atomic.h>
 
 #include "vc4_context.h"
 
 struct vc4_bo {
-	atomic_t ref;
+	int ref;
 	struct vc4_context *vc4;
 	size_t size;
 	uint32_t handle;
@@ -26,17 +25,18 @@ void *vc4_bo_map(struct vc4_bo *bo);
 
 static inline void vc4_bo_reference_init(struct vc4_bo *bo, unsigned count)
 {
-	atomic_set(&(bo->ref), count);
+	__atomic_store(&(bo->ref), &count, __ATOMIC_SEQ_CST);
 }
 
 static inline void vc4_bo_reference(struct vc4_bo *bo)
 {
-	atomic_add_return(&(bo->ref), 1);
+	__atomic_fetch_add(&(bo->ref), 1, __ATOMIC_SEQ_CST);
 }
 
 static inline void vc4_bo_unreference(struct vc4_bo *bo)
 {
-	if (bo && atomic_sub_return(&(bo->ref), 1) == 0) {
+	// TODO atomic
+	if (bo && __atomic_fetch_sub(&(bo->ref), 1, __ATOMIC_SEQ_CST) == 1) {
 		list_del(&bo->bo_link);
 		vc4_bo_free(bo);
 	}

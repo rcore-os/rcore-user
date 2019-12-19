@@ -40,17 +40,9 @@ typedef unsigned long long uint64_t;
  *
  * */
 
-#ifdef __UCORE_64__
 
 /* Pointers and addresses are 64 bits long in 64-bit platform. */
-typedef uint64_t uintptr_t;
-
-#else /* not __UCORE_64__ (only used for 32-bit libs) */
-
-/* Pointers and addresses are 32 bits long in 32-bit platform. */
-typedef uint32_t uintptr_t;
-
-#endif /* !__UCORE_64__ */
+typedef long uintptr_t;
 
 /* sem_t is used for semaphore id */
 typedef uintptr_t sem_t;

@@ -124,7 +124,7 @@ struct drm_vc4_mmap_bo {
 	/** Handle for the object being mapped. */
 	__u32 handle;
 	/** offset into the drm node to use for subsequent mmap call. */
-	__u32 offset;
+	__u64 offset;
 };
 
 struct drm_vc4_free_bo {

@@ -155,6 +155,5 @@ void vc4_job_submit(struct vc4_context *vc4)
 	if (ret) {
 		printf("GLES: submit failed: %e.\n", ret);
 	}
-
 	vc4_job_reset(vc4);
 }

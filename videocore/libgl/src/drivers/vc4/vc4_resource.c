@@ -46,8 +46,9 @@ static struct pipe_resource *
 	struct vc4_bo *bo;
 
 	rsc = (struct vc4_resource *)malloc(sizeof(struct vc4_resource));
-	if (rsc == NULL)
+	if (rsc == NULL) {
 		return NULL;
+	}
 
 	memset(rsc, 0, sizeof(struct vc4_resource));
 

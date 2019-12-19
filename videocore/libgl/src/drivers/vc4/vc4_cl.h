@@ -23,6 +23,7 @@ void cl_ensure_space(struct vc4_cl *cl, uint32_t size);
 
 struct __attribute__((__packed__)) unaligned_16 { uint16_t x; };
 struct __attribute__((__packed__)) unaligned_32 { uint32_t x; };
+struct __attribute__((__packed__)) unaligned_64 { uint64_t x; };
 
 static inline uint32_t cl_offset(struct vc4_cl *cl)
 {
@@ -37,6 +38,12 @@ static inline void cl_advance(struct vc4_cl *cl, uint32_t n)
 static inline void put_unaligned_32(void *ptr, uint32_t val)
 {
 	struct unaligned_32 *p = (void *)ptr;
+	p->x = val;
+}
+
+static inline void put_unaligned_64(void *ptr, uint64_t val)
+{
+	struct unaligned_64 *p = (void *)ptr;
 	p->x = val;
 }
 
@@ -74,6 +81,12 @@ static inline void cl_u32(struct vc4_cl *cl, uint32_t n)
 {
 	put_unaligned_32(cl->next, n);
 	cl_advance(cl, 4);
+}
+
+static inline void cl_u64(struct vc4_cl *cl, uint64_t n)
+{
+	put_unaligned_64(cl->next, n);
+	cl_advance(cl, 8);
 }
 
 static inline void cl_aligned_u32(struct vc4_cl *cl, uint32_t n)
