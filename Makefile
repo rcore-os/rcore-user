@@ -168,5 +168,5 @@ endif
 
 clean:
 	@cd rust && cargo clean
-	@rm -rf biscuit/build ucore/build app/build
+	@rm -rf biscuit/build ucore/build app/build videocore/build
 	@rm -rf $(out_dir)

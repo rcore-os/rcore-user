@@ -16,7 +16,7 @@ TARGET_CFLAGS += -I$(USER_LIB_SRCDIR)/libgl/include -I$(USER_LIB_SRCDIR)/libgl/s
 TARGET_LDFLAGS += -Lbuild/libgl -lgl
 
 define make-user-app
-$2/$(notdir $1):
+$2/$(notdir $1): $(addsuffix .c,$1)
 	@echo LINK $$@
 	$(cc) $(addsuffix .c,$1) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) -o $$@
 endef
