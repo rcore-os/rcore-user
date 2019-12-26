@@ -10,7 +10,7 @@ TARGET_AR = $(arch)-linux-musl-ar
 
 TARGET_FLAGS = -Icommon -I../include -I.
 
-obj-y += gl_context.o gl.o egl.o
+obj-y += gl_context.o gl.o egl.o gl_matrix.o
 
 include drivers/vc4/Makefile
 

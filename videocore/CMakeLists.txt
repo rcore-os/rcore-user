@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 project(videocore)
 enable_language(ASM)
 
-aux_source_directory(src .)
+aux_source_directory(src SRCS)
 file(GLOB_RECURSE LIBSGL RELATIVE ${CMAKE_SOURCE_DIR} "libgl/src/*.[c,h]")
 include_directories(src/libgl/include ${ARCH_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${ARCH})
@@ -33,6 +33,8 @@ set(CMAKE_C_LINK_FLAGS      "${LINK_FLAGS} -nostdlib")  # override default value
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)                  # override default value to get rid of '-rdynamic' on Linux
 
 # Library
+ExternalProject_Add(ulibgl
+	BUILD_COMMAND make $(cmake_build_args))
 add_library(ulibgl ${LIBSGL})
 
 # Execuatble

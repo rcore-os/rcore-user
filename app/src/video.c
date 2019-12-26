@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <linux/fb.h>
+#include <sys/time.h>
 
 #if !defined(__riscv)
 
@@ -29,6 +30,7 @@ int inf = 0;
 int x = 0;
 int y = 0;
 int pos = 0;
+int frames = 0;
 
 static inline void put_in_win(unsigned char c) {
     if (win_n < WIN_SIZE) {
@@ -55,6 +57,7 @@ static inline void out_byte(pixel_t b) {
     y += 4;
     if (y == VID_W) {
         x = (x + 1) % VID_H;
+        if (x == 0) frames += 1;
         y = 0;
     }
 }
@@ -72,7 +75,7 @@ void decompress(int n) {
         idx = buf[i];
         length = buf[i+1];
         byte = buf[i+2];
-        //cprintf("triplet: %d %d %d \n", idx, length, byte);
+        //printf("triplet: %d %d %d \n", idx, length, byte);
         // cprintf("%d %d %d\n", idx, length, byte);
         old_win = win_e;
         real = (int) length;
@@ -119,8 +122,20 @@ int main() {
 
     printf("%d, %d, %d\n", width, height, bpp * 8);
 
+    struct timeval tv_begin, tv_end;
+    struct timezone tz;
+
+    gettimeofday(&tv_begin, &tz);
+
     decompress(BAD_APPLE_SIZE);
-    printf("%d\n", inf);
+
+    gettimeofday(&tv_end, &tz);
+
+    float times = 1.0 * (tv_end.tv_sec - tv_begin.tv_sec) + (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0;
+    float ff = 1.0 * frames;
+
+    printf("frames: %d, whole time: %f s\n", frames, times);
+    printf("frequency: %f\n", ff / times);
     return 0;
 }
 

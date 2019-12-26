@@ -183,3 +183,17 @@ GL_API void GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width,
 
 	gl_viewport(ctx, x, y, width, height);
 }
+
+GL_API void GL_APIENTRY glLoadIdentity(void)
+{
+	GET_CURRENT_CONTEXT(ctx);
+
+	gl_loadIdentity(ctx);
+}
+
+GL_API void GL_APIENTRY glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+	GET_CURRENT_CONTEXT(ctx);
+
+	gl_Rotatef(ctx, angle, x, y, z);	
+}

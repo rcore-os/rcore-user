@@ -5,6 +5,7 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 EGLDisplay dpy;
 EGLDisplay ctx;
@@ -71,11 +72,23 @@ int main(int argc, char *argv[])
 
 	init();
 
+	struct timeval tv_begin, tv_end;
+	struct timezone tz;
+
+	gettimeofday(&tv_begin, &tz);
+
 	int i;
 	for (i = 0; i < 100; i++)
 		draw(i);
 
+	gettimeofday(&tv_end, &tz);
+
 	eglDestroyContext(dpy, ctx);
+
+	float times = 1.0 * (tv_end.tv_sec - tv_begin.tv_sec) + (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0;
+
+	printf("whole time: %f s\n", times);
+	printf("frequency: %f\n", 100.0 / times);
 
 	return 0;
 }

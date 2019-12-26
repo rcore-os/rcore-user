@@ -32,6 +32,9 @@ struct gl_context {
 
 	union pipe_color_union current_color;
 	GLenum last_error;
+
+	GLfloat transform[16];
+	int transform_depth;
 };
 
 // DELETE INLINE KEYWORD, WILL CAUSE PROBLEM?
@@ -63,5 +66,7 @@ void gl_viewport(struct gl_context *ctx, GLint x, GLint y, GLsizei width,
 void gl_depth_stencil_alpha(struct gl_context *ctx);
 void gl_draw_arrays(struct gl_context *ctx, GLenum mode, GLint first,
 		    GLsizei count);
+void gl_loadIdentity(struct gl_context *ctx);
+void gl_Rotatef(struct gl_context *ctx, GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
 
 #endif // GL_CONTEXT_H

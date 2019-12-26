@@ -56,7 +56,7 @@ void draw()
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	{
-		glViewport(0, 0, 960, 540);
+		glViewport(0, 0, 640, 320);
 
 		glColor4f(1, 0, 0, 1);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -68,7 +68,7 @@ void draw()
 		glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
 	}
 	{
-		glViewport(960, 540, 960, 540);
+		glViewport(640, 320, 640, 320);
 
 		glColor4f(1, 1, 0, 1);
 		glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
