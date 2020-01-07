@@ -526,6 +526,15 @@ void gl_draw_arrays(struct gl_context *ctx, GLenum mode, GLint first,
 	ctx->pipe->resource_destroy(ctx->pipe, rsc);
 }
 
+void gl_translatef(struct gl_context *ctx, GLfloat x, GLfloat y, GLfloat z)
+{
+	GLfloat *m = ctx->transform;
+	m[12] = m[0] * x + m[4] * y + m[8]  * z + m[12];
+   	m[13] = m[1] * x + m[5] * y + m[9]  * z + m[13];
+   	m[14] = m[2] * x + m[6] * y + m[10] * z + m[14];
+  	m[15] = m[3] * x + m[7] * y + m[11] * z + m[15];
+}
+
 void gl_Rotatef(struct gl_context *ctx, GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
 	GLfloat xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c, s, c;

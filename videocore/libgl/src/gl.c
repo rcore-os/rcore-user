@@ -197,3 +197,10 @@ GL_API void GL_APIENTRY glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z
 
 	gl_Rotatef(ctx, angle, x, y, z);	
 }
+
+GL_API void GL_APIENTRY glTranslatef (GLfloat x, GLfloat y, GLfloat z)
+{
+	GET_CURRENT_CONTEXT(ctx);
+
+	gl_translatef(ctx, x, y, z);
+}

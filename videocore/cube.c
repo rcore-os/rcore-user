@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	float times = 1.0 * (tv_end.tv_sec - tv_begin.tv_sec) + (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0;
 
 	printf("whole time: %f s\n", times);
-	printf("frequency: %f\n", 360.0 / times);
+	printf("frequency: %f\n", 3600.0 / times);
 
 	return 0;
 }
