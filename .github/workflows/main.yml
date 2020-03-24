@@ -33,26 +33,19 @@ jobs:
         toolchain: nightly-2020-01-17
         components: rust-src, llvm-tools-preview
 
-    - name: Set musl toolchain name for non-mipsel
-      if: matrix.arch != 'mipsel'
-      run: |
-        export FILE="${{ matrix.arch }}-linux-musl-cross"
-    - name: Set musl toolchain name for mipsel
-      if: matrix.arch == 'mipsel'
-      run: |
-        export FILE="${{ matrix.arch }}-linux-musln32-cross"
-
-    - name: Set musl toolchain file for linux
-      if: runner.os == 'linux'
-      run: |
-        export URL="https://musl.cc/$FILE.tgz"
-    - name: Set musl toolchain file for macOS
-      if: runner.os != 'linux'
-      run: |
-        export URL="https://mac.musl.cc/$FILE.tgz"
-
     - name: Setup musl toolchain
       run: |
+        export ARCH = ${{ matrix.arch }}
+        export OS_NAME = ${{ runner.os }}
+        [ $ARCH = riscv32 ] && export FILE="riscv32-linux-musl-cross";
+        [ $ARCH = riscv64 ] && export FILE="riscv64-linux-musl-cross";
+        [ $ARCH = mipsel  ] && export FILE="mipsel-linux-musln32-cross";
+        [ $ARCH = aarch64 ] && export FILE="aarch64-linux-musl-cross";
+        [ $ARCH = x86_64  ] && export FILE="x86_64-linux-musl-cross";
+        [ $OS_NAME = linux ] && export URL="https://musl.cc/$FILE.tgz";
+        [ $OS_NAME = osx   ] && export URL="https://mac.musl.cc/$FILE.tgz";
+        [ $OS_NAME = linux ] && [ $ARCH = riscv32 ] && export URL="https://more.musl.cc/8/x86_64-linux-musl/$FILE.tgz";
+        [ $OS_NAME = osx   ] && [ $ARCH = riscv32 ] && export URL="https://lisa.musl.cc/9.1.0/$FILE.tgz" && brew install isl;
         wget $URL;
         tar -xf $FILE.tgz;
         export PATH=$PATH:$PWD/$FILE/bin;
