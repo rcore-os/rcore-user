@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        arch: [x86_64, riscv32, riscv64, aarch64, mipsel]
+        arch: [x86_64, riscv64, aarch64, mipsel]
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
