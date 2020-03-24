@@ -1,6 +1,5 @@
 #![no_std]
 #![feature(asm)]
-#![feature(alloc)]
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 #![feature(linkage)]
