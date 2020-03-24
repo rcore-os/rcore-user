@@ -33,7 +33,13 @@ jobs:
         toolchain: nightly-2020-01-17
         components: rust-src, llvm-tools-preview
 
-    - name: Setup musl toolchain
+    
+    - name: Setup cargo-xbuild
+      run: |
+        rustup component add rust-src
+        (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
+
+    - name: Setup musl toolchain and compile
       run: |
         export ARCH=${{ matrix.arch }}
         export OS_NAME=${{ runner.os }}
@@ -49,13 +55,4 @@ jobs:
         wget $URL;
         tar -xf $FILE.tgz;
         export PATH=$PATH:$PWD/$FILE/bin;
-    
-    - name: Setup cargo-xbuild
-      run: |
-        rustup component add rust-src
-        (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
-
-    - name: Compile
-      run: make tar arch=${{ matrix.arch }} mode=release
-    - name: Build kernel
-      run: cd kernel && make build ARCH=${{ matrix.arch }} && cd ..
+        make tar arch=${{ matrix.arch }} mode=release
