@@ -42,10 +42,10 @@ jobs:
         [ $ARCH = mipsel  ] && export FILE="mipsel-linux-musln32-cross";
         [ $ARCH = aarch64 ] && export FILE="aarch64-linux-musl-cross";
         [ $ARCH = x86_64  ] && export FILE="x86_64-linux-musl-cross";
-        [ $OS_NAME = linux ] && export URL="https://musl.cc/$FILE.tgz";
-        [ $OS_NAME = osx   ] && export URL="https://mac.musl.cc/$FILE.tgz";
-        [ $OS_NAME = linux ] && [ $ARCH = riscv32 ] && export URL="https://more.musl.cc/8/x86_64-linux-musl/$FILE.tgz";
-        [ $OS_NAME = osx   ] && [ $ARCH = riscv32 ] && export URL="https://lisa.musl.cc/9.1.0/$FILE.tgz" && brew install isl;
+        [ $OS_NAME = Linux ] && export URL="https://musl.cc/$FILE.tgz";
+        [ $OS_NAME = macOS ] && export URL="https://mac.musl.cc/$FILE.tgz";
+        [ $OS_NAME = Linux ] && [ $ARCH = riscv32 ] && export URL="https://more.musl.cc/8/x86_64-linux-musl/$FILE.tgz";
+        [ $OS_NAME = macOS ] && [ $ARCH = riscv32 ] && export URL="https://lisa.musl.cc/9.1.0/$FILE.tgz" && brew install isl;
         wget $URL;
         tar -xf $FILE.tgz;
         export PATH=$PATH:$PWD/$FILE/bin;
