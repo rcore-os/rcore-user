@@ -15,7 +15,7 @@ jobs:
         override: true
         components: rustfmt, clippy
     - name: Check code format
-      run: cd kernel && cargo fmt -- --check
+      run: cd rust && cargo fmt -- --check
 
   build:
     runs-on: ${{ matrix.os }}
