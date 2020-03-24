@@ -52,8 +52,8 @@ jobs:
     
     - name: Setup cargo-xbuild
       run: |
-        - rustup component add rust-src
-        - (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
+        rustup component add rust-src
+        (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
 
     - name: Compile
       run: make tar arch=${{ matrix.arch }} mode=release
