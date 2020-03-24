@@ -35,8 +35,8 @@ jobs:
 
     - name: Setup musl toolchain
       run: |
-        export ARCH = ${{ matrix.arch }}
-        export OS_NAME = ${{ runner.os }}
+        export ARCH=${{ matrix.arch }}
+        export OS_NAME=${{ runner.os }}
         [ $ARCH = riscv32 ] && export FILE="riscv32-linux-musl-cross";
         [ $ARCH = riscv64 ] && export FILE="riscv64-linux-musl-cross";
         [ $ARCH = mipsel  ] && export FILE="mipsel-linux-musln32-cross";
