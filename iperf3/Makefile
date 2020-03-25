@@ -1,4 +1,4 @@
-iperf3_version := 3.6
+iperf3_version := 3.7
 iperf3_tarball := iperf3-$(iperf3_version).tar.gz
 iperf3_tarball_path := src/$(iperf3_tarball)
 build_dir := build/$(arch)
@@ -24,6 +24,7 @@ $(iperf3_dir): $(iperf3_tarball_path)
 $(iperf3_dir)/src/iperf3: $(iperf3_dir)
 	sed -i 's/AM_INIT_AUTOMAKE$$/AM_INIT_AUTOMAKE\([foreign]\)/' $(iperf3_dir)/configure.ac
 	sed -i 's/-pg//' $(iperf3_dir)/src/Makefile.am
+	cd $(iperf3_dir) && libtoolize
 	cd $(iperf3_dir) && autoreconf
 	cd $(iperf3_dir) && ./configure CC=$(cc) --disable-shared --enable-static --without-openssl --host $(arch)-linux-musl
 	cd $(iperf3_dir) && make iperf3_CFLAGS="--static"
