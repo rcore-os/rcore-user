@@ -56,3 +56,23 @@ jobs:
         tar -xf $FILE.tgz;
         export PATH=$PATH:$PWD/$FILE/bin;
         make tar arch=${{ matrix.arch }} mode=release
+    - uses: actions/upload-artifact@v1
+      with:
+        name: binaries
+        path: build/${{ matri.arch }}.tar.gz
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - uses: actions/checkout@master
+    - name: Create release
+      uses: Roang-zero1/github-create-release-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub release
+      uses: Roang-zero1/github-upload-release-artifacts-action@master
+      with:
+        args: build/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
