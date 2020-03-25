@@ -22,6 +22,10 @@ alpine_version_full := 3.10.2
 alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
+musl-gcc_version := 6
+musl-gcc_file := ${arch}-linux-musl-cross.tgz
+musl-gcc := musl-gcc/$(musl-gcc_file)
+
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
 
@@ -33,7 +37,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc
 
 all: build
 
@@ -122,6 +126,14 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
+$(musl-gcc):
+	-wget "https://more.musl.cc/$(musl-gcc_version)/x86_64-linux-musl/$(musl-gcc_file)" -O $(musl-gcc)
+
+musl-gcc: $(musl-gcc)
+ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+	@cd $(out_dir) && tar xf ../../$(musl-gcc)
+endif
+
 test:
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@echo setup test DIR
@@ -133,7 +145,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit app busybox nginx redis iperf3 test
+build: alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc
 endif
 
 $(prebuilt_tar):
