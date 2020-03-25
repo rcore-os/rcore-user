@@ -64,7 +64,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: [build]
-    if: contains(github.ref, "tag")
+    if: contains(github.ref, 'tag')
     steps:
     - uses: actions/checkout@master
     - name: Create release
