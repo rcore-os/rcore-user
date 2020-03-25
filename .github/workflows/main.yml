@@ -59,7 +59,7 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: binaries
-        path: build/${{ matri.arch }}.tar.gz
+        path: build/${{ matrix.arch }}.tar.gz
 
   release:
     runs-on: ubuntu-latest
