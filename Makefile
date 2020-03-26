@@ -5,6 +5,7 @@ mode ?= debug
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
+ld_path_file := $(out_dir)/etc/ld-musl-x86_64.path
 
 prebuilt_version ?= 0.1.2
 rcore_fs_fuse_revision ?= e17b27b
@@ -41,7 +42,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust pre
 
 all: build
 
@@ -136,16 +137,18 @@ $(musl-gcc):
 musl-gcc: $(musl-gcc)
 ifeq ($(arch), $(filter $(arch), x86_64))
 	@mkdir -p $(out_dir)/etc
-	@echo "/x86_64-linux-musl-cross/x86_64-linux-musl/lib" > $(out_dir)/etc/ld-musl-x86_64.path
+	@echo "/x86_64-linux-musl-cross/x86_64-linux-musl/lib" >> $(ld_path_file)
 	@cd $(out_dir) && tar xf ../../$(musl-gcc)
 endif
 
-musl-rust:
+musl-rust: $(out_dir)/musl-rust
 ifneq ($(shell uname), Darwin)
+	@mkdir -p $(out_dir)/etc
+	@echo "/musl-rust/lib" >> $(ld_path_file)
 	@echo Building musl-rust
 	@mkdir -p $(out_dir)
-	cd musl-rust && make all arch=$(arch)
-	cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
+	@cd musl-rust && make all arch=$(arch)
+	@cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
 endif
 
 test:
@@ -176,8 +179,11 @@ $(out_qcow2): $(out_img)
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
 
+pre:
+	cat /dev/null > $(ld_path_file)
+
 tar: build
-	@cd build && tar -czf $(arch).tar.gz $(arch)
+	@cd pre build && tar -czf $(arch).tar.gz $(arch)
 
 rcore-fs-fuse:
 ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
