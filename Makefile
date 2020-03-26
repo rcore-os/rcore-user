@@ -131,6 +131,8 @@ $(musl-gcc):
 
 musl-gcc: $(musl-gcc)
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+	@mkdir -p $(out_dir)/etc
+	@echo "/x86_64-linux-musl-cross/x86_64-linux-musl/lib" > $(out_dir)/etc/ld-musl-x86_64.path
 	@cd $(out_dir) && tar xf ../../$(musl-gcc)
 endif
 
