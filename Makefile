@@ -7,7 +7,7 @@ out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
 prebuilt_version ?= 0.1.2
-rcore_fs_fuse_revision ?= 351d382
+rcore_fs_fuse_revision ?= e17b27b3d257f23ed8ba43d902c909d23245a008
 
 prebuilt_tar := build/$(arch)_v$(prebuilt_version).tar.gz
 rust_src_dir := rust/src/bin
