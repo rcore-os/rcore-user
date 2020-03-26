@@ -7,7 +7,7 @@ out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
 
 prebuilt_version ?= 0.1.2
-rcore_fs_fuse_revision ?= e17b27b3d257f23ed8ba43d902c909d23245a008
+rcore_fs_fuse_revision ?= e17b27b
 
 prebuilt_tar := build/$(arch)_v$(prebuilt_version).tar.gz
 rust_src_dir := rust/src/bin
@@ -26,6 +26,10 @@ musl-gcc_version := 6
 musl-gcc_file := ${arch}-linux-musl-cross.tgz
 musl-gcc := musl-gcc/$(musl-gcc_file)
 
+musl-rust_version := 1.42.0
+musl-rust_file := rust-$(musl-rust_version)-$(arch)-unknown-linux-musl.tar.gz
+musl-rust := musl-rust/$(musl-rust_file)
+
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
 
@@ -37,7 +41,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust
 
 all: build
 
@@ -130,10 +134,18 @@ $(musl-gcc):
 	-wget "https://more.musl.cc/$(musl-gcc_version)/x86_64-linux-musl/$(musl-gcc_file)" -O $(musl-gcc)
 
 musl-gcc: $(musl-gcc)
-ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
+ifeq ($(arch), $(filter $(arch), x86_64))
 	@mkdir -p $(out_dir)/etc
 	@echo "/x86_64-linux-musl-cross/x86_64-linux-musl/lib" > $(out_dir)/etc/ld-musl-x86_64.path
 	@cd $(out_dir) && tar xf ../../$(musl-gcc)
+endif
+
+musl-rust:
+ifneq ($(shell uname), Darwin)
+	@echo Building musl-rust
+	@mkdir -p $(out_dir)
+	cd musl-rust && make all arch=$(arch)
+	cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
 endif
 
 test:
@@ -147,7 +159,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc
+build: alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc musl-rust
 endif
 
 $(prebuilt_tar):
