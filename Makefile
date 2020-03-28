@@ -142,14 +142,12 @@ ifeq ($(arch), $(filter $(arch), x86_64))
 	@echo Building musl-gcc
 	cp -r $(musl-gcc)/* $(out_dir)/usr/
 	@mkdir -p $(out_dir)/etc
-	@echo "/usr/$(arch)-linux-musl/lib" > $(ld_path_file)
 endif
 endif
 
 musl-rust:
 ifneq ($(shell uname), Darwin)
 	@mkdir -p $(out_dir)/etc
-	@echo "/musl-rust/lib" >> $(ld_path_file)
 	@echo Building musl-rust
 	@mkdir -p $(out_dir)
 	@cd musl-rust && make all
@@ -166,7 +164,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc musl-rust
+build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc musl-rust
 endif
 
 $(prebuilt_tar):
@@ -185,6 +183,8 @@ $(out_qcow2): $(out_img)
 
 pre:
 	cat /dev/null > $(ld_path_file)
+	@echo "/usr/$(arch)-linux-musl/lib" >> $(ld_path_file)
+	@echo "/usr/lib" >> $(ld_path_file)
 
 tar: build
 	@cd pre build && tar -czf $(arch).tar.gz $(arch)
