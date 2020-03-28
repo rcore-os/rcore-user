@@ -7,9 +7,6 @@ musl-rust = $(build_dir)/musl-rust
 
 .PHONY: all clean
 
-cc := $(prefix)gcc
-strip := $(prefix)strip
-
 $(musl-rust_tarball_path):
 	mkdir -p src
 	wget https://static.rust-lang.org/dist/rust-$(musl-rust_version)-$(arch)-unknown-linux-musl.tar.gz -O $(musl-rust_tarball_path)

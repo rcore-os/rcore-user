@@ -5,7 +5,7 @@ mode ?= debug
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
-ld_path_file := $(out_dir)/etc/ld-musl-x86_64.path
+ld_path_file := $(out_dir)/etc/ld-musl-$(arch).path
 
 prebuilt_version ?= 0.1.2
 rcore_fs_fuse_revision ?= e17b27b
@@ -131,23 +131,28 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
+musl-gcc = musl-gcc/build/$(arch)/musl-gcc/
+
 $(musl-gcc):
-	-wget "https://more.musl.cc/$(musl-gcc_version)/x86_64-linux-musl/$(musl-gcc_file)" -O $(musl-gcc)
+	cd musl-gcc && make all
 
 musl-gcc: $(musl-gcc)
+ifneq ($(shell uname), Darwin)
 ifeq ($(arch), $(filter $(arch), x86_64))
+	@echo Building musl-gcc
+	cp -r $(musl-gcc)/* $(out_dir)/usr/
 	@mkdir -p $(out_dir)/etc
-	@echo "/x86_64-linux-musl-cross/x86_64-linux-musl/lib" >> $(ld_path_file)
-	@cd $(out_dir) && tar xf ../../$(musl-gcc)
+	@echo "/usr/$(arch)-linux-musl/lib" > $(ld_path_file)
+endif
 endif
 
-musl-rust: $(out_dir)/musl-rust
+musl-rust:
 ifneq ($(shell uname), Darwin)
 	@mkdir -p $(out_dir)/etc
 	@echo "/musl-rust/lib" >> $(ld_path_file)
 	@echo Building musl-rust
 	@mkdir -p $(out_dir)
-	@cd musl-rust && make all arch=$(arch)
+	@cd musl-rust && make all
 	@cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
 endif
 
