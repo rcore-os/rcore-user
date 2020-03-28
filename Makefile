@@ -149,6 +149,7 @@ ifneq ($(shell uname), Darwin)
 	@mkdir -p $(out_dir)
 	@cd musl-rust && make all arch=$(arch)
 	@cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
+	@cp -r musl-rust/build/$(arch)/musl-rust/ $(out_dir)/usr
 endif
 
 test:
