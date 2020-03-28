@@ -58,7 +58,7 @@ jobs:
         make tar arch=${{ matrix.arch }} mode=release
     - uses: actions/upload-artifact@v1
       with:
-        name: binaries
+        name: binaries-${{ matrix.os }}-${{ matrix.arch }}
         path: build/${{ matrix.arch }}.tar.gz
 
   release:
