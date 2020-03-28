@@ -14,10 +14,10 @@ $(musl-rust_tarball_path):
 $(musl-rust_dir): $(musl-rust_tarball_path)
 	mkdir -p $(build_dir)
 	cd $(build_dir) && tar xvf ../../$(musl-rust_tarball_path)
-	cp $(build_dir)/rust-$(musl-rust_version)-$(arch)-unknown-linux-musl $(musl-rust_dir)
+	mv $(build_dir)/rust-$(musl-rust_version)-$(arch)-unknown-linux-musl $(musl-rust_dir)
 
 $(musl-rust): $(musl-rust_dir)
-	cd $(musl-rust_dir) && ./install.sh --prefix=../musl-rust
+	cd $(musl-rust_dir) && ./install.sh --prefix=../../../../build/$(arch)/usr
 
 all: $(musl-rust)
 

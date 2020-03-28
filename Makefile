@@ -131,7 +131,7 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
-musl-gcc = musl-gcc/build/$(arch)/musl-gcc/
+musl-gcc = musl-gcc/build/$(arch)/musl-gcc
 
 $(musl-gcc):
 	cd musl-gcc && make all
@@ -153,8 +153,6 @@ ifneq ($(shell uname), Darwin)
 	@echo Building musl-rust
 	@mkdir -p $(out_dir)
 	@cd musl-rust && make all
-	@cp -r musl-rust/build/$(arch)/musl-rust $(out_dir)
-	@cp -r musl-rust/build/$(arch)/musl-rust/ $(out_dir)/usr
 endif
 
 test:
@@ -178,7 +176,7 @@ $(prebuilt_tar):
 sfsimg: $(out_qcow2)
 
 $(out_img): build rcore-fs-fuse
-	@rcore-fs-fuse $@ $(out_dir) zip
+	rcore-fs-fuse $@ $(out_dir) zip
 
 $(out_qcow2): $(out_img)
 	@echo Generating sfsimg
