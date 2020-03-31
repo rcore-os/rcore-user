@@ -24,7 +24,7 @@ alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
 musl-gcc_version := 6
-musl-gcc_file := ${arch}-linux-musl-cross.tgz
+musl-gcc_file := $(arch)-linux-musl-cross.tgz
 musl-gcc := musl-gcc/$(musl-gcc_file)
 
 musl-rust_version := 1.42.0
@@ -42,7 +42,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust pre
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust pre make
 
 all: build
 
@@ -164,7 +164,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc musl-rust
+build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc # musl-rust
 endif
 
 $(prebuilt_tar):
@@ -182,6 +182,8 @@ $(out_qcow2): $(out_img)
 	@qemu-img resize $@ +1G
 
 pre:
+	@mkdir -p $(out_dir)
+	@mkdir -p $(out_dir)/etc
 	cat /dev/null > $(ld_path_file)
 	@echo "/usr/$(arch)-linux-musl/lib" >> $(ld_path_file)
 	@echo "/usr/lib" >> $(ld_path_file)
