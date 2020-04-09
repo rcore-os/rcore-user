@@ -1,0 +1,69 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: rm rust/rust-toolchain
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+    - name: Check code format
+      run: cd rust && cargo fmt -- --check
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        arch: [x86_64, riscv64, aarch64, mipsel]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly-2020-01-17
+        components: rust-src, llvm-tools-preview
+
+    
+    - name: Setup cargo-xbuild
+      run: |
+        rustup component add rust-src
+        (test -x $HOME/.cargo/bin/cargo-xbuild || cargo install cargo-xbuild)
+
+    - name: Setup musl toolchain and compile
+      run: |
+        export ARCH=${{ matrix.arch }}
+        export OS_NAME=${{ runner.os }}
+        [ $ARCH = riscv32 ] && export FILE="riscv32-linux-musl-cross";
+        [ $ARCH = riscv64 ] && export FILE="riscv64-linux-musl-cross";
+        [ $ARCH = mipsel  ] && export FILE="mipsel-linux-musln32-cross";
+        [ $ARCH = aarch64 ] && export FILE="aarch64-linux-musl-cross";
+        [ $ARCH = x86_64  ] && export FILE="x86_64-linux-musl-cross";
+        [ $OS_NAME = Linux ] && export URL="https://musl.cc/$FILE.tgz";
+        [ $OS_NAME = macOS ] && export URL="https://mac.musl.cc/$FILE.tgz";
+        [ $OS_NAME = Linux ] && [ $ARCH = riscv32 ] && export URL="https://more.musl.cc/8/x86_64-linux-musl/$FILE.tgz";
+        [ $OS_NAME = macOS ] && [ $ARCH = riscv32 ] && export URL="https://lisa.musl.cc/9.1.0/$FILE.tgz" && brew install isl;
+        wget $URL;
+        tar -xf $FILE.tgz;
+        export PATH=$PATH:$PWD/$FILE/bin;
+        make tar arch=${{ matrix.arch }} mode=release
+    - uses: actions/upload-artifact@v1
+      with:
+        name: binaries-${{ matrix.os }}-${{ matrix.arch }}
+        path: build/${{ matrix.arch }}.tar.gz
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: "build/*.tar.gz"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

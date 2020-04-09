@@ -8,7 +8,7 @@ out_qcow2 ?= build/$(arch).qcow2
 ld_path_file := $(out_dir)/etc/ld-musl-$(arch).path
 
 prebuilt_version ?= 0.1.2
-rcore_fs_fuse_revision ?= e17b27b
+rcore_fs_fuse_revision ?= 7f5eeac
 
 prebuilt_tar := build/$(arch)_v$(prebuilt_version).tar.gz
 rust_src_dir := rust/src/bin
