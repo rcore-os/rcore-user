@@ -164,7 +164,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc # musl-rust
+build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make # musl-rust
 endif
 
 $(prebuilt_tar):
@@ -180,6 +180,9 @@ $(out_qcow2): $(out_img)
 	@echo Generating sfsimg
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
+
+make: 
+	cd make && make make
 
 pre:
 	@mkdir -p $(out_dir)
