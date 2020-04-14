@@ -5,6 +5,7 @@ mode ?= debug
 out_dir ?= build/$(arch)
 out_img ?= build/$(arch).img
 out_qcow2 ?= build/$(arch).qcow2
+ld_path_file := $(out_dir)/etc/ld-musl-$(arch).path
 
 prebuilt_version ?= 0.1.2
 rcore_fs_fuse_revision ?= 7f5eeac
@@ -22,6 +23,14 @@ alpine_version_full := 3.10.2
 alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
+musl-gcc_version := 6
+musl-gcc_file := $(arch)-linux-musl-cross.tgz
+musl-gcc := musl-gcc/$(musl-gcc_file)
+
+musl-rust_version := 1.42.0
+musl-rust_file := rust-$(musl-rust_version)-$(arch)-unknown-linux-musl.tar.gz
+musl-rust := musl-rust/$(musl-rust_file)
+
 rust_build_args := --target targets/$(arch)-rcore.json
 cmake_build_args := -DARCH=$(arch)
 
@@ -33,7 +42,7 @@ cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust pre make
 
 all: build
 
@@ -122,6 +131,28 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
+musl-gcc = musl-gcc/build/$(arch)/musl-gcc
+
+$(musl-gcc):
+	cd musl-gcc && make all
+
+musl-gcc: $(musl-gcc)
+ifneq ($(shell uname), Darwin)
+ifeq ($(arch), $(filter $(arch), x86_64))
+	@echo Building musl-gcc
+	cp -r $(musl-gcc)/* $(out_dir)/usr/
+	@mkdir -p $(out_dir)/etc
+endif
+endif
+
+musl-rust:
+ifneq ($(shell uname), Darwin)
+	@mkdir -p $(out_dir)/etc
+	@echo Building musl-rust
+	@mkdir -p $(out_dir)
+	@cd musl-rust && make all
+endif
+
 test:
 ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@echo setup test DIR
@@ -133,7 +164,7 @@ ifeq ($(prebuilt), 1)
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: alpine rust ucore biscuit app busybox nginx redis iperf3 test
+build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make # musl-rust
 endif
 
 $(prebuilt_tar):
@@ -143,15 +174,25 @@ $(prebuilt_tar):
 sfsimg: $(out_qcow2)
 
 $(out_img): build rcore-fs-fuse
-	@rcore-fs-fuse $@ $(out_dir) zip
+	rcore-fs-fuse $@ $(out_dir) zip
 
 $(out_qcow2): $(out_img)
 	@echo Generating sfsimg
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
 
+make: 
+	cd make && make make
+
+pre:
+	@mkdir -p $(out_dir)
+	@mkdir -p $(out_dir)/etc
+	cat /dev/null > $(ld_path_file)
+	@echo "/usr/$(arch)-linux-musl/lib" >> $(ld_path_file)
+	@echo "/usr/lib" >> $(ld_path_file)
+
 tar: build
-	@cd build && tar -czf $(arch).tar.gz $(arch)
+	@cd pre build && tar -czf $(arch).tar.gz $(arch)
 
 rcore-fs-fuse:
 ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
