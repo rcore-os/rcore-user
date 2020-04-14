@@ -1,17 +1,18 @@
+arch := x86_64
 musl-gcc_version := 6
-musl-gcc_tarball := musl-gcc-$(musl-gcc_version).tgz
+musl-gcc_tarball := musl-gcc-$(musl-gcc_version)-$(arch).tgz
 musl-gcc_tarball_path := src/$(musl-gcc_tarball)
 build_dir := build/$(arch)
 musl-gcc_dir := $(build_dir)/musl-gcc/
 musl-gcc = $(build_dir)/musl-gcc
 
-prefix = x86_64-linux-musl
+prefix = $(arch)-linux-musl
 
 .PHONY: all clean
 
 $(musl-gcc_tarball_path):
 	@mkdir -p src
-	wget "https://more.musl.cc/$(musl-gcc_version)/x86_64-linux-musl/$(arch)-linux-musl-cross.tgz" -O $(musl-gcc_tarball_path)
+	wget "https://more.musl.cc/$(musl-gcc_version)/$(arch)-linux-musl/$(arch)-linux-musl-cross.tgz" -O $(musl-gcc_tarball_path)
 
 $(musl-gcc_dir): $(musl-gcc_tarball_path)
 	@mkdir -p $(build_dir)

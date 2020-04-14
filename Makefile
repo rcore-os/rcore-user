@@ -24,8 +24,7 @@ alpine_file := alpine-minirootfs-$(alpine_version_full)-$(arch).tar.gz
 alpine := alpine/$(alpine_file)
 
 musl-gcc_version := 6
-musl-gcc_file := $(arch)-linux-musl-cross.tgz
-musl-gcc := musl-gcc/$(musl-gcc_file)
+musl-gcc := musl-gcc/build/$(arch)/musl-gcc
 
 musl-rust_version := 1.42.0
 musl-rust_file := rust-$(musl-rust_version)-$(arch)-unknown-linux-musl.tar.gz
@@ -131,10 +130,8 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@cd $(out_dir) && tar xf ../../$(alpine)
 endif
 
-musl-gcc = musl-gcc/build/$(arch)/musl-gcc
-
 $(musl-gcc):
-	cd musl-gcc && make all
+	cd musl-gcc && make all arch=$(arch)
 
 musl-gcc: $(musl-gcc)
 ifneq ($(shell uname), Darwin)
