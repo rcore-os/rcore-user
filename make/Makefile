@@ -16,7 +16,7 @@ prefix = $(shell readlink -f ../build/$(arch)/usr)
 
 $(make_dir): $(make_tarball_path)
 	@mkdir -p $(build_dir)
-	@cd $(build_dir) && tar xvf ../../$(make_tarball_path)
+	@cd $(build_dir) && tar xvf ../$(make_tarball_path)
 
 make: $(make_dir)
 	@cp -r $(make_dir) ../build/$(arch)/
