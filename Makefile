@@ -131,15 +131,15 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 endif
 
 $(musl-gcc):
+ifeq ($(arch), $(filter $(arch), x86_64))
 	cd musl-gcc && make all arch=$(arch)
+endif
 
 musl-gcc: $(musl-gcc)
-ifneq ($(shell uname), Darwin)
 ifeq ($(arch), $(filter $(arch), x86_64))
 	@echo Building musl-gcc
 	cp -r $(musl-gcc)/* $(out_dir)/usr/
 	@mkdir -p $(out_dir)/etc
-endif
 endif
 
 musl-rust:
