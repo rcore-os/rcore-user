@@ -59,18 +59,22 @@ ucore:
 	@cp $(ucore_bin_path)/* $(out_dir)/ucore
 
 biscuit:
+ifneq ($(shell uname), Darwin)
 	@echo Building biscuit programs
 	@mkdir -p biscuit/build
 	@cd biscuit/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/biscuit && mkdir -p $(out_dir)/biscuit
 	@cp $(biscuit_bin_path)/* $(out_dir)/biscuit
+endif
 
 app:
+ifneq ($(shell uname), Darwin)
 	@echo Building custom test programs
 	@mkdir -p app/build
 	@cd app/build && cmake $(cmake_build_args) .. && make -j
 	@rm -rf $(out_dir)/app && mkdir -p $(out_dir)/app
 	@cp $(app_bin_path)/* $(out_dir)/app
+endif
 
 $(busybox):
 ifeq ($(arch), x86_64)
@@ -169,6 +173,12 @@ $(prebuilt_tar):
 	@wget https://github.com/rcore-os/rcore-user/releases/download/v$(prebuilt_version)/$(arch).tar.gz -O $@
 
 sfsimg: $(out_qcow2)
+
+# pack qcow2 and img without building again
+pack:
+	rcore-fs-fuse $(out_img) $(out_dir) zip
+	qemu-img convert -f raw $(out_img) -O qcow2 $(out_qcow2)
+	qemu-img resize $(out_qcow2) +1G
 
 $(out_img): build rcore-fs-fuse
 	rcore-fs-fuse $@ $(out_dir) zip
