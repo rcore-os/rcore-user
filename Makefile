@@ -159,6 +159,7 @@ ifeq ($(arch), $(filter $(arch), x86_64 aarch64))
 	@echo setup test DIR
 	@mkdir -p $(out_dir)
 	@cp -r testsuits_alpine $(out_dir)/test
+	@cp test.sh $(out_dir)
 endif
 
 ifeq ($(prebuilt), 1)
