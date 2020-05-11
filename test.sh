@@ -1,7 +1,9 @@
 #!/bin/ash
+# run this with ash test.sh
 set -e
 set -v
 echo "test begin"
+# ucore tests
 /ucore/badarg
 /ucore/exit
 /ucore/forktest
@@ -10,3 +12,4 @@ echo "test begin"
 /ucore/testbss
 /ucore/yield
 echo "test end"
+halt -f
