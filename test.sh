@@ -8,6 +8,8 @@ echo "test begin"
 /ucore/exit
 /ucore/forktest
 /ucore/matrix
+/ucore/sleep
+/ucore/sleepkill
 /ucore/spin
 /ucore/testbss
 /ucore/yield

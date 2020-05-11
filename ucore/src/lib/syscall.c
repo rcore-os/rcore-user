@@ -110,7 +110,8 @@ sys_yield(void) {
 
 int
 sys_kill(int pid) {
-    return syscall(SYS_kill, pid);
+#define SIGKILL 9
+    return syscall(SYS_kill, pid, SIGKILL);
 }
 
 int
