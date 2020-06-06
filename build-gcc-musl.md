@@ -1,4 +1,4 @@
-#method 1
+# method 1
 ## install steps
 ```
 wget https://www.musl-libc.org/releases/musl-1.1.21.tar.gz
