@@ -256,7 +256,7 @@ pre:
 	@echo "/usr/lib" >> $(ld_path_file)
 
 tar: build
-	@cd pre build && tar -czf $(ARCH).tar.gz $(ARCH)
+	@cd build && tar -czf $(ARCH).tar.gz $(ARCH)
 
 rcore-fs-fuse:
 ifneq ($(shell rcore-fs-fuse dir image git-version), $(rcore_fs_fuse_revision))
