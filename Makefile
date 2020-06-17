@@ -181,7 +181,7 @@ $(alpine):
 musl-gcc: $(musl-gcc)
 ifeq ($(EN_MUSL_GCC), y)
 	@echo Building musl-gcc
-	@cp -r $(musl-gcc)/* $(out_dir)/usr/
+	@cp -r $(musl-gcc)/* $(out_dir)/usr/ || true # might fail in vanilla macOS, but is ok
 	@mkdir -p $(out_dir)/etc
 else
 	@echo Musl-gcc disabled
