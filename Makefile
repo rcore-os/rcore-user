@@ -217,7 +217,7 @@ ifdef PREBUILT
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make # musl-rust
+build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make # musl-rust
 endif
 
 # prebuilt
