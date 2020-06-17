@@ -1,13 +1,13 @@
 nginx_version := 1.14.2
 nginx_tarball := nginx-$(nginx_version).tar.gz
 nginx_tarball_path := src/nginx-$(nginx_version).tar.gz
-build_dir := build/$(arch)
+build_dir := build/$(ARCH)
 nginx_dir := $(build_dir)/nginx-$(nginx_version)
-prefix := $(arch)-linux-musl-
-bin_unstripped := build/$(arch)/nginx_unstripped
-bin := build/$(arch)/nginx
+prefix := $(ARCH)-linux-musl-
+bin_unstripped := build/$(ARCH)/nginx_unstripped
+bin := build/$(ARCH)/nginx
 
-ifeq ($(arch), mipsel)
+ifeq ($(ARCH), mipsel)
 	prefix := mipsel-linux-musln32-
 endif
 
@@ -44,4 +44,4 @@ $(bin): $(bin_unstripped)
 all: $(bin)
 
 clean:
-	rm -rf build/$(arch)
+	rm -rf build/$(ARCH)

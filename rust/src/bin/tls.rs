@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(asm)]
+#![feature(llvm_asm)]
 
 #[macro_use]
 extern crate rcore_user;
@@ -13,11 +13,11 @@ use rcore_user::syscall::sys_set_theaad_area;
 fn set_tls(tls: usize, pid: usize) {
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
-        asm!("mv tp, $0" : : "r"(tls));
+        llvm_asm!("mv tp, $0" : : "r"(tls));
     }
     #[cfg(target_arch = "aarch64")]
     unsafe {
-        asm!("msr tpidr_el0, $0" : : "r"(tls));
+        llvm_asm!("msr tpidr_el0, $0" : : "r"(tls));
     }
     #[cfg(target_arch = "x86_64")]
     unsafe {
@@ -34,19 +34,19 @@ fn get_tls() -> usize {
     let mut tls: usize = 0;
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
-        asm!("mv $0, tp" : "=r"(tls) :);
+        llvm_asm!("mv $0, tp" : "=r"(tls) :);
     }
     #[cfg(target_arch = "aarch64")]
     unsafe {
-        asm!("mrs $0, tpidr_el0" : "=r"(tls) :);
+        llvm_asm!("mrs $0, tpidr_el0" : "=r"(tls) :);
     }
     #[cfg(target_arch = "x86_64")]
     unsafe {
-        asm!("mov %fs:0, $0" : "=r"(tls) :);
+        llvm_asm!("mov %fs:0, $0" : "=r"(tls) :);
     }
     #[cfg(target_arch = "mips")]
     unsafe {
-        asm!("rdhwr $0, $$29" : "=r"(tls) :);
+        llvm_asm!("rdhwr $0, $$29" : "=r"(tls) :);
     }
     tls
 }

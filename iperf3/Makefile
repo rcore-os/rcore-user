@@ -1,13 +1,13 @@
 iperf3_version := 3.7
 iperf3_tarball := iperf3-$(iperf3_version).tar.gz
 iperf3_tarball_path := src/$(iperf3_tarball)
-build_dir := build/$(arch)
+build_dir := build/$(ARCH)
 iperf3_dir := $(build_dir)/iperf-$(iperf3_version)
-prefix := $(arch)-linux-musl-
-bin_unstripped := build/$(arch)/iperf3_unstripped
-bin := build/$(arch)/iperf3
+prefix := $(ARCH)-linux-musl-
+bin_unstripped := build/$(ARCH)/iperf3_unstripped
+bin := build/$(ARCH)/iperf3
 
-ifeq ($(arch), mipsel)
+ifeq ($(ARCH), mipsel)
 	prefix := mipsel-linux-musln32-
 endif
 
@@ -41,4 +41,4 @@ $(bin): $(bin_unstripped)
 all: $(bin)
 
 clean:
-	rm -rf build/$(arch)
+	rm -rf build/$(ARCH)

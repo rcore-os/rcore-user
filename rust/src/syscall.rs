@@ -17,32 +17,32 @@ fn sys_call(
 
     unsafe {
         #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
-        asm!("ecall"
+        llvm_asm!("ecall"
             : "={x10}" (ret)
             : "{x17}" (id), "{x10}" (arg0), "{x11}" (arg1), "{x12}" (arg2), "{x13}" (arg3), "{x14}" (arg4), "{x15}" (arg5)
             : "memory"
             : "volatile");
         #[cfg(target_arch = "x86")]
-        asm!("int 0x80"
+        llvm_asm!("int 0x80"
             : "={eax}" (ret)
             : "{eax}" (id), "{edx}" (arg0), "{ecx}" (arg1), "{ebx}" (arg2), "{edi}" (arg3), "{esi}" (arg4)
             : "memory"
             : "intel" "volatile");
         #[cfg(target_arch = "x86_64")]
-        asm!("syscall"
+        llvm_asm!("syscall"
             : "={rax}" (ret)
             : "{rax}" (id), "{rdi}" (arg0), "{rsi}" (arg1), "{rdx}" (arg2), "{r10}" (arg3), "{r8}" (arg4), "{r9}" (arg5)
             : "rcx" "r11" "memory"
             : "intel" "volatile");
         #[cfg(target_arch = "aarch64")]
-        asm!("svc 0"
+        llvm_asm!("svc 0"
             : "={x0}" (ret)
             : "{x8}" (id), "{x0}" (arg0), "{x1}" (arg1), "{x2}" (arg2), "{x3}" (arg3), "{x4}" (arg4), "{x5}" (arg5)
             : "memory"
             : "volatile");
         #[cfg(target_arch = "mips")]
         {
-            asm!("syscall"
+            llvm_asm!("syscall"
             // v0 for syscall id
             : "={$2}" (ret), "={$7}" (failed)
             // v0, a0, a1, a2, a3, a4, a5
@@ -122,7 +122,7 @@ pub fn sys_vfork() -> i32 {
     let mut sp: usize = 0;
     #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))]
     unsafe {
-        asm!("mv $0, sp" : "=r" (sp) :: );
+        llvm_asm!("mv $0, sp" : "=r" (sp) :: );
     }
     // TODO: more arch
     const CLONE_VFORK: usize = 0x00004000;
