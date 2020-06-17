@@ -1,8 +1,7 @@
-arch ?= x86_64
 make_version := 3.75
 make_tarball := make-$(make_version).tar.gz
 make_tarball_path := src/$(make_tarball)
-build_dir := build/$(arch)
+build_dir := build/$(ARCH)
 make_dir := $(build_dir)/make-$(make_version)
 
 # http://ftp.gnu.org/gnu/make/make-4.3.tar.gz
@@ -21,9 +20,9 @@ $(make_dir): $(make_tarball_path)
 	chmod +w $(make_dir)/README
 
 make: $(make_dir)
-	@cp -r $(make_dir) ../build/$(arch)/
+	@cp -rf $(make_dir) ../build/$(ARCH)/
 
 all: make
 
 clean:
-	rm -rf build/$(arch)
+	rm -rf build/$(ARCH)
