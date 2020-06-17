@@ -181,14 +181,16 @@ $(alpine):
 musl-gcc: $(musl-gcc)
 ifeq ($(EN_MUSL_GCC), y)
 	@echo Building musl-gcc
-	cp -r $(musl-gcc)/* $(out_dir)/usr/
+	@cp -r $(musl-gcc)/* $(out_dir)/usr/
 	@mkdir -p $(out_dir)/etc
 else
 	@echo Musl-gcc disabled
 endif
 
 $(musl-gcc):
+ifeq ($(EN_MUSL_GCC), y)
 	cd musl-gcc && make all ARCH=$(ARCH)
+endif
 
 # musl-rust
 musl-rust:
