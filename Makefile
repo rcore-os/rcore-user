@@ -44,9 +44,6 @@ rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(r
 ucore_bin_path := ucore/build/$(ARCH)
 musl-gcc_version := 6
 musl-gcc := musl-gcc/build/$(ARCH)/musl-gcc
-musl-rust_version := 1.42.0
-musl-rust_file := rust-$(musl-rust_version)-$(ARCH)-unknown-linux-musl.tar.gz
-musl-rust := musl-rust/$(musl-rust_file)
 cmake_build_args := -DARCH=$(ARCH)
 
 ifeq ($(MODE), release)
@@ -56,7 +53,7 @@ else ifeq ($(MODE), debug)
 cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc musl-rust pre make
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test
 
 all: build
 
@@ -192,17 +189,6 @@ ifeq ($(EN_MUSL_GCC), y)
 	cd musl-gcc && make all ARCH=$(ARCH)
 endif
 
-# musl-rust
-musl-rust:
-ifeq ($(EN_MUSL_RUST), y)
-	@echo Building musl-rust
-	@mkdir -p $(out_dir)/etc
-	@mkdir -p $(out_dir)
-	@cd musl-rust && make all
-else
-	@echo Musl-rust disabled
-endif
-
 # tests
 test:
 ifeq ($(EN_TEST), y)
@@ -214,12 +200,18 @@ else
 	@echo Tests disabled
 endif
 
+# libc-test
+libc-test:
+	@echo Building libc-test
+	@mkdir -p $(out_dir)/libc-test
+	cp -r libc-test $(out_dir)
+
 # build
 ifdef PREBUILT
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make # musl-rust
+build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test
 endif
 
 # prebuilt
