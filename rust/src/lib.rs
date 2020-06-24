@@ -5,6 +5,7 @@
 #![feature(linkage)]
 
 extern crate alloc;
+extern crate rlibc;
 
 #[macro_use]
 pub mod io;

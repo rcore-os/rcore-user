@@ -39,7 +39,7 @@ alpine_file := alpine-minirootfs-$(alpine_version_full)-$(ARCH).tar.gz
 alpine := alpine/$(alpine_file)
 rust_src_dir := rust/src/bin
 rust_bin_path := rust/target/$(ARCH)-rcore/$(MODE)
-rust_build_args := --target targets/$(ARCH)-rcore.json
+rust_build_args := -Z build-std=core,alloc --target targets/$(ARCH)-rcore.json
 rust_bins := $(patsubst $(rust_src_dir)/%.rs, $(rust_bin_path)/%, $(wildcard $(rust_src_dir)/*.rs))
 ucore_bin_path := ucore/build/$(ARCH)
 musl-gcc_version := 6
@@ -61,7 +61,7 @@ all: build
 rust:
 ifeq ($(EN_RUST), y)
 	@echo Building rust programs
-	@cd rust && cargo xbuild $(rust_build_args)
+	@cd rust && cargo build $(rust_build_args)
 	@rm -rf $(out_dir)/rust && mkdir -p $(out_dir)/rust
 	@cp $(rust_bins) $(out_dir)/rust
 else

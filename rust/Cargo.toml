@@ -9,3 +9,4 @@ buddy_system_allocator = "0.4"
 isomorphic_drivers = { git = "https://github.com/rcore-os/isomorphic_drivers", default-features = false, features = ["log"]}
 smoltcp = { version = "0.6.0", default-features = false, features = ["alloc", "log", "ethernet", "proto-ipv4", "socket-tcp", "socket-raw"] }
 treebitmap = { git = "https://github.com/jiegec/treebitmap" , features = ["alloc"] }
+rlibc = "1.0"
