@@ -206,6 +206,13 @@ libc-test:
 	@mkdir -p $(out_dir)/libc-test
 	cp -r libc-test $(out_dir)
 
+# prebuilt
+prebuilt_version := 0.1.2
+prebuilt_tar := build/$(ARCH)_v$(prebuilt_version).tar.gz
+$(prebuilt_tar):
+	@mkdir -p build
+	@wget https://github.com/rcore-os/rcore-user/releases/download/v$(prebuilt_version)/$(ARCH).tar.gz -O $@
+
 # build
 ifdef PREBUILT
 build: $(prebuilt_tar)
@@ -213,13 +220,6 @@ build: $(prebuilt_tar)
 else
 build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test
 endif
-
-# prebuilt
-prebuilt_version := 0.1.2
-prebuilt_tar := build/$(ARCH)_v$(prebuilt_version).tar.gz
-$(prebuilt_tar):
-	@mkdir -p build
-	@wget https://github.com/rcore-os/rcore-user/releases/download/v$(prebuilt_version)/$(ARCH).tar.gz -O $@
 
 sfsimg: $(out_qcow2)
 
