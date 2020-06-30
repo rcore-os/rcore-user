@@ -24,10 +24,6 @@ ifeq ($(ARCH), $(filter $(ARCH), x86_64 aarch64))
 	EN_ALPINE ?= y
 	EN_TEST ?= y
 endif
-ifeq ($(ARCH), $(filter $(ARCH), x86_64 aarch64))
-	EN_ALPINE ?= y
-	EN_TEST ?= y
-endif
 ifeq ($(ARCH), $(filter $(ARCH), x86_64))
 	EN_MUSL_GCC ?= y
 endif
@@ -40,8 +36,8 @@ rcore_fs_fuse_revision := 7f5eeac
 biscuit_bin_path := biscuit/build/$(ARCH)
 app_bin_path := app/build/$(ARCH)
 busybox := $(out_dir)/busybox
-alpine_version_major := 3.10
-alpine_version_full := 3.10.2
+alpine_version_major := 3.12
+alpine_version_full := 3.12.0
 alpine_file := alpine-minirootfs-$(alpine_version_full)-$(ARCH).tar.gz
 alpine := alpine/$(alpine_file)
 rust_src_dir := rust/src/bin
