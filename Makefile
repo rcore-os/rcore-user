@@ -17,6 +17,13 @@ ifeq ($(ARCH), x86_64)
 	EN_IPERF3 ?= y
 endif
 endif
+ifeq ($(ARCH), $(filter $(ARCH), x86_64 aarch64 riscv64))
+	EN_LIBC_TEST ?= y
+endif
+ifeq ($(ARCH), $(filter $(ARCH), x86_64 aarch64))
+	EN_ALPINE ?= y
+	EN_TEST ?= y
+endif
 ifeq ($(ARCH), $(filter $(ARCH), x86_64 aarch64))
 	EN_ALPINE ?= y
 	EN_TEST ?= y
@@ -202,10 +209,14 @@ endif
 
 # libc-test
 libc-test:
+ifeq ($(EN_LIBC_TEST), y)
 	@echo Building libc-test
 	@mkdir -p $(out_dir)/libc-test
-	@cp -r libc-test $(out_dir)
-	@ cd $(out_dir)/libc-test && make build ARCH=$(ARCH) -k
+	@cp -r -p libc-test $(out_dir)
+	@cd $(out_dir)/libc-test && make build ARCH=$(ARCH) -k
+else
+	@echo Libc-test disabled
+endif
 
 # prebuilt
 prebuilt_version := 0.1.2
