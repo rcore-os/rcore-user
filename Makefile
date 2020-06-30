@@ -204,7 +204,8 @@ endif
 libc-test:
 	@echo Building libc-test
 	@mkdir -p $(out_dir)/libc-test
-	cp -r libc-test $(out_dir)
+	@cp -r libc-test $(out_dir)
+	@ cd $(out_dir)/libc-test && make build ARCH=$(ARCH) -k
 
 # prebuilt
 prebuilt_version := 0.1.2
