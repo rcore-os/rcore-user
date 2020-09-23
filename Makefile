@@ -8,6 +8,7 @@ ARCH ?= riscv32
 MODE ?= debug
 EN_RUST ?= y
 EN_UCORE ?= y
+EN_VMM ?= n
 ifneq ($(shell uname), Darwin)
 	EN_BISCUIT ?= y
 	EN_APP ?= y
@@ -56,7 +57,7 @@ else ifeq ($(MODE), debug)
 cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test vmm
 
 all: build
 
@@ -214,6 +215,17 @@ else
 	@echo Libc-test disabled
 endif
 
+# vmm
+vmm: | vmm/*
+ifeq ($(EN_VMM), y)
+	@echo Building rcore-vmm
+	@mkdir -p $(out_dir)/vmm
+	@cd vmm && make ARCH=$(ARCH)
+	@cp vmm/build/$(ARCH)/* $(out_dir)/vmm/
+else
+	@echo rcore-vmm disabled
+endif
+
 # prebuilt
 prebuilt_version := 0.1.2
 prebuilt_tar := build/$(ARCH)_v$(prebuilt_version).tar.gz
@@ -226,7 +238,7 @@ ifdef PREBUILT
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test
+build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test vmm
 endif
 
 sfsimg: $(out_qcow2)
@@ -245,7 +257,7 @@ $(out_qcow2): $(out_img)
 	@qemu-img convert -f raw $< -O qcow2 $@
 	@qemu-img resize $@ +1G
 
-make: 
+make:
 	cd make && make make
 
 pre:
@@ -266,5 +278,6 @@ endif
 
 clean:
 	@cd rust && cargo clean
+	@if [ -d vmm ]; then cd vmm && make clean; fi
 	@rm -rf biscuit/build ucore/build app/build
 	@rm -rf $(out_dir)
