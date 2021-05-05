@@ -316,6 +316,14 @@ pub fn sys_sendto(
     )
 }
 
+pub fn sys_fcntl_0(fd: usize, cmd: usize)->i32{
+    sys_call(SyscallId::Fcntl, fd, cmd, 0, 0, 0, 0)
+}
+
+pub fn sys_fcntl_1(fd: usize, cmd: usize, arg1: usize) -> i32{
+    sys_call(SyscallId::Fcntl, fd, cmd, arg1, 0, 0, 0)
+}
+
 pub fn sys_ioctl(fd: usize, request: usize, arg1: usize) -> i32 {
     sys_call(SyscallId::Ioctl, fd, request, arg1, 0, 0, 0)
 }
@@ -506,6 +514,7 @@ enum SyscallId {
     Mmap = 222,
     Munmap = 215,
     Ioctl = 29,
+    Fcntl = 25,
     Yield = 124,
     Socket = 198,
     SendTo = 206,
