@@ -91,21 +91,28 @@ pub fn sys_read(fd: usize, base: *mut u8, len: usize) -> i32 {
 }
 
 pub fn sys_open(path: &str, flags: usize) -> i32 {
-    // UNSAFE: append '\0' to the string
-    use core::mem::replace;
-    let end = unsafe { &mut *(path.as_ptr().offset(path.len() as isize) as *mut u8) };
-    let backup = replace(end, 0);
+    // Converting &str to &CStr is impossible without memcpy, according to https://cheats.rs/ .
+    use alloc::vec::Vec;
+    fn str_to_cstr(s: &str)->Vec<u8>{
+        let str_len = s.len();
+        let mut buf = Vec::with_capacity(str_len+1);
+        for i in s.as_bytes(){
+            buf.push(*i);
+        }
+        buf.push(0);
+        buf
+    }
+    let path_cstr = str_to_cstr(path);
     const AT_FDCWD: isize = -100;
     let ret = sys_call(
         SyscallId::Openat,
         AT_FDCWD as usize,
-        path.as_ptr() as usize,
+        path_cstr.as_ptr() as usize,
         flags,
         0,
         0,
         0,
     );
-    *end = backup;
     ret
 }
 
