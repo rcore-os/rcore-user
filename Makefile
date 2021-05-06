@@ -57,7 +57,7 @@ else ifeq ($(MODE), debug)
 cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test vmm
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test vmm rust-rvm-vmm
 
 all: build
 
@@ -66,8 +66,9 @@ rust:
 ifeq ($(EN_RUST), y)
 	@echo Building rust programs
 	@cd rust && cargo build $(rust_build_args)
+	@for i in $(rust_bins); do make -f rust/Makefile strip STRIP_FILE=$$i; done
 	@rm -rf $(out_dir)/rust && mkdir -p $(out_dir)/rust
-	@cp $(rust_bins) $(out_dir)/rust
+	@for i in $(rust_bins); do cp $$i-strip $(out_dir)/rust/$$(basename $$i); done
 else
 	@echo Building rust disabled
 endif

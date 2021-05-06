@@ -187,6 +187,8 @@ impl fmt::Write for StdOut {
         }
     }
 }
+pub const F_GETFL: usize = 3; /* get file->f_flags */
+pub const F_SETFL: usize = 4; /* set file->f_flags */
 
 /* VFS flags */
 // TODO: use bitflags
@@ -199,3 +201,4 @@ pub const O_CREAT: usize = 0x00000004; // create file if it does not exist
 pub const O_EXCL: usize = 0x00000008; // error if O_CREAT and the file exists
 pub const O_TRUNC: usize = 0x00000010; // truncate file upon open
 pub const O_APPEND: usize = 0x00000020; // append on each write
+pub const O_NONBLOCK: usize = 0o4000;
