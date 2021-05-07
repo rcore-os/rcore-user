@@ -77,6 +77,8 @@ extern "C" fn run_boxed_thread(arg: usize) -> i32 {
         rcore_user_thread_unmmap_and_exit(stack as usize, STACK_SIZE);
     }
 }
+
+/// Join handle for thread.
 pub struct JoinHandle<T>(Arc<ThreadControlBlock<T>>);
 
 impl<T> JoinHandle<T> {
@@ -88,12 +90,9 @@ impl<T> JoinHandle<T> {
     }
 }
 
-static LEAKED_PAGES: Mutex<Vec<Arc<Page>>> = Mutex::new(Vec::new());
-
-pub fn cleanup_dropped_pages() -> usize {
-    core::mem::replace(&mut *LEAKED_PAGES.lock(), Vec::new()).len()
-}
 const STACK_SIZE: usize = 16384;
+
+/// Spawn thread.
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
 where
     F: FnOnce() -> T,
@@ -115,6 +114,7 @@ where
     JoinHandle(tcb)
 }
 
+/// Check whether thread is supported.
 pub fn init() {
     extern "C" {
         #[link_name = "rcore_user_thread_init"]

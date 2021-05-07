@@ -39,8 +39,4 @@ pub fn main() {
     while counter.load(Relaxed) > 0 {
         // spin
     }
-    println!(
-        "All {}*2 threads ended successfully.",
-        thread::cleanup_dropped_pages()
-    );
 }
