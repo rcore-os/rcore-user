@@ -12,7 +12,7 @@ fn main() {
 }
 
 fn init_heap() {
-    const HEAP_SIZE: usize = 0x1000;
+    const HEAP_SIZE: usize = 0x100000;
     static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
     unsafe {
         ALLOCATOR.lock().init(HEAP.as_ptr() as usize, HEAP_SIZE);
