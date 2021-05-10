@@ -46,20 +46,20 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 ## Support matrix
 
-|                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
-| ------------------ | ------ | ------- | ------- | ------- | ------ |
-| ucore              | ✅     | ✅      | ✅     | ✅      | ❗     |
-| rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
-| biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
-| app                | ✅     | ✅      | ✅     | ✅      | ✅    |
-| nginx (linux only) | ✅     | ✅      | ❗      | ✅      | ❗      |
-| redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
-| busybox            | ✅     | ✅      | ✅     | ✅      | ✅    |
-| alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
-| iperf3             | ✅     | ❌      | ❌     | ❌      | ❌    |
-| test             	 | ✅     | ❌      | ❌     | ❌      | ❌    |
-| vmm (linux only)  	 | ✅     | ❌      | ❌     | ❌      | ❌    |
-| rust-rvm-vmm (linux only)  	 | ❌     | ❌      | ✅     | ❌      | ❌    |
+|                             | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
+| --------------------------- | ------ | ------- | ------- | ------- | ------ |
+| ucore                       | ✅     | ✅      | ✅     | ✅      | ❗     |
+| rust                        | ✅     | ✅      | ✅     | ✅      | ✅    |
+| biscuit                     | ✅     | ✅      | ✅     | ✅      | ✅    |
+| app                         | ✅     | ✅      | ✅     | ✅      | ✅    |
+| nginx (linux only)          | ✅     | ✅      | ❗      | ✅      | ❗      |
+| redis (linux only)          | ✅     | ✅      | ✅     | ✅      | ✅    |
+| busybox                     | ✅     | ✅      | ✅     | ✅      | ✅    |
+| alpine rootfs               | ✅     | ✅      | ❌     | ❌      | ❌    |
+| iperf3                      | ✅     | ❌      | ❌     | ❌      | ❌    |
+| test             	          | ✅     | ❌      | ❌     | ❌      | ❌    |
+| vmm (linux only)  	          | ✅     | ❌      | ❌     | ❌      | ❌    |
+| rust-rvm-vmm (linux only)  	 | ❌     | ❌      | ❌     | ✅      | ❌    |
 
 Note: ❗ means workarounds are used so that they may not work properly. ❌ means failure in compiling or not existed on such platform.
 
