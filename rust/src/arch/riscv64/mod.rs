@@ -28,6 +28,7 @@ rcore_user_thread_clone_impl:
     # exit
     li a7, 93 # SYS_EXIT
     ecall
+    unimp
 "#
 );
 
@@ -42,6 +43,7 @@ ecall
 li a0, 0
 li a7, 93 # SYS_EXIT
 ecall
+unimp
 "#
 );
 

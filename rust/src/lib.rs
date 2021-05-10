@@ -4,9 +4,13 @@
 #![feature(panic_info_message)]
 #![feature(linkage)]
 #![feature(global_asm)]
+#![feature(renamed_spin_loop)]
 
 extern crate alloc;
 extern crate rlibc;
+
+#[macro_use]
+extern crate bitflags;
 
 #[macro_use]
 pub mod io;

@@ -71,7 +71,14 @@ fn sys_call_generic<T: From<isize>>(
 
 pub fn enlarge_heap() {
     const HEAP_SIZE: usize = 16 * 1024 * 1024;
-    let addr = sys_mmap(0, HEAP_SIZE, 0x3, 0x22, 0, 0) as usize;
+    let addr = sys_mmap(
+        0,
+        HEAP_SIZE,
+        MmapProt::READ | MmapProt::WRITE,
+        MmapFlags::ANONYMOUS | MmapFlags::PRIVATE,
+        0,
+        0,
+    ) as usize;
     unsafe {
         ALLOCATOR.lock().init(addr, HEAP_SIZE);
     }
@@ -290,12 +297,20 @@ pub fn sys_get_paddr(vaddr: &[u64], paddr: &mut [u64]) -> i32 {
 pub fn sys_mmap(
     addr: usize,
     len: usize,
-    prot: usize,
-    flags: usize,
+    prot: MmapProt,
+    flags: MmapFlags,
     fd: usize,
     offset: usize,
 ) -> usize {
-    sys_call_generic::<isize>(SyscallId::Mmap, addr, len, prot, flags, fd, offset) as usize
+    sys_call_generic::<isize>(
+        SyscallId::Mmap,
+        addr,
+        len,
+        prot.bits(),
+        flags.bits(),
+        fd,
+        offset,
+    ) as usize
 }
 
 pub fn sys_socket(domain: usize, socket_type: usize, protocol: usize) -> i32 {
@@ -664,4 +679,45 @@ impl EpollEvent {
     pub const WAKEUP: u32 = 1 << 29;
     pub const ONESHOT: u32 = 1 << 30;
     pub const ET: u32 = 1 << 31;
+}
+
+bitflags! {
+    pub struct MmapProt: usize {
+        /// Data cannot be accessed
+        const NONE = 0;
+        /// Data can be read
+        const READ = 1 << 0;
+        /// Data can be written
+        const WRITE = 1 << 1;
+        /// Data can be executed
+        const EXEC = 1 << 2;
+    }
+}
+
+#[cfg(target_arch = "mips")]
+bitflags! {
+    pub struct MmapFlags: usize {
+        /// Changes are shared.
+        const SHARED = 1 << 0;
+        /// Changes are private.
+        const PRIVATE = 1 << 1;
+        /// Place the mapping at the exact address
+        const FIXED = 1 << 4;
+        /// The mapping is not backed by any file. (non-POSIX)
+        const ANONYMOUS = 0x800;
+    }
+}
+
+#[cfg(not(target_arch = "mips"))]
+bitflags! {
+    pub struct MmapFlags: usize {
+        /// Changes are shared.
+        const SHARED = 1 << 0;
+        /// Changes are private.
+        const PRIVATE = 1 << 1;
+        /// Place the mapping at the exact address
+        const FIXED = 1 << 4;
+        /// The mapping is not backed by any file. (non-POSIX)
+        const ANONYMOUS = 1 << 5;
+    }
 }

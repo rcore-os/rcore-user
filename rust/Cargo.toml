@@ -11,3 +11,4 @@ smoltcp = { version = "0.6.0", default-features = false, features = ["alloc", "l
 treebitmap = { git = "https://github.com/jiegec/treebitmap" , features = ["alloc"] }
 rlibc = "1.0"
 spin = "0.5"
+bitflags = "1.2.1"

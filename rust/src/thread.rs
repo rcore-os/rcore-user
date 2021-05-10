@@ -44,15 +44,14 @@ where
     T: Send + 'static,
 {
     fn run(&mut self) -> *mut () {
-        let closure =
-            core::mem::replace(&mut self.closure, None).expect("you can't run a thread twice!");
+        let closure = self.closure.take().expect("you can't run a thread twice!");
         let ret = (closure)();
         let mut r = self.tcb.ret.lock();
         *r = Some(ret);
         drop(r);
         self.tcb
             .finished
-            .store(true, core::sync::atomic::Ordering::Relaxed);
+            .store(true, core::sync::atomic::Ordering::Release);
         self.stack
     }
 }
@@ -83,10 +82,10 @@ pub struct JoinHandle<T>(Arc<ThreadControlBlock<T>>);
 
 impl<T> JoinHandle<T> {
     pub fn join(self) -> Option<T> {
-        while !self.0.finished.load(core::sync::atomic::Ordering::Relaxed) {
-            // spin
+        while !self.0.finished.load(core::sync::atomic::Ordering::Acquire) {
+            core::hint::spin_loop();
         }
-        core::mem::replace(&mut *self.0.ret.lock(), None)
+        self.0.ret.lock().take()
     }
 }
 
@@ -100,7 +99,15 @@ where
     T: Send + 'static,
 {
     let tcb = Arc::new(ThreadControlBlock::new_stub());
-    let stack = sys_mmap(0, STACK_SIZE, 3, 34, 114, 0) as *mut ();
+    use crate::syscall::{MmapFlags, MmapProt};
+    let stack = sys_mmap(
+        0,
+        STACK_SIZE,
+        MmapProt::READ | MmapProt::WRITE,
+        MmapFlags::ANONYMOUS | MmapFlags::PRIVATE,
+        0,
+        0,
+    ) as *mut ();
     let runner = ThreadRunner {
         tcb: Arc::clone(&tcb),
         closure: Some(f),
