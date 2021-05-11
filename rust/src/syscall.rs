@@ -11,8 +11,20 @@ fn sys_call(
     arg4: usize,
     arg5: usize,
 ) -> i32 {
+    sys_call_generic::<isize>(syscall_id, arg0, arg1, arg2, arg3, arg4, arg5) as i32
+}
+#[inline(always)]
+fn sys_call_generic<T: From<isize>>(
+    syscall_id: SyscallId,
+    arg0: usize,
+    arg1: usize,
+    arg2: usize,
+    arg3: usize,
+    arg4: usize,
+    arg5: usize,
+) -> T {
     let id = syscall_id as usize;
-    let mut ret: i32;
+    let mut ret: isize;
     let failed: i32;
 
     unsafe {
@@ -54,12 +66,19 @@ fn sys_call(
             }
         }
     }
-    ret
+    From::from(ret)
 }
 
 pub fn enlarge_heap() {
     const HEAP_SIZE: usize = 16 * 1024 * 1024;
-    let addr = sys_mmap(0, HEAP_SIZE, 0x3, 0x22, 0, 0) as usize;
+    let addr = sys_mmap(
+        0,
+        HEAP_SIZE,
+        MmapProt::READ | MmapProt::WRITE,
+        MmapFlags::ANONYMOUS | MmapFlags::PRIVATE,
+        0,
+        0,
+    ) as usize;
     unsafe {
         ALLOCATOR.lock().init(addr, HEAP_SIZE);
     }
@@ -93,10 +112,10 @@ pub fn sys_read(fd: usize, base: *mut u8, len: usize) -> i32 {
 pub fn sys_open(path: &str, flags: usize) -> i32 {
     // Converting &str to &CStr is impossible without memcpy, according to https://cheats.rs/ .
     use alloc::vec::Vec;
-    fn str_to_cstr(s: &str)->Vec<u8>{
+    fn str_to_cstr(s: &str) -> Vec<u8> {
         let str_len = s.len();
-        let mut buf = Vec::with_capacity(str_len+1);
-        for i in s.as_bytes(){
+        let mut buf = Vec::with_capacity(str_len + 1);
+        for i in s.as_bytes() {
             buf.push(*i);
         }
         buf.push(0);
@@ -144,6 +163,35 @@ pub fn sys_vfork() -> i32 {
         0,
         0,
     )
+}
+
+pub fn sys_clone(f: extern "C" fn(usize) -> i32, stack: usize, _flags: i32, arg: usize) -> u32 {
+    let (mut ptid, mut ctid) = (0u32, 0u32);
+    extern "C" {
+        #[no_mangle]
+        fn rcore_user_thread_clone_impl(
+            f: usize,
+            flags: usize,
+            stack: usize,
+            arg: usize,
+            ptid: *mut u32,
+            ctid: *mut u32,
+            tls: usize,
+        );
+    }
+
+    unsafe {
+        rcore_user_thread_clone_impl(
+            f as usize,
+            0x7d0f00,
+            stack,
+            arg,
+            &mut ptid as *mut _,
+            &mut ctid as *mut _,
+            0,
+        );
+    }
+    return ptid;
 }
 
 /// Wait the process exit.
@@ -249,12 +297,20 @@ pub fn sys_get_paddr(vaddr: &[u64], paddr: &mut [u64]) -> i32 {
 pub fn sys_mmap(
     addr: usize,
     len: usize,
-    prot: usize,
-    flags: usize,
+    prot: MmapProt,
+    flags: MmapFlags,
     fd: usize,
     offset: usize,
-) -> i32 {
-    sys_call(SyscallId::Mmap, addr, len, prot, flags, fd, offset)
+) -> usize {
+    sys_call_generic::<isize>(
+        SyscallId::Mmap,
+        addr,
+        len,
+        prot.bits(),
+        flags.bits(),
+        fd,
+        offset,
+    ) as usize
 }
 
 pub fn sys_socket(domain: usize, socket_type: usize, protocol: usize) -> i32 {
@@ -323,11 +379,13 @@ pub fn sys_sendto(
     )
 }
 
-pub fn sys_fcntl_0(fd: usize, cmd: usize)->i32{
+#[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
+pub fn sys_fcntl_0(fd: usize, cmd: usize) -> i32 {
     sys_call(SyscallId::Fcntl, fd, cmd, 0, 0, 0, 0)
 }
 
-pub fn sys_fcntl_1(fd: usize, cmd: usize, arg1: usize) -> i32{
+#[cfg(not(any(target_arch = "x86_64", target_arch = "mips")))]
+pub fn sys_fcntl_1(fd: usize, cmd: usize, arg1: usize) -> i32 {
     sys_call(SyscallId::Fcntl, fd, cmd, arg1, 0, 0, 0)
 }
 
@@ -621,4 +679,45 @@ impl EpollEvent {
     pub const WAKEUP: u32 = 1 << 29;
     pub const ONESHOT: u32 = 1 << 30;
     pub const ET: u32 = 1 << 31;
+}
+
+bitflags! {
+    pub struct MmapProt: usize {
+        /// Data cannot be accessed
+        const NONE = 0;
+        /// Data can be read
+        const READ = 1 << 0;
+        /// Data can be written
+        const WRITE = 1 << 1;
+        /// Data can be executed
+        const EXEC = 1 << 2;
+    }
+}
+
+#[cfg(target_arch = "mips")]
+bitflags! {
+    pub struct MmapFlags: usize {
+        /// Changes are shared.
+        const SHARED = 1 << 0;
+        /// Changes are private.
+        const PRIVATE = 1 << 1;
+        /// Place the mapping at the exact address
+        const FIXED = 1 << 4;
+        /// The mapping is not backed by any file. (non-POSIX)
+        const ANONYMOUS = 0x800;
+    }
+}
+
+#[cfg(not(target_arch = "mips"))]
+bitflags! {
+    pub struct MmapFlags: usize {
+        /// Changes are shared.
+        const SHARED = 1 << 0;
+        /// Changes are private.
+        const PRIVATE = 1 << 1;
+        /// Place the mapping at the exact address
+        const FIXED = 1 << 4;
+        /// The mapping is not backed by any file. (non-POSIX)
+        const ANONYMOUS = 1 << 5;
+    }
 }
