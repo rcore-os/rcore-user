@@ -1,6 +1,6 @@
 [submodule "libc-test"]
 	path = libc-test
-	url = https://github.com/rcore-os/libc-test
+	url = https://github.com/rcore-os/libc-test.git
 [submodule "vmm"]
 	path = vmm
 	url = https://github.com/rcore-os/rcore-vmm.git
