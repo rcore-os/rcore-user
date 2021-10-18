@@ -8,8 +8,6 @@
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 
-#if !defined(__riscv)
-
 char *buf;
 
 int width, height, bpp;
@@ -26,7 +24,7 @@ void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
     volatile char *line_addr = frame_buf;
     for (y = 0; y < height; y++) {
         if (y % skip) {
-            memcpy(line_addr, line_addr - width * bpp, width * bpp);
+            memcpy((void *)line_addr, (void *)(line_addr - width * bpp), width * bpp);
             line_addr += width * bpp;
             continue;
         }
@@ -62,14 +60,14 @@ void plot(float moveX, float moveY, float zoom, int maxIterations, int skip) {
                 buf[x * bpp + i] = (color << 5) | (color << 2) | (color >> 1);
             }
         }
-        memcpy(line_addr, buf, width * bpp);
+        memcpy((void *)line_addr, buf, width * bpp);
         line_addr += width * bpp;
     }
 }
 
 int main(void) {
     struct fb_var_screeninfo vinfo;
-    int fd = open("/dev/fb0", O_WRONLY);
+    int fd = open("/dev/fb0", O_RDWR);
     if (!fd) {
         printf("Error: cannot open framebuffer device.\n");
         exit(1);
@@ -148,12 +146,3 @@ int main(void) {
     }
     return 0;
 }
-
-#else
-
-int main(void) {
-    printf("This program can only run on platforms with floating point support.\n");
-    return 0;
-}
-
-#endif

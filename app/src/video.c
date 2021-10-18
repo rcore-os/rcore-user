@@ -7,8 +7,6 @@
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 
-#if !defined(__riscv)
-
 #include <bad_apple.h>
 
 #define WIN_SIZE 256
@@ -25,7 +23,6 @@ int win_e = 0;
 int win_n = 0;
 const unsigned char *buf = BAD_APPLE_BIN;
 
-int inf = 0;
 int x = 0;
 int y = 0;
 int pos = 0;
@@ -96,7 +93,7 @@ void decompress(int n) {
 
 int main() {
     struct fb_var_screeninfo vinfo;
-    int fd = open("/dev/fb0", O_WRONLY);
+    int fd = open("/dev/fb0", O_RDWR);
     if (!fd) {
         printf("Error: cannot open framebuffer device.\n");
         exit(1);
@@ -120,15 +117,5 @@ int main() {
     printf("%d, %d, %d\n", width, height, bpp * 8);
 
     decompress(BAD_APPLE_SIZE);
-    printf("%d\n", inf);
     return 0;
 }
-
-#else
-
-int main() {
-    printf("This program can not be run on RISCV platform.\n");
-    return 0;
-}
-
-#endif

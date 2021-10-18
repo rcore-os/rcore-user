@@ -16,6 +16,10 @@ void test_mmap(int active) {
   } else {
     k = mmap(NULL, BUF_SIZE, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
   }
+  if (k == (void *)-1) {
+    perror("Cannot mmap shared memory!\n");
+    return;
+  }
   *k = 0;
 
   int pid = fork();

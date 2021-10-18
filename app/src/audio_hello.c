@@ -9083,7 +9083,7 @@ int main(int argc, char **argv)
     ioctl(fd_dsp, 0, NULL);
     write(fd_dsp, sound, sizeof(sound));
     ioctl(fd_dsp, 1, NULL);
-    printf("finish writing %d\n", sizeof(sound));
+    printf("finish writing %ld\n", sizeof(sound));
 
 	return 0;
 }
