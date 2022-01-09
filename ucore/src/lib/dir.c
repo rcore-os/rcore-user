@@ -8,7 +8,8 @@
 #include <error.h>
 #include <unistd.h>
 
-DIR dir, *dirp=&dir;
+static DIR dir, *dirp=&dir;
+
 DIR *
 opendir(const char *path) {
 
