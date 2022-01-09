@@ -5,8 +5,8 @@
 #include <ulib.h>
 #include <unistd.h>
 
-char buf[1024];
-int buf_pos = 0;
+static char buf[1024];
+static int buf_pos = 0;
 
 static void
 fputch(char c, int *cnt, int fd) {
