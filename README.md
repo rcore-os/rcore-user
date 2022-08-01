@@ -17,7 +17,7 @@
 
 User programs for [rCore OS](https://github.com/rcore-os/rCore).
 
-Now it has 6 parts:
+Now it has 7 parts:
 
 * `ucore`: C-lang, from the original [ucore_os_lab](https://github.com/chyyuu/ucore_os_plus)
 * `biscuit`: C/C++, from [Biscuit](https://github.com/mit-pdos/biscuit), based on a `musl` instead of original `litc`.
@@ -25,6 +25,7 @@ Now it has 6 parts:
 * `app`: C-lang, custom test programs based on `musl`.
 * `nginx`, `redis`, `busybox`, `alpine`, `gcc`: Real world applications.
 * `vmm`: Simple VMM (Virtual Machine Monitor) runs on top of [RVM](https://github.com/rcore-os/RVM), can run the unmodified [ucore_os_lab](https://github.com/chyyuu/os_kernel_lab/tree/master) as a guest OS.
+* `rust-rvm-vmm`: VMM (Virtual Machine Monitor) runs on top of [RVM](https://github.com/rcore-os/RVM) written in Rust. Can run unmodified (except drivers) rCore as a guest OS.
 
 ## Build
 
@@ -45,19 +46,20 @@ A rootfs is created at `build/$(arch)` and converted to `qcow2`.
 
 ## Support matrix
 
-|                    | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
-| ------------------ | ------ | ------- | ------- | ------- | ------ |
-| ucore              | ✅     | ✅      | ✅     | ✅      | ❗     |
-| rust               | ✅     | ✅      | ✅     | ✅      | ✅    |
-| biscuit            | ✅     | ✅      | ✅     | ✅      | ✅    |
-| app                | ✅     | ✅      | ✅     | ✅      | ✅    |
-| nginx (linux only) | ✅     | ✅      | ❗      | ✅      | ❗      |
-| redis (linux only) | ✅     | ✅      | ✅     | ✅      | ✅    |
-| busybox            | ✅     | ✅      | ✅     | ✅      | ✅    |
-| alpine rootfs      | ✅     | ✅      | ❌     | ❌      | ❌    |
-| iperf3             | ✅     | ❌      | ❌     | ❌      | ❌    |
-| test             	 | ✅     | ❌      | ❌     | ❌      | ❌    |
-| vmm (linux only)  	 | ✅     | ❌      | ❌     | ❌      | ❌    |
+|                             | x86_64 | aarch64 | riscv32 | riscv64 | mipsel |
+| --------------------------- | ------ | ------- | ------- | ------- | ------ |
+| ucore                       | ✅     | ✅      | ✅     | ✅      | ❗     |
+| rust                        | ✅     | ✅      | ✅     | ✅      | ✅    |
+| biscuit                     | ✅     | ✅      | ✅     | ✅      | ✅    |
+| app                         | ✅     | ✅      | ✅     | ✅      | ✅    |
+| nginx (linux only)          | ✅     | ✅      | ❗      | ✅      | ❗      |
+| redis (linux only)          | ✅     | ✅      | ✅     | ✅      | ✅    |
+| busybox                     | ✅     | ✅      | ✅     | ✅      | ✅    |
+| alpine rootfs               | ✅     | ✅      | ❌     | ❌      | ❌    |
+| iperf3                      | ✅     | ❌      | ❌     | ❌      | ❌    |
+| test             	          | ✅     | ❌      | ❌     | ❌      | ❌    |
+| vmm (linux only)  	          | ✅     | ❌      | ❌     | ❌      | ❌    |
+| rust-rvm-vmm (linux only)  	 | ❌     | ❌      | ❌     | ✅      | ❌    |
 
 Note: ❗ means workarounds are used so that they may not work properly. ❌ means failure in compiling or not existed on such platform.
 
@@ -228,3 +230,57 @@ vcpu_id = 1
 ```
 
 Now uCore is booting and your can get uCore's shell soon.
+
+
+### How to run rCore in rCore
+Clone this repo recursively with [rust-rvm-vmm](https://github.com/rcore-riscv-hypervisor-dev/rust-rvm-vmm). 
+
+```bash
+$ git clone https://github.com/rcore-os/rcore-user.git --recursive
+```
+
+Note: Currently guest rCore is provided as blob and will be downloaded while building sfsimg, but you can easily build your own guest rCore image using the flags mentioned in the [blob repo](https://github.com/rcore-riscv-hypervisor-dev/rcore-guest-image-blob).
+
+
+Build with `EN_RUST_RVM_VMM=y`:
+
+```bash
+$ make sfsimg ARCH=riscv64 EN_RUST_RVM_VMM=y
+```
+
+Build and run [rCore](https://github.com/rcore-os/rCore) with `HYPERVISOR=on` and second uart `UART2=on`:
+
+```bash
+$ cd $(RCORE_ROOT)/kernel
+$ make run mode=release ARCH=riscv64 HYPERVISOR=on UART2=on
+```
+
+Run the `vmm` app in rCore shell:
+
+```
+/ # cd rust-rvm-vmm
+/rust-rvm-vmm # ./vmm
+rust-rvm-vmm starting
+starting
+
+```
+
+
+And connect to the secondary UART using `nc`:
+
+```bash
+$ nc -U /tmp/rcore_uart2
+hello, vmm[vmm] Bad ecall eid=4739917 fid=0. Ignore.
+[vmm] Bad ecall eid=4739917 fid=0. Ignore.
+...
+[vmm] Bad ecall eid=4739917 fid=0. Ignore.
+/ # /busybox
+/busybox
+BusyBox v1.30.1 (2019-03-22 15:43:23 CST) multi-call binary.
+BusyBox is copyrighted by many authors between 1998-2015.
+Licensed under GPLv2. See source distribution for detailed
+copyright notices.
+...
+```
+
+Now you can use rCore shell from the secondary UART.

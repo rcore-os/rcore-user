@@ -6,9 +6,12 @@
 # targets: build, pack
 ARCH ?= riscv32
 MODE ?= debug
+export ARCH
+export MODE
 EN_RUST ?= y
 EN_UCORE ?= y
 EN_VMM ?= n
+EN_RUST_RVM_VMM ?= n
 ifneq ($(shell uname), Darwin)
 	EN_BISCUIT ?= y
 	EN_APP ?= y
@@ -57,7 +60,7 @@ else ifeq ($(MODE), debug)
 cmake_build_args += -DCMAKE_BUILD_TYPE=Debug
 endif
 
-.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test vmm rust-rvm-vmm
+.PHONY: all clean build rust ucore biscuit app bin busybox nginx redis alpine iperf3 musl-gcc pre make libc-test vmm rust-rvm-vmm rcore-guest
 
 all: build
 
@@ -221,12 +224,34 @@ vmm: | vmm/*
 ifeq ($(EN_VMM), y)
 	@echo Building rcore-vmm
 	@mkdir -p $(out_dir)/vmm
-	@cd vmm && make ARCH=$(ARCH)
+	@cd vmm && make build-$(ARCH) ARCH=$(ARCH)
 	@cp vmm/build/$(ARCH)/* $(out_dir)/vmm/
 else
 	@echo rcore-vmm disabled
 endif
 
+# rust-rvm-vmm
+rust-rvm-vmm: | rust-rvm-vmm/* rcore-guest
+ifeq ($(EN_RUST_RVM_VMM), y)
+	@echo Building rust-rvm-vmm
+	@cd rust-rvm-vmm && cargo build $(rust_build_args) && make strip
+	@rm -rf $(out_dir)/rust-rvm-vmm && mkdir -p $(out_dir)/rust-rvm-vmm
+	@cp rust-rvm-vmm/target/$(ARCH)-rcore/$(MODE)/rust-rvm-vmm-strip $(out_dir)/rust-rvm-vmm/vmm
+else
+	@echo rust-rvm-vmm disabled
+endif
+
+# prebuilt rCore guest image
+
+rcore_guest_image := build/$(ARCH)/vmm/rcore
+rcore-guest: $(rcore_guest_image)
+$(rcore_guest_image):
+ifeq ($(ARCH), riscv64)
+	@mkdir -p build/$(ARCH)/vmm
+	@wget "https://github.com/rcore-riscv-hypervisor-dev/rcore-guest-image-blob/blob/master/kernel.img?raw=true" -O $@
+else
+	@echo rcore guest image not supported
+endif
 # prebuilt
 prebuilt_version := 0.1.2
 prebuilt_tar := build/$(ARCH)_v$(prebuilt_version).tar.gz
@@ -239,7 +264,7 @@ ifdef PREBUILT
 build: $(prebuilt_tar)
 	@tar -xzf $< -C build
 else
-build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test vmm
+build: rcore-fs-fuse pre alpine rust ucore biscuit app busybox nginx redis iperf3 test musl-gcc make libc-test vmm rust-rvm-vmm rcore-guest
 endif
 
 sfsimg: $(out_qcow2)

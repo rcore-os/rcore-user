@@ -4,3 +4,6 @@
 [submodule "vmm"]
 	path = vmm
 	url = https://github.com/rcore-os/rcore-vmm.git
+[submodule "rust-rvm-vmm"]
+	path = rust-rvm-vmm
+	url = https://github.com/rcore-riscv-hypervisor-dev/rust-rvm-vmm.git
